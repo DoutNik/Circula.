@@ -1,8 +1,7 @@
 /* eslint-disable no-unused-vars */
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-/* import OneSignal from "react-onesignal"; */
 import Avatar from "../../components/avatar/Avatar";
 import Publication from "../../components/publication/Publication";
 import Header from "../../components/header/Header";

@@ -1,9 +1,8 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from 'react-router-dom';
-import OneSignal from "react-onesignal";
 import style from "./Avatar.module.css";
 import PayModal from "../payModal/PayModal";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -59,19 +58,6 @@ const Avatar = ({ userData, setAuth, toggleDarkMode }) => {
 
     localStorage.setItem("darkMode", updatedDarkMode);
   };
-
-  /* const sendMail = () => {
-    OneSignal.User.addEmail(userData && userData.email || user && user.mail);
-    console.log(userData && userData.email || user && user.mail);
-    if (isPremium) {
-      OneSignal.User.addTag("subscription:", "premium");
-    }
-    if (!isPremium) {
-      OneSignal.User.addTag("subscription:", "notPremium");
-    }
-  };
-  
-  sendMail(); */
   
   return (
     <>
