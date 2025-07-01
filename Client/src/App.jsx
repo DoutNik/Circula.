@@ -53,6 +53,18 @@ const App = () => {
   axios.defaults.baseURL = "http://localhost:3001/";
   //axios.defaults.baseURL = "https://lo-canjeamos-production.up.railway.app/";
 
+
+  if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(registration => {
+        console.log('✅ Service Worker registrado con éxito:', registration);
+      })
+      .catch(error => {
+        console.log('❌ Falló el registro del Service Worker:', error);
+      });
+  });
+}
   //*Auth0
   const {
     user,
