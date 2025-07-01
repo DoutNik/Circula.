@@ -5,7 +5,7 @@ import Swal from "sweetalert2";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
-import OneSignal from "react-onesignal";
+import { messaging, getToken, onMessage } from "./firebase";
 
 import AddProduct from "./views/addProduct/addProduct";
 import Chats from "./views/chats/Chats";
@@ -136,7 +136,6 @@ const App = () => {
   }, [isAuthenticatedAuth0, isLoading]);
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userToken, setUserToken] = useState("");
   const [userData, setUserData] = useState(null);
 
   const setAuth = (status, user) => {
@@ -185,7 +184,7 @@ const App = () => {
           }
         })
         .catch((error) => {
-          console.error("Error al verificar el token:", error);
+          console.error("Token no valido o expirado:", error);
           setIsAuthenticated(false);
         });
     } else {
@@ -197,34 +196,23 @@ const App = () => {
   const [isPremium, setPremium] = useState(false);
 
   useEffect(() => {
-    const setupOneSignal = async () => {
-      await OneSignal.init({
-        appId: "bd442249-142f-4367-9f32-0d10df4a3be1",
-        notifyButton: { enable: true },
-        allowLocalhostAsSecureOrigin: true, // útil en localhost
+    // Pide permiso
+    getToken(messaging, { vapidKey: "BIgcX_H0G3MswOLcfly2-S_b8SY-LI9zu4ihlf5jK2GOgJUhsTMrKZ0nLJUUwwMNqkSQSt76cT_qOpZ9o7QNBzA" })
+      .then((currentToken) => {
+        if (currentToken) {
+          console.log("Token FCM:", currentToken);
+          // Podrías enviarlo a tu backend
+        } else {
+          console.warn("No se recibió token.");
+        }
+      })
+      .catch((err) => {
+        console.error("Error al obtener token FCM:", err);
       });
 
-      // Esperar que OneSignal esté completamente listo
-      const isPushSupported = await OneSignal.isPushNotificationsSupported();
-      if (!isPushSupported) {
-        console.warn("Notificaciones push no soportadas en este navegador.");
-        return;
-      }
-
-      const email = userData?.email || user?.mail;
-      if (email) {
-        OneSignal.User.addEmail(email);
-        console.log("Email enviado a OneSignal:", email);
-      }
-
-      OneSignal.User.addTag(
-        "subscription",
-        isPremium ? "premium" : "notPremium"
-      );
-      console.log("isPremium:", isPremium);
-    };
-
-    setupOneSignal();
+    onMessage(messaging, (payload) => {
+      console.log("Mensaje en primer plano: ", payload);
+    });
   }, []);
 
   if (userData && userData) {
