@@ -139,8 +139,8 @@ const NavBar = ({ isAuthenticated, setAuth, userData }) => {
       >
         {isAuthenticated ? (
           <button className={style.iconos}>
-            <img src={(user && user.picture) || (userData && userData.image)} width="24" height="24" className={style.avatar}></img>
-            {(user && user.name) || (userData && userData.username)}
+            <img src={(userData && userData.image)} width="24" height="24" className={style.avatar}></img>
+            {userData && userData.username}
           </button>
         ) : (
           <button className={style.iconos}>

@@ -68,7 +68,7 @@ const Avatar = ({ userData, setAuth, toggleDarkMode }) => {
         )}
 
         <img
-          src={(user && user.picture) || (userData && userData.image)}
+          src={(userData && userData.image)}
           className={style.photo}
         ></img>
         {isPremium && (
@@ -80,8 +80,8 @@ const Avatar = ({ userData, setAuth, toggleDarkMode }) => {
             className={style.logo}
           />
         )}
-        <h3>{userData.username || user.name}</h3>
-        <p>{userData.email || user.email}</p>
+        <h3>{userData.username}</h3>
+        <p>{userData.email}</p>
         {userData.averageRating ? (
           <div>
             {Array.from({ length: userData.averageRating }, (_, index) => (
@@ -112,12 +112,7 @@ const Avatar = ({ userData, setAuth, toggleDarkMode }) => {
         <br /><br />
 
         <div>
-          {user && (
-            <button className={style.logout} onClick={loguotAuth0}>
-              Salir
-            </button>
-          )}
-          {!user && userData && (
+          {!userData && (
             <button className={style.logout} onClick={logout}>
               Salir
             </button>
@@ -127,7 +122,6 @@ const Avatar = ({ userData, setAuth, toggleDarkMode }) => {
         <PayModal
           isOpen={isModalOpen}
           userData={userData}
-          user={user}
           onClose={closeModal}
         />
       </div>
