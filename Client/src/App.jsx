@@ -1,6 +1,5 @@
 /* eslint-disable no-unused-vars */
 import axios from "axios";
-import Swal from "sweetalert2";
 
 import { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
@@ -219,8 +218,6 @@ const App = () => {
           element={
             userData ? (
               <AddProduct userData={userData} />
-            ) : user ? (
-              <AddProduct userData={user} />
             ) : (
               <Loading />
             )
@@ -232,9 +229,7 @@ const App = () => {
           element={
             userData ? (
               <Detail userData={userData} />
-            ) : user ? (
-              <Detail userData={user} />
-            ) : (
+            ) :  (
               <Loading />
             )
           }
@@ -245,9 +240,7 @@ const App = () => {
           element={
             userData ? (
               <Exchanges userData={userData} />
-            ) : user ? (
-              <Exchanges userData={user} />
-            ) : (
+            ) :  (
               <Loading />
             )
           }
@@ -274,8 +267,6 @@ const App = () => {
           element={
             userData ? (
               <ReviewForm userData={userData} />
-            ) : user ? (
-              <ReviewForm userData={user} />
             ) : (
               <Loading />
             )
@@ -291,9 +282,7 @@ const App = () => {
           element={
             userData ? (
               <Messages userData={userData} />
-            ) : user ? (
-              <Messages userData={user} />
-            ) : (
+            ) :  (
               <Loading />
             )
           }
