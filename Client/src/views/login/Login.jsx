@@ -2,24 +2,20 @@
 /* eslint-disable no-unused-vars */
 import Logo from '../../assets/locan.png'
 import { useState } from 'react'
-import React from 'react'
 import style from './Login.module.css'
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Swal from 'sweetalert2'; 
 
-import LoginButton from '../Auth0/LoginButton';
+//import LoginButton from '../../components/logButtons/LoginButton';
 
 const Login = ({ setAuth, userData }) => {
-  const [ userValidated, setUser ] = useState(false);
   const [input, setInput] = useState({
     username: "",
     password: "",
   });
 
   const [error, setErrors] = useState("")
-  // const [userError, setUserErrors] = useState("")
-  // const [passwordError, setPasswordErrors] = useState("")
 
 
   const handleInputChange = (e) => {
@@ -75,7 +71,6 @@ const Login = ({ setAuth, userData }) => {
         setErrors('Error: No response received from server');
       }
       console.error("Error al enviar los datos al servidor:", error);
-      // console.log("Hubo un error al iniciar sesión.");
       setErrors("Usuario o contraseña incorrectos")
 
     }
@@ -110,12 +105,12 @@ const Login = ({ setAuth, userData }) => {
           </span>
         </div>
 
-        <div className={style.buttons}>
+        {/* <div className={style.buttons}>
           <span>
           o 
           <LoginButton/>
           </span>
-        </div>
+        </div> */}
         <div className={style.buttons}>
           <span className={style.recover}>
           ¿Olvidaste la contraseña? 

@@ -1,13 +1,21 @@
-import { useAuth0 } from "@auth0/auth0-react";
-import React from "react";
+import { useClerk } from '@clerk/clerk-react';
 import style from './LoginButton.module.css'
 
+
 const LoginButton = () => {
-  const { loginWithRedirect } = useAuth0();
+  const { signInWithRedirect } = useClerk();
+
+  const handleLogin = () => {
+    signInWithRedirect({
+      strategy: "oauth_google", // 👈 Directo a Google
+      redirectUrl: "/",         // 👈 A dónde volver después del login (opcional)
+    });
+  };
 
   return (
     <div className={style.login}>
-    <button onClick={() => loginWithRedirect()} >
+      
+    <button onClick={handleLogin} >
       Ingresa con{" "}
      { <img
         width="24"

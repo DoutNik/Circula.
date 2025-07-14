@@ -2,7 +2,6 @@
 import axios from "axios";
 import Swal from "sweetalert2";
 
-import { useAuth0 } from "@auth0/auth0-react";
 import { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { messaging, getToken, onMessage } from "./firebase";
@@ -65,75 +64,6 @@ const App = () => {
       });
   });
 }
-  //*Auth0
-  const {
-    user,
-    isAuthenticated: isAuthenticatedAuth0,
-    loginWithRedirect,
-    isLoading,
-  } = useAuth0();
-
-  const handleUserGoogle = async () => {
-    if (isAuthenticatedAuth0) {
-      const userByGoogle = {
-        username: user.name,
-        password: "123123",
-        email: user.email,
-        image: user.picture,
-        ubication: `Buenos Aires, Palermo`,
-        origin: "google",
-      };
-      // que pregunte si ya existe el usuario, si existe que haga la request a la ruta de loguin y que si no existe haga a register
-      try {
-        const userLog = {
-          email: userByGoogle.email,
-        };
-        const existe = await axios.get("/users/logueado", {
-          params: userLog,
-        });
-
-        if (!existe.data) {
-          const response = await axios.post("/users/register", userByGoogle);
-          if (response) {
-            await localStorage.setItem("token", response.data.token);
-            setAuth(true);
-
-            // Mostrar una alerta de éxito
-            Swal.fire({
-              icon: "success",
-              title: "Registro exitoso",
-              text: `¡Bienvenido ${userByGoogle.username}!`,
-            });
-          } else {
-            console.log("Hubo un error al crear el usuario.");
-          }
-        } else {
-          const response = await axios.post("/users/login", userByGoogle);
-          if (response) {
-            await localStorage.setItem("token", response.data.token);
-            setAuth(true, response.data.usuario);
-
-            // Mostrar una alerta de éxito
-            Swal.fire({
-              icon: "success",
-              title: `Bienvenido devuelta ${userByGoogle.username}`,
-              text: "¡Te has logueado exitosamente!",
-            });
-          } else {
-            console.log("Hubo un error al crear el usuario.");
-          }
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    }
-  };
-
-  useEffect(() => {
-    if (!isLoading) {
-      handleUserGoogle();
-    }
-  }, [isAuthenticatedAuth0, isLoading]);
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userData, setUserData] = useState(null);
@@ -264,7 +194,7 @@ const App = () => {
                   <div className="bounce3"></div>
                 </div>
               )
-            ) : isAuthenticatedAuth0 ? (
+            ) : isAuthenticated ? (
               user ? (
                 <MyProfile
                   userData={user.name}

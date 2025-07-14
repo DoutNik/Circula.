@@ -5,11 +5,9 @@ import { useState, useEffect } from "react";
 import { Link } from 'react-router-dom';
 import style from "./Avatar.module.css";
 import PayModal from "../payModal/PayModal";
-import { useAuth0 } from "@auth0/auth0-react";
 import axios from "axios";
 
 const Avatar = ({ userData, setAuth, toggleDarkMode }) => {
-  const { user, logout: loguotAuth0 } = useAuth0();
   const [isPremium, setPremium] = useState(false);
 
   const premium = async () => {
@@ -43,28 +41,31 @@ const Avatar = ({ userData, setAuth, toggleDarkMode }) => {
   const initialDarkMode = localStorage.getItem("darkMode") === "true";
   const [isDarkMode, setIsDarkMode] = useState(initialDarkMode);
 
-  const openModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   const handleThemeToggle = () => {
     const updatedDarkMode = !isDarkMode;
     setIsDarkMode(updatedDarkMode);
     toggleDarkMode();
-
     localStorage.setItem("darkMode", updatedDarkMode);
   };
-  
+
   return (
     <>
       <div className={isPremium ? style.avatarPremium : style.avatar}>
-        {userData.rol === "admin" &&         <Link to="/admin">
-        <button className={style.dash}><img width="30" height="30" src="https://img.icons8.com/color/48/dashboard.png" alt="dashboard"/></button>
-        </Link>}
+        {userData.rol === "admin" && (
+          <Link to="/admin">
+            <button className={style.dash}>
+              <img
+                width="30"
+                height="30"
+                src="https://img.icons8.com/color/48/dashboard.png"
+                alt="dashboard"
+              />
+            </button>
+          </Link>
+        )}
 
         <img
           src={(user && user.picture) || (userData && userData.image)}
@@ -90,13 +91,16 @@ const Avatar = ({ userData, setAuth, toggleDarkMode }) => {
         ) : (
           <h4>Todavía nadie te ha calificado.</h4>
         )}
+
         <button
           className={isDarkMode ? style.dark : style.light}
           onClick={handleThemeToggle}
         >
           {isDarkMode ? "Oscuro 🌘" : "Claro ☀️"}
         </button>
-        <br></br>
+
+        <br />
+
         <button
           className={style.premium}
           onClick={openModal}
@@ -104,8 +108,9 @@ const Avatar = ({ userData, setAuth, toggleDarkMode }) => {
         >
           {isPremium ? "¡Gracias!" : "Sé premium"}
         </button>
-        <br />
-        <br />
+
+        <br /><br />
+
         <div>
           {user && (
             <button className={style.logout} onClick={loguotAuth0}>
@@ -118,6 +123,7 @@ const Avatar = ({ userData, setAuth, toggleDarkMode }) => {
             </button>
           )}
         </div>
+
         <PayModal
           isOpen={isModalOpen}
           userData={userData}

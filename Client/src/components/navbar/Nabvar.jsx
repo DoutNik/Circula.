@@ -1,36 +1,22 @@
 import { Link, useLocation } from "react-router-dom";
 import Logo from "../../assets/locan.png";
 import style from "./Nabvar.module.css";
-//Auth0
-import { useAuth0 } from "@auth0/auth0-react";
+
 
 const NavBar = ({ isAuthenticated, setAuth, userData }) => {
-  
   const location = useLocation();
-  const { user, isAuthenticated: isAuthenticatedAuth0, logout: loguotAuth0 } = useAuth0();
-  
 
   const logout = () => {
     localStorage.removeItem("token");
     setAuth(false);
-    loguotAuth0({ logoutParams: { returnTo: window.location.origin } })
   };
 
   return (
     <div
       className={
-        isAuthenticatedAuth0 || isAuthenticated ? style.navbar : style.navbarOff
+        isAuthenticated ? style.navbar : style.navbarOff
       }
     >
-      {/* {isAuthenticatedx && userData ? (
-        <div>
-          <h2>
-            Hola, {userData.username}!{" "}
-            <img src={smile} className={style.smile}></img>
-          </h2>
-        </div>
-      ) : null} */}
-
       <Link to="/" className={style.linkLogo}>
         <img src={Logo} className={style.logo} alt="Locan" />
       </Link>
@@ -52,7 +38,7 @@ const NavBar = ({ isAuthenticated, setAuth, userData }) => {
         </button>
       </Link>
 
-      {isAuthenticatedAuth0 || isAuthenticated ? (
+      {isAuthenticated ? (
         <Link
           to="/addProduct"
           className={`${style.link} ${
@@ -83,7 +69,7 @@ const NavBar = ({ isAuthenticated, setAuth, userData }) => {
         </Link>
       )}
 
-      {isAuthenticated || isAuthenticatedAuth0 ? (
+      {isAuthenticated ? (
         <Link
           to="exchanges"
           className={`${style.link} ${
@@ -114,7 +100,7 @@ const NavBar = ({ isAuthenticated, setAuth, userData }) => {
         </Link>
       )}
 
-      {isAuthenticated || isAuthenticatedAuth0 ? (
+      {isAuthenticated ? (
         <Link
           to="/messages"
           className={`${style.link} ${
@@ -151,7 +137,7 @@ const NavBar = ({ isAuthenticated, setAuth, userData }) => {
           location.pathname === "/login" ? style.active : ""
         }`}
       >
-        {isAuthenticated || isAuthenticatedAuth0 ? (
+        {isAuthenticated ? (
           <button className={style.iconos}>
             <img src={(user && user.picture) || (userData && userData.image)} width="24" height="24" className={style.avatar}></img>
             {(user && user.name) || (userData && userData.username)}
@@ -169,17 +155,17 @@ const NavBar = ({ isAuthenticated, setAuth, userData }) => {
         )}
       </Link>
 
-      {isAuthenticated || isAuthenticatedAuth0 ? 
+      {isAuthenticated ? 
         (
         <button className={style.logout} onClick={logout}>
-          <img
-            width="24"
-            height="24"
-            src="https://img.icons8.com/fluency-systems-filled/48/exit.png"
-            alt="exit"
-          />
-          Salir
-        </button>
+            <img
+              width="24"
+              height="24"
+              src="https://img.icons8.com/fluency-systems-filled/48/exit.png"
+              alt="exit"
+            />
+            Salir
+          </button>
       ) : null}
     </div>
   );
