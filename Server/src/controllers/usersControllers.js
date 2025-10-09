@@ -106,6 +106,43 @@ exports.createUser = async (user) => {
   }
 };
 
+exports.socialRegisterOrLogin = async (user) => {
+  try {
+    // Buscar usuario por email
+    let usuarios = await User.findAll({ where: { email: user.email } });
+    let usuario;
+    
+    if (usuarios.length === 0) {
+      // Si no existe, crear usuario
+      usuario = await User.create({
+        username: user.username,
+        email: user.email,
+        password: "SOCIAL_LOGIN", // No usamos contraseña real
+        image: user.image,
+        ubication: user.ubication || "No especificada",
+        origin: user.origin, // "google", "facebook", "apple"
+        rol: adminList.includes(user.email) ? "admin" : "user"
+      });
+    } else {
+      usuario = usuarios[0];
+    }
+
+    // Generar JWT local
+    const token = jwtGenerator(usuario.id);
+
+    // Generar Firebase token personalizado
+    const firebaseToken = await admin
+      .auth()
+      .createCustomToken(usuario.id.toString());
+
+    return { usuario, token, firebaseToken };
+
+  } catch (error) {
+    console.error("Error socialRegisterOrLogin:", error);
+    throw new Error("Error al autenticar con red social");
+  }
+};
+
 
 exports.loginUser = async (user) => {
   let usuario;
