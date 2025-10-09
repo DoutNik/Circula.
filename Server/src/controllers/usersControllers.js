@@ -54,158 +54,76 @@ exports.getAllExisting = async () => {
 };
 
 exports.createUser = async (user) => {
-  if (
-    !user.username ||
-    !user.email ||
-    !user.password ||
-    !user.image ||
-    !user.ubication
-  ) {
+  if (!user.username || !user.email || !user.password || !user.image || !user.ubication) {
     throw new Error("Faltan datos");
-  } else {
-    const existEmail = await User.findAll({
-      where: {
-        email: user.email,
-      },
-    });
-    const existUsername = await User.findAll({
-      where: {
-        username: user.username,
-      },
-    });
-    if (existEmail.length !== 0) {
-      throw new Error("El email ya se encuentra registrado");
-    } else if (existUsername.length !== 0) {
-      throw new Error("El nombre de usuario ya se encuentra registrado");
-    }
-    // if (existEmail.length !== 0 && existUsername.length !== 0) {
-    //   throw new Error("El email y usuario ya están en uso, prueba uno diferente.");
-    // }
-    else {
-      try {
-        const saltRounds = 10;
-        const salt = await bcrypt.genSalt(saltRounds);
-        const password = user.password;
-        const bcryptPassword = await bcrypt.hash(password, salt);
+  }
 
-        if (adminList.includes(user.email) && user.origin === "google") {
-          const newUser = await User.create({
-            username: user.username,
-            email: user.email,
-            password: bcryptPassword,
-            image: user.image,
-            ubication: user.ubication,
-            rol: "admin",
-            origin: "google",
-          });
-          const token = jwtGenerator(newUser.id);
-          await transporter.sendMail(registerMail(user));
-          return { newUser, token };
-        } else if (adminList.includes(user.email)) {
-          const newUser = await User.create({
-            username: user.username,
-            email: user.email,
-            password: bcryptPassword,
-            image: user.image,
-            ubication: user.ubication,
-            rol: "admin",
-          });
-          const token = jwtGenerator(newUser.id);
-          await transporter.sendMail(registerMail(user));
-          return { newUser, token };
-        } else if (user.origin === "google") {
-          const newUser = await User.create({
-            username: user.username,
-            email: user.email,
-            password: bcryptPassword,
-            image: user.image,
-            ubication: user.ubication,
-            origin: user.origin,
-          });
-          const token = jwtGenerator(newUser.id);
-          await transporter.sendMail(registerMail(user));
-          return { newUser, token };
-        } else {
-          const newUser = await User.create({
-            username: user.username,
-            email: user.email,
-            password: bcryptPassword,
-            image: user.image,
-            ubication: user.ubication,
-            origin: "google",
-          });
-          await admin.auth().createUser({
-            uid: newUser.id.toString(),
-            email: newUser.email,
-            displayName: newUser.username,
-            photoURL: newUser.image,
-          });
-          const token = jwtGenerator(newUser.id);
-          await transporter.sendMail(registerMail(user));
-          return { newUser, token };
-        }
-      } catch (error) {
-        throw new Error("Hubo un error al crear el usuario: " + error);
-      }
-    }
+  const existEmail = await User.findOne({ where: { email: user.email } });
+  const existUsername = await User.findOne({ where: { username: user.username } });
+
+  if (existEmail) throw new Error("El email ya se encuentra registrado");
+  if (existUsername) throw new Error("El nombre de usuario ya se encuentra registrado");
+
+  try {
+    const salt = await bcrypt.genSalt(10);
+    const bcryptPassword = await bcrypt.hash(user.password, salt);
+
+    // Determinar rol
+    const rol = adminList.includes(user.email) ? "admin" : "user";
+
+    // Crear usuario en la DB
+    const newUser = await User.create({
+      username: user.username,
+      email: user.email,
+      password: bcryptPassword,
+      image: user.image,
+      ubication: user.ubication,
+      rol,
+      origin: user.origin || "local",
+    });
+
+    // Enviar mail
+    await transporter.sendMail(registerMail(user));
+
+    // Crear usuario en Firebase (solo si es registro normal o Google)
+    await admin.auth().createUser({
+      uid: newUser.id.toString(),
+      email: newUser.email,
+      displayName: newUser.username,
+      photoURL: newUser.image,
+    });
+
+    // JWT local
+    const token = jwtGenerator(newUser.id);
+
+    // Token Firebase personalizado
+    const firebaseToken = await admin.auth().createCustomToken(newUser.id.toString());
+
+    return { newUser, token, firebaseToken };
+
+  } catch (error) {
+    throw new Error("Hubo un error al crear el usuario: " + error);
   }
 };
 
+
 exports.loginUser = async (user) => {
+  let usuario;
   if (user.origin === "google") {
-    const usuarios = await User.findAll({
-      where: { email: user.email },
-    });
-
-    if (usuarios.length === 0) {
-      throw new Error("No existe ningún usuario con ese nombre");
-    }
-
-    try {
-      const usuario = usuarios[0];
-      const token = jwtGenerator(usuario.id);
-
-      // 🔥 Generar token de Firebase personalizado
-      const firebaseToken = await admin
-        .auth()
-        .createCustomToken(usuario.id.toString());
-
-      return { usuario, token, firebaseToken };
-    } catch (error) {
-      console.log(error);
-    }
+    usuario = await User.findOne({ where: { email: user.email } });
   } else {
-    const usuarios = await User.findAll({
-      where: { username: user.username },
-    });
-
-    if (usuarios.length === 0) {
-      throw new Error("No existe ningún usuario con ese nombre");
-    } else {
-      try {
-        const usuario = usuarios[0];
-        const validPassword = await bcrypt.compare(
-          user.password,
-          usuario.password
-        );
-
-        if (!validPassword) {
-          throw new Error("La contraseña es incorrecta");
-        } else {
-          const token = jwtGenerator(usuario.id);
-
-          // 🔥 Generar token personalizado de Firebase
-          const firebaseToken = await admin
-            .auth()
-            .createCustomToken(usuario.id.toString());
-
-          return { usuario, token, firebaseToken };
-        }
-      } catch (error) {
-        throw new Error("Error al iniciar sesión");
-      }
+    usuario = await User.findOne({ where: { username: user.username } });
+    if (usuario && !(await bcrypt.compare(user.password, usuario.password))) {
+      throw new Error("La contraseña es incorrecta");
     }
   }
+
+  if (!usuario) throw new Error("No existe ningún usuario con ese nombre");
+
+  const token = jwtGenerator(usuario.id);
+  const firebaseToken = await admin.auth().createCustomToken(usuario.id.toString());
+
+  return { usuario, token, firebaseToken };
 };
 
 exports.getUserId = async (user) => {
