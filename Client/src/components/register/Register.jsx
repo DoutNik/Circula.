@@ -1,27 +1,36 @@
-import Logo from '../../assets/locan.png'
+import Logo from "../../assets/locan.png";
 import React from "react";
 import { useState, useEffect } from "react";
 import style from "./Register.module.css";
 import axios from "axios";
-import { validateUsername, validateEmail, validatePassword, validateImagen, validateProvince, validateLocalidad, validatePasswordRepeat } from "./validations";
-import Swal from 'sweetalert2';
+import {
+  validateUsername,
+  validateEmail,
+  validatePassword,
+  validateImagen,
+  validateProvince,
+  validateLocalidad,
+  validatePasswordRepeat,
+} from "./validations";
+import Swal from "sweetalert2";
+import { auth } from "../../firebase.js"; // tu config de Firebase
+import { signInWithCustomToken } from "firebase/auth";
 
-const Register = ({setAuth}) => {
-
+const Register = ({ setAuth }) => {
   const [provinces, setProvinces] = useState([]);
   const [localities, setLocalities] = useState([]);
   const [selectedProvince, setSelectedProvince] = useState("");
-  const [ localidad, setSelectedLocalidad ] = useState("")
+  const [localidad, setSelectedLocalidad] = useState("");
 
-    // Constantes para Cloudinary.
+  // Constantes para Cloudinary.
 
-    const preset_key = "postsimages";
-    const cloud_name = "dlahgnpwp";
-    const folderName = "usersProfilePic";
+  const preset_key = "postsimages";
+  const cloud_name = "dlahgnpwp";
+  const folderName = "usersProfilePic";
 
-    const [imageError, setImageError] = useState(null);
-    const [provinceError, setProvinceError] = useState(null);
-    const [localidadError, setLocalidadError] = useState(null);
+  const [imageError, setImageError] = useState(null);
+  const [provinceError, setProvinceError] = useState(null);
+  const [localidadError, setLocalidadError] = useState(null);
   const [errors, setErrors] = useState({
     username: null,
     password: null,
@@ -30,7 +39,7 @@ const Register = ({setAuth}) => {
     province: null,
     localidad: null,
   });
-  
+
   useEffect(() => {
     fetch("https://apis.datos.gob.ar/georef/api/provincias")
       .then((res) => (res.ok ? res.json() : Promise.reject(res)))
@@ -51,7 +60,6 @@ const Register = ({setAuth}) => {
     const provinceError = validateProvince(selectedProvince);
     setErrors({ ...errors, province: provinceError });
     setProvinceError(provinceError);
-
 
     fetch(
       `https://apis.datos.gob.ar/georef/api/localidades?provincia=${selectedProvince}&max=500`
@@ -96,7 +104,6 @@ const Register = ({setAuth}) => {
 
   const [imageFile, setImageFile] = useState(null);
 
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setInput({
@@ -104,25 +111,24 @@ const Register = ({setAuth}) => {
       [name]: value,
     });
 
-    if (name === 'username') {
+    if (name === "username") {
       setErrors({ ...errors, username: validateUsername(value) });
-    } else if (name === 'email') {
+    } else if (name === "email") {
       setErrors({ ...errors, email: validateEmail(value) });
-    } else if (name === 'password') {
+    } else if (name === "password") {
       setErrors({ ...errors, password: validatePassword(value) });
-    } else if (name === 'repeatPassword') {
+    } else if (name === "repeatPassword") {
       setErrors({
         ...errors,
         repeatPassword: validatePasswordRepeat(value, input.password),
-      });    
-    } else if (name === 'image') {
+      });
+    } else if (name === "image") {
       setErrors({ ...errors, image: validateImagen(value) });
     }
   };
 
-
   const [showPassword, setShowPassword] = useState(false);
-    
+
   const handleShowPassword = () => {
     setShowPassword(!showPassword);
   };
@@ -135,151 +141,158 @@ const Register = ({setAuth}) => {
         ...input,
         image: imageUrl,
       });
-      setImageFile(file); 
-      setImageError(null)
+      setImageFile(file);
+      setImageError(null);
     }
   };
-  
+
   const handleImageClear = () => {
     setInput({
       ...input,
-      image: '',
+      image: "",
     });
     setImageFile(null);
   };
 
-
-
   const handleSumbit = async (e) => {
-  e.preventDefault();
-  setInput({
-    ...input,
-    disabled: true})
-
-  if (
-    !input.username ||
-    !input.email ||
-    !input.password ||
-    !input.repeatPassword ||
-    !input.image ||
-    !selectedProvince ||
-    !localidad
-  )   
-  {
- 
-    
-  if (!input.image) {
-    setImageError('Es necesario completar con una imagen.');
-  } else {
-    setImageError(null); 
-  }
-
-  if (!selectedProvince) {
-    setProvinceError('Es necesario seleccionar una provincia.');
-  } else {
-    setProvinceError(null); 
-  }
-
-  if (!localidad) {
-    setLocalidadError('Es necesario seleccionar una localidad.');
-  } else {
-    setLocalidadError(null); 
-  }
-  Swal.fire({
-    icon: 'info',
-    title: 'Campos incompletos',
-    html: 'Todos los campos son obligatorios para completar el registro'
-  });
-    
+    e.preventDefault();
     setInput({
       ...input,
-      disabled: false,
+      disabled: true,
     });
-    return;
-  }
 
-  try {
-    let secureUrl = '';
+    if (
+      !input.username ||
+      !input.email ||
+      !input.password ||
+      !input.repeatPassword ||
+      !input.image ||
+      !selectedProvince ||
+      !localidad
+    ) {
+      if (!input.image) {
+        setImageError("Es necesario completar con una imagen.");
+      } else {
+        setImageError(null);
+      }
 
-    if (imageFile) {
-      const formData = new FormData();
-      formData.append('file', imageFile);
-      formData.append('upload_preset', preset_key);
-      formData.append('folder', folderName);
+      if (!selectedProvince) {
+        setProvinceError("Es necesario seleccionar una provincia.");
+      } else {
+        setProvinceError(null);
+      }
 
-      const responseImage = await axios.post(
-        `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload/`,
-        formData
-      );
+      if (!localidad) {
+        setLocalidadError("Es necesario seleccionar una localidad.");
+      } else {
+        setLocalidadError(null);
+      }
+      Swal.fire({
+        icon: "info",
+        title: "Campos incompletos",
+        html: "Todos los campos son obligatorios para completar el registro",
+      });
 
-      secureUrl = responseImage.data.secure_url;
+      setInput({
+        ...input,
+        disabled: false,
+      });
+      return;
     }
 
-    let newUser = {
-      username: input.username,
-      password: input.password,
-      email: input.email,
-      image: secureUrl,
-      ubication: `${selectedProvince}, ${localidad}`,
-      origin: "DB"
-    };
+    try {
+      let secureUrl = "";
 
-    const response = await axios.post('/users/register', newUser);
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append("file", imageFile);
+        formData.append("upload_preset", preset_key);
+        formData.append("folder", folderName);
 
-    if (response) {
-      await localStorage.setItem('token', response.data.token);
-      setAuth(true);
+        const responseImage = await axios.post(
+          `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload/`,
+          formData
+        );
 
-      // Mostrar una alerta de éxito
-      Swal.fire({
-        icon: 'success',
-        title: 'Registro exitoso',
-        text: '¡Te has registrado exitosamente!',
-      });
-    } else {
-      console.log('Hubo un error al crear el usuario.');
-    }
-  } catch (error) {
-    console.error('Error al enviar los datos al servidor:', error);
-    console.log('Hubo un error al crear el usuario.');
+        secureUrl = responseImage.data.secure_url;
+      }
 
-    if (error.response && error.response.data === 'El email ya se encuentra registrado') {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Email en uso',
-        text: 'El correo electrónico ya está en uso. Por favor, elige otro.',
+      let newUser = {
+        username: input.username,
+        password: input.password,
+        email: input.email,
+        image: secureUrl,
+        ubication: `${selectedProvince}, ${localidad}`,
+        origin: "DB",
+      };
+
+      const response = await axios.post("/users/register", newUser);
+
+      if (response) {
+        // Guardar JWT local
+        await localStorage.setItem("token", response.data.token);
+
+        // 🔥 Loguear usuario en Firebase con el token personalizado
+        await signInWithCustomToken(auth, response.data.firebaseToken);
+
+        setAuth(true); // Actualizar estado de autenticación
+
+        Swal.fire({
+          icon: "success",
+          title: "Registro exitoso",
+          text: "¡Te has registrado exitosamente!",
+        });
+      } else {
+        console.log("Hubo un error al crear el usuario.");
+      }
+    } catch (error) {
+      console.error("Error al enviar los datos al servidor:", error);
+      console.log("Hubo un error al crear el usuario.");
+
+      if (
+        error.response &&
+        error.response.data === "El email ya se encuentra registrado"
+      ) {
+        Swal.fire({
+          icon: "warning",
+          title: "Email en uso",
+          text: "El correo electrónico ya está en uso. Por favor, elige otro.",
+        });
+      } else if (
+        error.response &&
+        error.response.data ===
+          "El nombre de usuario ya se encuentra registrado"
+      ) {
+        Swal.fire({
+          icon: "warning",
+          title: "Nombre de usuario en uso",
+          text: "El nombre de usuario ya está en uso. Por favor, elige otro.",
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error al registrar",
+          text: "Hubo un error al registrar el usuario. Por favor, inténtalo de nuevo.",
+        });
+      }
+
+      setInput({
+        ...input,
+        disabled: false,
       });
-    } else if (error.response && error.response.data === 'El nombre de usuario ya se encuentra registrado') {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Nombre de usuario en uso',
-        text: 'El nombre de usuario ya está en uso. Por favor, elige otro.',
-      });
-    } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error al registrar',
-        text: 'Hubo un error al registrar el usuario. Por favor, inténtalo de nuevo.',
-      });
+      return;
     }
 
     setInput({
-      ...input,
+      username: "",
+      password: "",
+      repeatPassword: "",
+      email: "",
+      image: "",
+      imageFile: null,
       disabled: false,
     });
-    return;
-  }
-
-  setInput({
-    username: '',
-    password: '',
-    repeatPassword: '',
-    email: '',
-    image: '',
-    imageFile: null,
-    disabled: false,
-  });
-};
+  };
 
   function isSubmitDisabled() {
     return Object.values(errors).some((error) => error !== null);
@@ -287,7 +300,7 @@ const Register = ({setAuth}) => {
 
   return (
     <div className={style.container}>
-      <img src={Logo} className={style.logo}/>
+      <img src={Logo} className={style.logo} />
       <div className={style.title}>
         <h2>Regístrate</h2>
       </div>
@@ -303,7 +316,9 @@ const Register = ({setAuth}) => {
               value={input.username}
               disabled={input.disabled}
             />
-             {errors.username && <span className={style.error}>{errors.username}</span>}
+            {errors.username && (
+              <span className={style.error}>{errors.username}</span>
+            )}
           </div>
 
           <div>
@@ -315,7 +330,9 @@ const Register = ({setAuth}) => {
               value={input.email}
               disabled={input.disabled}
             />
-            {errors.email && <span className={style.error}>{errors.email}</span>}
+            {errors.email && (
+              <span className={style.error}>{errors.email}</span>
+            )}
           </div>
 
           <div>
@@ -333,71 +350,95 @@ const Register = ({setAuth}) => {
               onChange={handleShowPassword}
               checked={showPassword}
             /> */}
-            {errors.password && <span className={style.error}>{errors.password}</span>}
+            {errors.password && (
+              <span className={style.error}>{errors.password}</span>
+            )}
           </div>
           <div>
-          <input
-            type="password"
-            name="repeatPassword"
-            placeholder="Repetir contraseña"
-            onChange={handleInputChange}
-            value={input.repeatPassword} // Asegúrate de tener un valor inicial en el estado
-            disabled={input.disabled}
-          />
-            {errors.repeatPassword && <span className={style.error}>{errors.repeatPassword}</span>}
-        </div>
-            {/* <input
+            <input
+              type="password"
+              name="repeatPassword"
+              placeholder="Repetir contraseña"
+              onChange={handleInputChange}
+              value={input.repeatPassword} // Asegúrate de tener un valor inicial en el estado
+              disabled={input.disabled}
+            />
+            {errors.repeatPassword && (
+              <span className={style.error}>{errors.repeatPassword}</span>
+            )}
+          </div>
+          {/* <input
               type="checkbox"
               id="showPassword"
               onChange={handleShowPassword}
               checked={showPassword}
             /> */}
-        <div className={style.fileInput} disabled={input.disabled}>
-          <input
-            type="file"
-            accept="image/*"
-            name="image"
-            onChange={handleFile}
-          />
-          {input.image && (
-            <div className={style.imagePreview}>
-              <img src={input.image} alt="Preview" className={style.imgUser}/>
-              <button onClick={handleImageClear}>✖️</button>
-            </div>
-          )}
-          {/* {errors.image && <span className={style.error}>{errors.image}</span>} */}
-          {imageError && <div className={style.error}>{imageError}</div>}
-        </div>
+          <div className={style.fileInput} disabled={input.disabled}>
+            <input
+              type="file"
+              accept="image/*"
+              name="image"
+              onChange={handleFile}
+            />
+            {input.image && (
+              <div className={style.imagePreview}>
+                <img
+                  src={input.image}
+                  alt="Preview"
+                  className={style.imgUser}
+                />
+                <button onClick={handleImageClear}>✖️</button>
+              </div>
+            )}
+            {/* {errors.image && <span className={style.error}>{errors.image}</span>} */}
+            {imageError && <div className={style.error}>{imageError}</div>}
+          </div>
 
-            <select onChange={handleProvinceChange} disabled={input.disabled}>
-              <option value="Elige una provincia">Provincia</option>
-              {sortedProvinces.map((province) => (
-                <option key={province.id} value={province.nombre}>
-                  {province.nombre}
-                </option>
-              ))}
-            </select>
-            {/* {errors.province && <span className={style.error}>{errors.province}</span>} */}
-            {provinceError && <div className={style.error}>{provinceError}</div>}
-               
-            <select id="selectLocalidades" onChange={handleLocalidadChange} disabled={input.disabled}>
-              <option value="Elige una localidad">Localidad</option>
-              {sortedLocalities.map((locality) => (
-                <option key={locality.id} value={locality.nombre}>
-                  {locality.nombre}
-                </option>
-              ))}
-            </select>
-            {/* {errors.localidad && <span className={style.error}>{errors.localidad}</span>} */}
-            {localidadError && <div className={style.error}>{localidadError}</div>}
-       
-          <button className={isSubmitDisabled() ? `${style.register} ${style.buttonDisabled}` : style.register} disabled={isSubmitDisabled()} type="submit">
+          <select onChange={handleProvinceChange} disabled={input.disabled}>
+            <option value="Elige una provincia">Provincia</option>
+            {sortedProvinces.map((province) => (
+              <option key={province.id} value={province.nombre}>
+                {province.nombre}
+              </option>
+            ))}
+          </select>
+          {/* {errors.province && <span className={style.error}>{errors.province}</span>} */}
+          {provinceError && <div className={style.error}>{provinceError}</div>}
+
+          <select
+            id="selectLocalidades"
+            onChange={handleLocalidadChange}
+            disabled={input.disabled}
+          >
+            <option value="Elige una localidad">Localidad</option>
+            {sortedLocalities.map((locality) => (
+              <option key={locality.id} value={locality.nombre}>
+                {locality.nombre}
+              </option>
+            ))}
+          </select>
+          {/* {errors.localidad && <span className={style.error}>{errors.localidad}</span>} */}
+          {localidadError && (
+            <div className={style.error}>{localidadError}</div>
+          )}
+
+          <button
+            className={
+              isSubmitDisabled()
+                ? `${style.register} ${style.buttonDisabled}`
+                : style.register
+            }
+            disabled={isSubmitDisabled()}
+            type="submit"
+          >
             Enviar
           </button>
-          {input.disabled && <div className={style.loaderContainer}>
-            <span>Creando usuario...</span>
-            <div className={style.loader}></div>
-          </div>}
+          {input.disabled && (
+            <div className={style.loaderContainer}>
+              <span>Creando usuario...</span>
+              <div className={style.loader}></div>
+            </div>
+          )}
         </form>
       </div>
     </div>
