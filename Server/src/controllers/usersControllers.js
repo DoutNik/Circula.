@@ -1,13 +1,14 @@
 const { Post, User } = require("../DB_config");
 require("dotenv").config();
-const bcrypt = require('bcrypt');
-const { transporter } = require("../config/mailer")
-const { registerMail, passwordForgot} = require("../utils/mailObjects")
-const jwtGenerator = require("../utils/jwtGenerator")
-const nodemailer = require('nodemailer')
+const bcrypt = require("bcrypt");
+const { transporter } = require("../config/mailer");
+const { registerMail, passwordForgot } = require("../utils/mailObjects");
+const jwtGenerator = require("../utils/jwtGenerator");
+const nodemailer = require("nodemailer");
+const admin = require("../config/firebaseAdmin");
 const { ADMIN_USERS } = process.env;
 
-const adminList = ADMIN_USERS.split(", ")
+const adminList = ADMIN_USERS.split(", ");
 
 exports.getAllUser = async () => {
   try {
@@ -30,10 +31,10 @@ exports.getAllUser = async () => {
 exports.getAllDisabled = async () => {
   try {
     const disabledUsers = await User.findAll({
-      where: {paranoid: false}
-    })
+      where: { paranoid: false },
+    });
 
-    return disabledUsers
+    return disabledUsers;
   } catch (error) {
     throw "Ocurrió un error al traer los usuarios: " + error;
   }
@@ -43,10 +44,10 @@ exports.getAllExisting = async () => {
   try {
     const existingUsers = await User.findAll({
       paranoid: false,
-      order: [['id', 'ASC']],
-    })
+      order: [["id", "ASC"]],
+    });
 
-    return existingUsers
+    return existingUsers;
   } catch (error) {
     throw "Ocurrió un error al traer los usuarios: " + error;
   }
@@ -64,20 +65,19 @@ exports.createUser = async (user) => {
   } else {
     const existEmail = await User.findAll({
       where: {
-        email: user.email
-      }
+        email: user.email,
+      },
     });
     const existUsername = await User.findAll({
       where: {
-        username: user.username
-      }
+        username: user.username,
+      },
     });
     if (existEmail.length !== 0) {
       throw new Error("El email ya se encuentra registrado");
-    } 
-    else if (existUsername.length !== 0) {
+    } else if (existUsername.length !== 0) {
       throw new Error("El nombre de usuario ya se encuentra registrado");
-    } 
+    }
     // if (existEmail.length !== 0 && existUsername.length !== 0) {
     //   throw new Error("El email y usuario ya están en uso, prueba uno diferente.");
     // }
@@ -88,7 +88,7 @@ exports.createUser = async (user) => {
         const password = user.password;
         const bcryptPassword = await bcrypt.hash(password, salt);
 
-        if(adminList.includes(user.email) && user.origin === "google"){
+        if (adminList.includes(user.email) && user.origin === "google") {
           const newUser = await User.create({
             username: user.username,
             email: user.email,
@@ -96,49 +96,54 @@ exports.createUser = async (user) => {
             image: user.image,
             ubication: user.ubication,
             rol: "admin",
-            origin: "google"
+            origin: "google",
           });
-          const token = jwtGenerator(newUser.id)
-          await transporter.sendMail(registerMail(user))
-          return {newUser, token};
-        } else if(adminList.includes(user.email)){
+          const token = jwtGenerator(newUser.id);
+          await transporter.sendMail(registerMail(user));
+          return { newUser, token };
+        } else if (adminList.includes(user.email)) {
           const newUser = await User.create({
             username: user.username,
             email: user.email,
             password: bcryptPassword,
             image: user.image,
             ubication: user.ubication,
-            rol: "admin"
+            rol: "admin",
           });
-          const token = jwtGenerator(newUser.id)
-          await transporter.sendMail(registerMail(user))
-          return {newUser, token};
-        } else if(user.origin === "google"){
-        const newUser = await User.create({
-          username: user.username,
-          email: user.email,
-          password: bcryptPassword,
-          image: user.image,
-          ubication: user.ubication,
-          origin: user.origin
-        });
-        const token = jwtGenerator(newUser.id)
-        await transporter.sendMail(registerMail(user))
-        return {newUser, token};
-      } else {
-        const newUser = await User.create({
-          username: user.username,
-          email: user.email,
-          password: bcryptPassword,
-          image: user.image,
-          ubication: user.ubication,
-          origin: "google"
-        });
-        const token = jwtGenerator(newUser.id)
-        await transporter.sendMail(registerMail(user))
-        return {newUser, token};
-      }
-
+          const token = jwtGenerator(newUser.id);
+          await transporter.sendMail(registerMail(user));
+          return { newUser, token };
+        } else if (user.origin === "google") {
+          const newUser = await User.create({
+            username: user.username,
+            email: user.email,
+            password: bcryptPassword,
+            image: user.image,
+            ubication: user.ubication,
+            origin: user.origin,
+          });
+          const token = jwtGenerator(newUser.id);
+          await transporter.sendMail(registerMail(user));
+          return { newUser, token };
+        } else {
+          const newUser = await User.create({
+            username: user.username,
+            email: user.email,
+            password: bcryptPassword,
+            image: user.image,
+            ubication: user.ubication,
+            origin: "google",
+          });
+          await admin.auth().createUser({
+            uid: newUser.id.toString(),
+            email: newUser.email,
+            displayName: newUser.username,
+            photoURL: newUser.image,
+          });
+          const token = jwtGenerator(newUser.id);
+          await transporter.sendMail(registerMail(user));
+          return { newUser, token };
+        }
       } catch (error) {
         throw new Error("Hubo un error al crear el usuario: " + error);
       }
@@ -147,86 +152,95 @@ exports.createUser = async (user) => {
 };
 
 exports.loginUser = async (user) => {
-  if(user.origin === "google"){
+  if (user.origin === "google") {
     const usuarios = await User.findAll({
-      where: {
-        email: user.email
-      }
+      where: { email: user.email },
     });
 
     if (usuarios.length === 0) {
       throw new Error("No existe ningún usuario con ese nombre");
     }
 
-    try{
-      const usuario = usuarios[0]; // Acceder al primer usuario en el array
-      const token = jwtGenerator(usuario.id);
-      return {usuario, token };
-
-    } catch (error){
-      console.log(error)
-    }
-  } else {
-  const usuarios = await User.findAll({
-    where: {
-      username: user.username
-    }
-  });
-
-  if (usuarios.length === 0) {
-    throw new Error("No existe ningún usuario con ese nombre");
-  } else {
     try {
-      const usuario = usuarios[0]; // Acceder al primer usuario en el array
+      const usuario = usuarios[0];
+      const token = jwtGenerator(usuario.id);
 
-      const validPassword = await bcrypt.compare(user.password, usuario.password);
+      // 🔥 Generar token de Firebase personalizado
+      const firebaseToken = await admin
+        .auth()
+        .createCustomToken(usuario.id.toString());
 
-      if (!validPassword) {
-        throw new Error("La contraseña es incorrecta");
-      } else {
-        const token = jwtGenerator(usuario.id);
-        return {usuario, token };
-      }
+      return { usuario, token, firebaseToken };
     } catch (error) {
-      throw new Error("Error al iniciar sesión");
+      console.log(error);
+    }
+  } else {
+    const usuarios = await User.findAll({
+      where: { username: user.username },
+    });
+
+    if (usuarios.length === 0) {
+      throw new Error("No existe ningún usuario con ese nombre");
+    } else {
+      try {
+        const usuario = usuarios[0];
+        const validPassword = await bcrypt.compare(
+          user.password,
+          usuario.password
+        );
+
+        if (!validPassword) {
+          throw new Error("La contraseña es incorrecta");
+        } else {
+          const token = jwtGenerator(usuario.id);
+
+          // 🔥 Generar token personalizado de Firebase
+          const firebaseToken = await admin
+            .auth()
+            .createCustomToken(usuario.id.toString());
+
+          return { usuario, token, firebaseToken };
+        }
+      } catch (error) {
+        throw new Error("Error al iniciar sesión");
+      }
     }
   }
-}
 };
 
 exports.getUserId = async (user) => {
   try {
-    const userId = await User.findByPk(user)
+    const userId = await User.findByPk(user);
 
     return userId;
   } catch (error) {
     throw new Error("Error al iniciar sesión");
   }
-}
+};
 
 exports.getUserById = async (id) => {
   try {
-    const user = await User.findByPk(id)
+    const user = await User.findByPk(id);
 
     return user;
   } catch (error) {
     throw error;
   }
-}
+};
 
-exports.userLogueado = async ({email}) => {
+exports.userLogueado = async ({ email }) => {
   try {
-      const user = await User.findOne({
-        where: {
-          email: email,
-        },
-      });
-  
-      return user !== null;
+    const user = await User.findOne({
+      where: {
+        email: email,
+      },
+    });
+
+    return user !== null;
   } catch (error) {
     throw new Error("Error al iniciar sesión");
   }
-}
+};
 
 exports.updateUser = async (id, updatedData) => {
   try {
@@ -261,15 +275,14 @@ exports.deleteUser = async (id) => {
 };
 
 exports.forgotPassword = async (email) => {
-  try{
-    const usuario = await User.findOne({where: {email}})
+  try {
+    const usuario = await User.findOne({ where: { email } });
 
-    if(!usuario){
-        throw new Error("El usuario no existe")
+    if (!usuario) {
+      throw new Error("El usuario no existe");
     }
-    await transporter.sendMail(passwordForgot(email, usuario.id))
+    await transporter.sendMail(passwordForgot(email, usuario.id));
     return "El mail fue enviado correctamente";
-
   } catch (error) {
     throw error;
   }
@@ -280,8 +293,8 @@ exports.resetPassword = async (id, newPassword) => {
     const user = await User.findOne({ where: { id } });
 
     if (!user) {
-      throw new Error('User not found', error);
-    } 
+      throw new Error("User not found", error);
+    }
     const saltRounds = 10;
     const salt = await bcrypt.genSalt(saltRounds);
     const bcryptPassword = await bcrypt.hash(newPassword, salt);
@@ -291,31 +304,31 @@ exports.resetPassword = async (id, newPassword) => {
     return "Contraseña actualizada correctamente";
   } catch (error) {
     console.error(error);
-  throw new Error("No se pudo actualizar la contraseña", error);
+    throw new Error("No se pudo actualizar la contraseña", error);
   }
 };
 
 exports.restoreUser = async (id) => {
   try {
-    const userDisabled = await User.findByPk(id, {paranoid:false})
+    const userDisabled = await User.findByPk(id, { paranoid: false });
 
-    if(!userDisabled) {
-      throw new Error("El usuario que intenta restaurar no se encuentra.")
+    if (!userDisabled) {
+      throw new Error("El usuario que intenta restaurar no se encuentra.");
     }
-    
-    await userDisabled.restore()
+
+    await userDisabled.restore();
     return userDisabled;
   } catch (error) {
-    throw (error)
+    throw error;
   }
 };
 
-exports.getAnotherUser= async (id) => {
+exports.getAnotherUser = async (id) => {
   try {
-    const userId = await User.findByPk(id)
+    const userId = await User.findByPk(id);
 
     return userId;
   } catch (error) {
     throw new Error("Error al iniciar sesión");
   }
-}
+};

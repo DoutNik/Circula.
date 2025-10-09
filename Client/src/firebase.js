@@ -1,6 +1,8 @@
 // src/firebase.js
 import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDD3yJAsH0CJEeKXYGTExS5zXyucEGv27o",
@@ -15,5 +17,15 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 const messaging = getMessaging(app);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-export { app, messaging, getToken, onMessage };
+onAuthStateChanged(auth, user => {
+  if (user) {
+    console.log( user, "se ha logueado");
+  } else {
+    console.log("No user is signed in.");
+  }
+});
+
+export { app, messaging, getToken, onMessage, auth, db };

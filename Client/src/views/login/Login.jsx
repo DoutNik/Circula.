@@ -4,6 +4,8 @@ import Logo from '../../assets/locan.png'
 import { useState } from 'react'
 import style from './Login.module.css'
 import { Link, useNavigate } from "react-router-dom";
+import { getAuth, signInWithCustomToken } from "firebase/auth";
+import { auth } from "../../firebase.js";
 import axios from "axios";
 import Swal from 'sweetalert2'; 
 
@@ -27,54 +29,46 @@ const Login = ({ setAuth, userData }) => {
   }
 
   const handleSumbit = async (e) => {
-    e.preventDefault();
-  
-    try {
-      let loginUser = {
-        username: input.username,
-        password: input.password,
-      };
-      const response = await axios.post("/users/login", loginUser);
-  
-      if (response.data && response.data.token) {
-        const token = await localStorage.setItem("token", response.data.token);
-        setAuth(true, userData); // Set auth to true and pass user data
+  e.preventDefault();
 
-        const Toast = Swal.mixin({
-          toast: true,
-          position: 'top-end',
-          showConfirmButton: false,
-          timer: 1000,
-          timerProgressBar: true,
-          didOpen: (toast) => {
-            toast.addEventListener('mouseleave', Swal.resumeTimer);
-          }
-        });
-  
-        Toast.fire({
-          icon: 'success',
-          title: 'Login exitoso',
-        });
+  try {
+    let loginUser = {
+      username: input.username,
+      password: input.password,
+    };
 
-      } else {
-        console.log("Hubo un error al iniciar sesión.");
-        setErrors("Usuario o contraseña incorrectos")
-      }
-    } catch (error) {
-      if (error.response) {
-        console.log(error.response.data);
-        console.log(error.response.status);
-        console.log(error.response.headers);
-        setErrors(`Error: ${error.response.data.message}`);
-      } else if (error.request) {
-        console.log(error.request);
-        setErrors('Error: No response received from server');
-      }
-      console.error("Error al enviar los datos al servidor:", error);
-      setErrors("Usuario o contraseña incorrectos")
+    // 1️⃣ Llamás al backend para autenticar
+    const response = await axios.post("/users/login", loginUser);
 
+    if (response.data && response.data.token && response.data.firebaseToken) {
+      // 2️⃣ Guardás tu JWT local
+      localStorage.setItem("token", response.data.token);
+
+      // 3️⃣ Iniciás sesión en Firebase con el Custom Token
+      await signInWithCustomToken(auth, response.data.firebaseToken);
+
+      // 4️⃣ Seteás estado global
+      setAuth(true, response.data.usuario);
+
+      // 5️⃣ Notificación
+      Swal.fire({
+        toast: true,
+        position: "top-end",
+        icon: "success",
+        title: "Login exitoso",
+        showConfirmButton: false,
+        timer: 1000,
+        timerProgressBar: true,
+      });
+
+    } else {
+      setErrors("Usuario o contraseña incorrectos");
     }
-  };
+  } catch (error) {
+    console.error("Error al iniciar sesión:", error);
+    setErrors("Usuario o contraseña incorrectos");
+  }
+};
 
   return (
     <div className={style.container}>
