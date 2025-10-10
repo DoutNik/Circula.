@@ -59,6 +59,16 @@ router.get("/verify", authorization, async (req, res) => {
   }
 });
 
+router.post("/social-login", async (req, res) => {
+  const user = req.body;
+  try {
+    const response = await userController.socialRegisterOrLogin(user);
+    return res.status(200).json(response);
+  } catch (error) {
+    return res.status(400).json(error.message);
+  }
+});
+
 router.get("/userId", authorization, async (req, res) => {
   try {
     const response = await userController.getUserId(req.body.user);

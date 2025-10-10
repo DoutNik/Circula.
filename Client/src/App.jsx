@@ -73,53 +73,54 @@ const App = () => {
   };
 
   useEffect(() => {
+  const checkAuth = async () => {
     const token = localStorage.getItem("token");
 
-    if (token) {
-      axios
-        .get("/users/verify", {
-          headers: {
-            token: token,
-          },
-        })
-        .then((response) => {
-          if (response.data === true) {
-            setIsAuthenticated(true);
-            axios
-              .get("/users/userId", {
-                headers: {
-                  token: token,
-                },
-              })
-              .then((userDataResponse) => {
-                setUserData({
-                  email: userDataResponse.data.email,
-                  id: userDataResponse.data.id,
-                  username: userDataResponse.data.username,
-                  image: userDataResponse.data.image,
-                  rol: userDataResponse.data.rol,
-                  averageRating: userDataResponse.data.averageRating,
-                  plan: userDataResponse.data.plan,
-                });
-              })
-              .catch((userDataError) => {
-                console.error(
-                  "Error al obtener los datos del usuario:",
-                  userDataError
-                );
-              });
-          } else {
-            setIsAuthenticated(false);
-          }
-        })
-        .catch((error) => {
-          console.error("Token no valido o expirado:", error);
-          setIsAuthenticated(false);
-        });
-    } else {
+    // 🧠 1️⃣ Si no hay token o está vacío, no hacemos request
+    if (!token || token === "undefined" || token.trim() === "") {
       setIsAuthenticated(false);
+      localStorage.removeItem("token"); // Limpieza por las dudas
+      return;
     }
-  }, [isAuthenticated]);
+
+    try {
+      // 🧠 2️⃣ Intentamos verificar el token
+      const verifyResponse = await axios.get("/users/verify", {
+        headers: { token },
+      });
+
+      if (verifyResponse.data === true) {
+        // 🧠 3️⃣ Si es válido, obtenemos los datos del usuario
+        const userResponse = await axios.get("/users/userId", {
+          headers: { token },
+        });
+
+        setIsAuthenticated(true);
+        setUserData({
+          email: userResponse.data.email,
+          id: userResponse.data.id,
+          username: userResponse.data.username,
+          image: userResponse.data.image,
+          rol: userResponse.data.rol,
+          averageRating: userResponse.data.averageRating,
+          plan: userResponse.data.plan,
+        });
+      } else {
+        // 🧠 4️⃣ Si el backend dice que no es válido
+        console.warn("❌ Token no autorizado (verificación fallida)");
+        setIsAuthenticated(false);
+        localStorage.removeItem("token");
+      }
+    } catch (error) {
+      // 🧠 5️⃣ Si el token está vencido o da error en el servidor
+      console.error("⚠️ Token inválido o expirado:", error.response?.data || error.message);
+      setIsAuthenticated(false);
+      localStorage.removeItem("token");
+    }
+  };
+
+  checkAuth();
+}, [isAuthenticated]);
 
   //onesignal push notifications
   const [isPremium, setPremium] = useState(false);
@@ -129,7 +130,6 @@ const App = () => {
     getToken(messaging, { vapidKey: "BIgcX_H0G3MswOLcfly2-S_b8SY-LI9zu4ihlf5jK2GOgJUhsTMrKZ0nLJUUwwMNqkSQSt76cT_qOpZ9o7QNBzA" })
       .then((currentToken) => {
         if (currentToken) {
-          console.log("Token FCM:", currentToken);
           // Podrías enviarlo a tu backend
         } else {
           console.warn("No se recibió token.");

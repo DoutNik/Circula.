@@ -41,7 +41,6 @@ const Login = ({ setAuth, userData }) => {
 
     // Guardar tokens
     localStorage.setItem("token", response.data.token);
-    await signInWithCustomToken(auth, response.data.firebaseToken);
 
     Swal.fire({
       icon: "success",
@@ -77,7 +76,6 @@ const Login = ({ setAuth, userData }) => {
 
       // Guardar tokens
       localStorage.setItem("token", response.data.token);
-      await signInWithCustomToken(auth, response.data.firebaseToken);
 
       setAuth(true);
 
