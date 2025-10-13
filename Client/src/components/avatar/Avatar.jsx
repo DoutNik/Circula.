@@ -96,7 +96,7 @@ const Avatar = ({ userData, setAuth, toggleDarkMode }) => {
           className={isDarkMode ? style.dark : style.light}
           onClick={handleThemeToggle}
         >
-          {isDarkMode ? "Oscuro 🌘" : "Claro ☀️"}
+          {isDarkMode ? "Fondo☀️" : "Fondo🌘"}
         </button>
 
         <br />
