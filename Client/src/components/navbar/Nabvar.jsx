@@ -147,12 +147,13 @@ const NavBar = ({ isAuthenticated, setAuth, userData }) => {
             <img
               width="24"
               height="24"
-              src="https://img.icons8.com/puffy/32/experimental-user-puffy.png"
+              src="https://img.icons8.com/?size=100&id=9ZgJRZwEc5Yj&format=png&color=000000"
               alt="Usuario"
             />
             Iniciar sesión
           </button>
         )}
+        
       </Link>
 
       {isAuthenticated ? 
