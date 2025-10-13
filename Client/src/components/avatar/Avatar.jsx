@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-vars */
 
 import { useState, useEffect } from "react";
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 import style from "./Avatar.module.css";
 import PayModal from "../payModal/PayModal";
 import axios from "axios";
@@ -68,9 +68,11 @@ const Avatar = ({ userData, setAuth, toggleDarkMode }) => {
         )}
 
         <img
-          src={(userData && userData.image)}
+          key={userData?.image}
+          src={userData?.image || "/default-avatar.png"}
+          alt="Foto de perfil"
           className={style.photo}
-        ></img>
+        />
         {isPremium && (
           <img
             width="36"
@@ -109,7 +111,8 @@ const Avatar = ({ userData, setAuth, toggleDarkMode }) => {
           {isPremium ? "¡Gracias!" : "Sé premium"}
         </button>
 
-        <br /><br />
+        <br />
+        <br />
 
         <div>
           {!userData && (

@@ -1,15 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
 import Logo from "../../assets/locan.png";
 import style from "./Nabvar.module.css";
+import { logoutUser } from "../logButtons/LogoutButton";
 
 
-const NavBar = ({ isAuthenticated, setAuth, userData }) => {
+const NavBar = ({ isAuthenticated, userData }) => {
   const location = useLocation();
-
-  const logout = () => {
-    localStorage.removeItem("token");
-    setAuth(false);
-  };
 
   return (
     <div
@@ -158,7 +154,7 @@ const NavBar = ({ isAuthenticated, setAuth, userData }) => {
 
       {isAuthenticated ? 
         (
-        <button className={style.logout} onClick={logout}>
+        <button className={style.logout} onClick={logoutUser}>
             <img
               width="24"
               height="24"

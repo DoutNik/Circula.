@@ -20,13 +20,14 @@ import Loading from "./views/loading/Loading";
 import ForgotPassword from "./components/forgotPassword/ForgotPassword";
 import ResetPassword from "./components/resetPassword/ResetPassword";
 import UserProfile from "./views/userProfile/userProfile";
+import useAutoLogout from "./hooks/useAutoLogout";
 
 import "./App.css";
 import ReviewForm from "./components/formReview/FormReview";
 
 const App = () => {
   const initialDarkMode = localStorage.getItem("darkMode") === "true";
-
+  useAutoLogout();
   const [darkMode, setDarkMode] = useState(initialDarkMode);
 
   useEffect(() => {
@@ -51,18 +52,18 @@ const App = () => {
   axios.defaults.baseURL = "http://localhost:3001/";
   //axios.defaults.baseURL = "https://lo-canjeamos-production.up.railway.app/";
 
-
-  if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(registration => {
-        console.log('✅ Service Worker registrado con éxito:', registration);
-      })
-      .catch(error => {
-        console.log('❌ Falló el registro del Service Worker:', error);
-      });
-  });
-}
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker
+        .register("/sw.js")
+        .then((registration) => {
+          console.log("✅ Service Worker registrado con éxito:", registration);
+        })
+        .catch((error) => {
+          console.log("❌ Falló el registro del Service Worker:", error);
+        });
+    });
+  }
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userData, setUserData] = useState(null);
@@ -73,61 +74,67 @@ const App = () => {
   };
 
   useEffect(() => {
-  const checkAuth = async () => {
-    const token = localStorage.getItem("token");
+    const checkAuth = async () => {
+      const token = localStorage.getItem("token");
 
-    // 🧠 1️⃣ Si no hay token o está vacío, no hacemos request
-    if (!token || token === "undefined" || token.trim() === "") {
-      setIsAuthenticated(false);
-      localStorage.removeItem("token"); // Limpieza por las dudas
-      return;
-    }
+      // 🧠 1️⃣ Si no hay token o está vacío, no hacemos request
+      if (!token || token === "undefined" || token.trim() === "") {
+        setIsAuthenticated(false);
+        localStorage.removeItem("token"); // Limpieza por las dudas
+        return;
+      }
 
-    try {
-      // 🧠 2️⃣ Intentamos verificar el token
-      const verifyResponse = await axios.get("/users/verify", {
-        headers: { token },
-      });
-
-      if (verifyResponse.data === true) {
-        // 🧠 3️⃣ Si es válido, obtenemos los datos del usuario
-        const userResponse = await axios.get("/users/userId", {
+      try {
+        // 🧠 2️⃣ Intentamos verificar el token
+        const verifyResponse = await axios.get("/users/verify", {
           headers: { token },
         });
 
-        setIsAuthenticated(true);
-        setUserData({
-          email: userResponse.data.email,
-          id: userResponse.data.id,
-          username: userResponse.data.username,
-          image: userResponse.data.image,
-          rol: userResponse.data.rol,
-          averageRating: userResponse.data.averageRating,
-          plan: userResponse.data.plan,
-        });
-      } else {
-        // 🧠 4️⃣ Si el backend dice que no es válido
-        console.warn("❌ Token no autorizado (verificación fallida)");
+        if (verifyResponse.data === true) {
+          // 🧠 3️⃣ Si es válido, obtenemos los datos del usuario
+          const userResponse = await axios.get("/users/userId", {
+            headers: { token },
+          });
+
+          setIsAuthenticated(true);
+          setUserData({
+            email: userResponse.data.email,
+            id: userResponse.data.id,
+            username: userResponse.data.username,
+            image: userResponse.data.image,
+            rol: userResponse.data.rol,
+            averageRating: userResponse.data.averageRating,
+            plan: userResponse.data.plan,
+          });
+        } else {
+          // 🧠 4️⃣ Si el backend dice que no es válido
+          console.warn("❌ Token no autorizado (verificación fallida)");
+          setIsAuthenticated(false);
+          localStorage.removeItem("token");
+        }
+      } catch (error) {
+        // 🧠 5️⃣ Si el token está vencido o da error en el servidor
+        console.error(
+          "⚠️ Token inválido o expirado:",
+          error.response?.data || error.message
+        );
         setIsAuthenticated(false);
         localStorage.removeItem("token");
       }
-    } catch (error) {
-      // 🧠 5️⃣ Si el token está vencido o da error en el servidor
-      console.error("⚠️ Token inválido o expirado:", error.response?.data || error.message);
-      setIsAuthenticated(false);
-      localStorage.removeItem("token");
-    }
-  };
+    };
 
-  checkAuth();
-}, [isAuthenticated]);
+    checkAuth();
+  }, [isAuthenticated]);
 
   //onesignal push notifications
   const [isPremium, setPremium] = useState(false);
 
   useEffect(() => {
     // Pide permiso
-    getToken(messaging, { vapidKey: "BIgcX_H0G3MswOLcfly2-S_b8SY-LI9zu4ihlf5jK2GOgJUhsTMrKZ0nLJUUwwMNqkSQSt76cT_qOpZ9o7QNBzA" })
+    getToken(messaging, {
+      vapidKey:
+        "BIgcX_H0G3MswOLcfly2-S_b8SY-LI9zu4ihlf5jK2GOgJUhsTMrKZ0nLJUUwwMNqkSQSt76cT_qOpZ9o7QNBzA",
+    })
       .then((currentToken) => {
         if (currentToken) {
           // Podrías enviarlo a tu backend
@@ -164,7 +171,6 @@ const App = () => {
     };
     premium();
   }
-
 
   return (
     <>
@@ -215,35 +221,17 @@ const App = () => {
 
         <Route
           path="/addProduct"
-          element={
-            userData ? (
-              <AddProduct userData={userData} />
-            ) : (
-              <Loading />
-            )
-          }
+          element={userData ? <AddProduct userData={userData} /> : <Loading />}
         />
 
         <Route
           path="/detail/:id"
-          element={
-            userData ? (
-              <Detail userData={userData} />
-            ) :  (
-              <Loading />
-            )
-          }
+          element={userData ? <Detail userData={userData} /> : <Loading />}
         />
 
         <Route
           path="/exchanges"
-          element={
-            userData ? (
-              <Exchanges userData={userData} />
-            ) :  (
-              <Loading />
-            )
-          }
+          element={userData ? <Exchanges userData={userData} /> : <Loading />}
         />
 
         <Route
@@ -264,13 +252,7 @@ const App = () => {
 
         <Route
           path="/review"
-          element={
-            userData ? (
-              <ReviewForm userData={userData} />
-            ) : (
-              <Loading />
-            )
-          }
+          element={userData ? <ReviewForm userData={userData} /> : <Loading />}
         />
 
         <Route path="/forgotpassword" element={<ForgotPassword />} />
@@ -279,13 +261,7 @@ const App = () => {
 
         <Route
           path="/messages"
-          element={
-            userData ? (
-              <Messages userData={userData} />
-            ) :  (
-              <Loading />
-            )
-          }
+          element={userData ? <Messages userData={userData} /> : <Loading />}
         />
 
         <Route path="/admin" element={<AdminDash></AdminDash>} />
