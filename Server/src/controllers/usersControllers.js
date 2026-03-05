@@ -54,15 +54,24 @@ exports.getAllExisting = async () => {
 };
 
 exports.createUser = async (user) => {
-  if (!user.username || !user.email || !user.password || !user.image || !user.ubication) {
+  if (
+    !user.username ||
+    !user.email ||
+    !user.password ||
+    !user.image ||
+    !user.ubication
+  ) {
     throw new Error("Faltan datos");
   }
 
   const existEmail = await User.findOne({ where: { email: user.email } });
-  const existUsername = await User.findOne({ where: { username: user.username } });
+  const existUsername = await User.findOne({
+    where: { username: user.username },
+  });
 
   if (existEmail) throw new Error("El email ya se encuentra registrado");
-  if (existUsername) throw new Error("El nombre de usuario ya se encuentra registrado");
+  if (existUsername)
+    throw new Error("El nombre de usuario ya se encuentra registrado");
 
   try {
     const salt = await bcrypt.genSalt(10);
@@ -97,10 +106,11 @@ exports.createUser = async (user) => {
     const token = jwtGenerator(newUser.id);
 
     // Token Firebase personalizado
-    const firebaseToken = await admin.auth().createCustomToken(newUser.id.toString());
+    const firebaseToken = await admin
+      .auth()
+      .createCustomToken(newUser.id.toString());
 
     return { newUser, token, firebaseToken };
-
   } catch (error) {
     throw new Error("Hubo un error al crear el usuario: " + error);
   }
@@ -111,7 +121,7 @@ exports.socialRegisterOrLogin = async (user) => {
     // Buscar usuario por email
     let usuarios = await User.findAll({ where: { email: user.email } });
     let usuario;
-    
+
     if (usuarios.length === 0) {
       // Si no existe, crear usuario
       usuario = await User.create({
@@ -121,7 +131,7 @@ exports.socialRegisterOrLogin = async (user) => {
         image: user.image,
         ubication: user.ubication || "No especificada",
         origin: user.origin, // "google", "facebook", "apple"
-        rol: adminList.includes(user.email) ? "admin" : "user"
+        rol: adminList.includes(user.email) ? "admin" : "user",
       });
     } else {
       usuario = usuarios[0];
@@ -136,13 +146,11 @@ exports.socialRegisterOrLogin = async (user) => {
       .createCustomToken(usuario.id.toString());
 
     return { usuario, token, firebaseToken };
-
   } catch (error) {
     console.error("Error socialRegisterOrLogin:", error);
     throw new Error("Error al autenticar con red social");
   }
 };
-
 
 exports.loginUser = async (user) => {
   let usuario;
@@ -158,7 +166,9 @@ exports.loginUser = async (user) => {
   if (!usuario) throw new Error("No existe ningún usuario con ese nombre");
 
   const token = jwtGenerator(usuario.id);
-  const firebaseToken = await admin.auth().createCustomToken(usuario.id.toString());
+  const firebaseToken = await admin
+    .auth()
+    .createCustomToken(usuario.id.toString());
 
   return { usuario, token, firebaseToken };
 };
@@ -232,6 +242,16 @@ exports.deleteUser = async (id) => {
 exports.forgotPassword = async (email) => {
   try {
     const usuario = await User.findOne({ where: { email } });
+
+    if (!email) {
+      return res.status(400).json({ message: "Email requerido" });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Email inválido" });
+    }
 
     if (!usuario) {
       throw new Error("El usuario no existe");

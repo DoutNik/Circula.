@@ -15,6 +15,11 @@ const ForgotPassword = () => {
   const [error, setError] = useState({});
   // eslint-disable-next-line no-unused-vars
 
+const validateEmail = (email) => {
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regex.test(email);
+};
+
   const handleChange = (e) => {
     setInput({
       ...input,
@@ -22,22 +27,45 @@ const ForgotPassword = () => {
     });
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    axios
-      .post("/users/forgot-password", { email: input.email }) // Pass email from input state
-      .then((res) => {
-        if (res.data) {
-          Swal.fire({
-            icon: 'success',
-            title: 'Solicitud de recuperacion de contraseña',
-            text: '¡Hemos enviado un link a su correo!',
-          });
-          navigate("/login");
-        }
-      })
-      .catch((err) => console.log(err));
-  };
+const handleSubmit = async (event) => {
+  event.preventDefault();
+
+  const newErrors = {};
+
+  if (!input.email) {
+    newErrors.email = "El email es obligatorio";
+  } else if (!validateEmail(input.email)) {
+    newErrors.email = "Ingrese un email válido";
+  }
+
+  if (Object.keys(newErrors).length > 0) {
+    setError(newErrors);
+    return; // NO hace request si hay error
+  }
+
+  setError({}); // limpia errores si todo está bien
+
+  try {
+    await axios.post("/users/forgot-password", {
+      email: input.email,
+    });
+
+    Swal.fire({
+      icon: "success",
+      title: "Solicitud enviada",
+      text: "Si el email está registrado, recibirá un link.",
+    });
+
+    navigate("/login");
+
+  } catch (err) {
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Ocurrió un problema. Intente nuevamente.",
+    });
+  }
+};
 
   useEffect(() => {}, []);
 
@@ -52,7 +80,7 @@ const ForgotPassword = () => {
         <div className={`${style.inputContainer} ${style.flexCol}`}>
           <label className={style.label}>Ingrese su email</label>
           <input
-            type="text"
+            type="email"
             name="email"
             value={input.email}
             onChange={handleChange}
@@ -64,7 +92,6 @@ const ForgotPassword = () => {
           <button
             type="submit"
             className={`${style.button} ${style.btnStone} ${style.btnHover}`}
-            onClick={handleSubmit}
           >
             Enviar
           </button>
