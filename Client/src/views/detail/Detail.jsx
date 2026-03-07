@@ -8,6 +8,7 @@ import {
   likePost,
   clearDetail,
   getAllLikes,
+  getAllPosts,
 } from "../../redux/actions";
 import { motion } from "framer-motion";
 
@@ -26,11 +27,28 @@ const Detail = ({ userData }) => {
   const anotherUserId = post.User?.id;
   const userName = post.User?.username;
   const myPostId = useSelector((state) => state.selectedPostToInteract);
+  const allPosts2 = useSelector((state) => state.allPostsCopy);
 
   const allLikes = useSelector((state) => state.allLikes);
   const [liked, setLiked] = useState(false);
+  const [userPosts, setUserPosts] = useState([]);
+  const [showPostSelector, setShowPostSelector] = useState(false);
+  const [selectedPostId, setSelectedPostId] = useState(null);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Filter user posts when userData or allPosts changes
+    if (userData) {
+      const filteredUserPosts = allPosts2.filter(
+        (post) => post.UserId === userData.id
+      );
+      setUserPosts(filteredUserPosts);
+    }
+  }, [userData, allPosts2]);
+  console.log("User Posts:", userPosts);
+  console.log("allLikes", allLikes);
+  
 
   const filteredMatches = useSelector((state) => state.matches).filter(
     (match) => {
@@ -54,6 +72,7 @@ const Detail = ({ userData }) => {
   useEffect(() => {
     dispatch(getMatches());
     dispatch(getAllLikes());
+    dispatch(getAllPosts());
   }, [dispatch]);
 
   useEffect(() => {
@@ -63,44 +82,25 @@ const Detail = ({ userData }) => {
     }; //limpia el detail
   }, []);
 
-  const handleLikeClick = () => {
-    if (myPostId) {
-      if (!liked) {
-        if (!isMatched) {
-          dispatch(likePost(myUserId, likedPostId, myPostId, anotherUserId));
-          setLiked(true);
-        }
-      }
-      setTimeout(function () {
-        Swal.fire({
-          title: "Solicitud de canje enviada",
-          text: "Tu solicitud de canje ha sido enviada con éxito.",
-          icon: "success",
-          confirmButtonText: "Ok",
-        });
-      }, 500);
-    } else {
-      setTimeout(function () {
-        Swal.fire({
-          title: "Aviso",
-          text: "Debes seleccionar una de tus publicaciones para intercambiar.",
-          icon: "info",
-          showCancelButton: true,
-          confirmButtonText: "Aceptar",
-          cancelButtonText: "Cancelar",
-        }).then((result) => {
-          if (result.isConfirmed) {
-            const isLocalhost = window.location.hostname === "localhost";
-            const redirectURL = isLocalhost
-              ? "http://localhost:5173/#/login"
-              : "https://locanjeamos.com.ar/#/login";
-            window.location.href = redirectURL;
-            Swal.close();
-          }
-        });
-      }, 500);
+const handleLikeClick = () => {
+  if (myPostId) {
+    if (!liked && !isMatched) {
+      dispatch(likePost(myUserId, likedPostId, myPostId, anotherUserId));
+      dispatch(getAllLikes());
+
+      setLiked(true);
+
+      Swal.fire({
+        title: "Solicitud de canje enviada",
+        text: "Tu solicitud de canje ha sido enviada con éxito.",
+        icon: "success",
+      });
     }
-  };
+  } else {
+    setSelectedPostId(null);
+    setShowPostSelector(true);
+  }
+};
   const settings = {
     dots: true,
     infinite: true,
@@ -160,8 +160,98 @@ const Detail = ({ userData }) => {
     }
   };
 
+  const isPostAlreadyRequested = (postId) => {
+    return allLikes.some((like) => like.myPostId == postId);
+  };
+
   return (
     <>
+      {showPostSelector && (
+        <div className={style.modalOverlay}>
+          <div className={style.modal}>
+            <h2>Elegí una publicación para el canje</h2>
+
+            <div className={style.postsContainer}>
+              {userPosts.map((post) => {
+                const requested = isPostAlreadyRequested(post.id);
+
+                return (
+                  <div
+                    key={post.id}
+                    className={`${style.postRow} 
+        ${selectedPostId === post.id ? style.selected : ""}
+        ${requested ? style.disabled : ""}`}
+                    onClick={() => {
+                      if (!requested) {
+                        setSelectedPostId(post.id);
+                      }
+                    }}
+                  >
+                    {post.image && (
+                      <img
+                        src={post.image[0]}
+                        className={style.rowImg}
+                        alt="Publication"
+                      />
+                    )}
+
+                    <div className={style.rowInfo}>
+                      <h3>{post.title}</h3>
+                    </div>
+
+                    {requested ? (
+                      <div className={style.requestedLabel}>
+                        Solicitud de canje enviada
+                      </div>
+                    ) : (
+                      <div className={style.rowSelect}>
+                        {selectedPostId === post.id ? "✓" : ""}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <div className={style.modalButtons}>
+              <button
+                className={style.cancelButton}
+                onClick={() => setShowPostSelector(false)}
+              >
+                Cancelar
+              </button>
+
+              <button
+                className={style.confirmButton}
+                onClick={() => {
+                  if (!selectedPostId) return;
+
+                  dispatch(
+                    likePost(
+                      myUserId,
+                      likedPostId,
+                      selectedPostId,
+                      anotherUserId
+                    )
+                  );
+
+                  dispatch(getAllLikes()); // ← actualizar estado
+
+                  setSelectedPostId(null);
+                  setShowPostSelector(false);
+
+                  Swal.fire({
+                    title: "Solicitud de canje enviada",
+                    text: "Tu solicitud de canje ha sido enviada con éxito.",
+                    icon: "success",
+                  });
+                }}
+              >
+                Confirmar canje
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <motion.div
         initial={{
           opacity: 0,
@@ -214,8 +304,6 @@ const Detail = ({ userData }) => {
           {post && post.description && <h4>{post.description}</h4>}
         </div>
 
-        
-
         <div className={style.buttons}>
           <Link to="/">
             <button className={style.back}>Principal</button>
@@ -232,25 +320,25 @@ const Detail = ({ userData }) => {
         </div>
       </motion.div>
       <div className={style.navigationButtons}>
-          <button onClick={handleNextClick}>
-            <img
-              width="24"
-              height="24"
-              src="https://img.icons8.com/ios-filled/50/back.png"
-              alt="back"
-              className={style.arrow}
-            />
-          </button>
-          <button onClick={handlePrevClick}>
-            <img
-              width="24"
-              height="24"
-              src="https://img.icons8.com/ios-filled/50/forward.png"
-              alt="forward"
-              className={style.arrow}
-            />
-          </button>
-        </div>
+        <button onClick={handleNextClick}>
+          <img
+            width="24"
+            height="24"
+            src="https://img.icons8.com/ios-filled/50/back.png"
+            alt="back"
+            className={style.arrow}
+          />
+        </button>
+        <button onClick={handlePrevClick}>
+          <img
+            width="24"
+            height="24"
+            src="https://img.icons8.com/ios-filled/50/forward.png"
+            alt="forward"
+            className={style.arrow}
+          />
+        </button>
+      </div>
     </>
   );
 };

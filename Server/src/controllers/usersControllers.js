@@ -8,7 +8,7 @@ const nodemailer = require("nodemailer");
 const admin = require("../config/firebaseAdmin");
 const { ADMIN_USERS } = process.env;
 
-const adminList = ADMIN_USERS.split(", ");
+const adminList = process.env.ADMIN_USERS.split(",").map(email => email.trim());
 
 exports.getAllUser = async () => {
   try {
@@ -118,34 +118,47 @@ exports.createUser = async (user) => {
 
 exports.socialRegisterOrLogin = async (user) => {
   try {
-    // Buscar usuario por email
     let usuarios = await User.findAll({ where: { email: user.email } });
     let usuario;
 
+    const rolCalculado = adminList.includes(user.email) ? "admin" : "user";
+
     if (usuarios.length === 0) {
-      // Si no existe, crear usuario
+      // Crear usuario si no existe
       usuario = await User.create({
         username: user.username,
         email: user.email,
-        password: "SOCIAL_LOGIN", // No usamos contraseña real
+        password: "SOCIAL_LOGIN",
         image: user.image,
         ubication: user.ubication || "No especificada",
-        origin: user.origin, // "google", "facebook", "apple"
-        rol: adminList.includes(user.email) ? "admin" : "user",
+        origin: user.origin,
+        rol: rolCalculado,
       });
     } else {
       usuario = usuarios[0];
+
+        console.log(adminList);
+  console.log(usuario.email, rolCalculado);
+  console.log(usuario.rol);
+
+      // Verificar si el rol cambió y actualizar
+      if (usuario.rol !== rolCalculado) {
+        await usuario.update({ rol: rolCalculado });
+      }
     }
 
-    // Generar JWT local
     const token = jwtGenerator(usuario.id);
 
-    // Generar Firebase token personalizado
     const firebaseToken = await admin
       .auth()
       .createCustomToken(usuario.id.toString());
 
-    return { usuario, token, firebaseToken };
+    return {
+      usuario,
+      token,
+      firebaseToken,
+      rol: rolCalculado,
+    };
   } catch (error) {
     console.error("Error socialRegisterOrLogin:", error);
     throw new Error("Error al autenticar con red social");
@@ -154,10 +167,12 @@ exports.socialRegisterOrLogin = async (user) => {
 
 exports.loginUser = async (user) => {
   let usuario;
+
   if (user.origin === "google") {
     usuario = await User.findOne({ where: { email: user.email } });
   } else {
     usuario = await User.findOne({ where: { username: user.username } });
+
     if (usuario && !(await bcrypt.compare(user.password, usuario.password))) {
       throw new Error("La contraseña es incorrecta");
     }
@@ -165,12 +180,31 @@ exports.loginUser = async (user) => {
 
   if (!usuario) throw new Error("No existe ningún usuario con ese nombre");
 
+  // determinar rol
+  const rolCalculado = adminList.includes(usuario.email) ? "admin" : "user";
+  console.log(adminList);
+  console.log(usuario.email, rolCalculado);
+  console.log(usuario.rol);
+  
+  
+
+  // actualizar rol si cambió
+  if (usuario.rol !== rolCalculado) {
+    await usuario.update({ rol: rolCalculado });
+  }
+
   const token = jwtGenerator(usuario.id);
+
   const firebaseToken = await admin
     .auth()
     .createCustomToken(usuario.id.toString());
 
-  return { usuario, token, firebaseToken };
+  return {
+    usuario,
+    token,
+    firebaseToken,
+    rol: rolCalculado,
+  };
 };
 
 exports.getUserId = async (user) => {

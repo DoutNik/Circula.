@@ -81,8 +81,8 @@ exports.createPost = async (postData) => {
 
     const usuario = await User.findByPk(postData.UserId);
 
-    if(posteos.length >= 1 && usuario.plan != "premium") {
-      throw new Error("Solo los usuarios premium pueden tener mas de una publicacion a la vez!")
+    if(posteos.length >= 3 && usuario.plan != "premium") {
+      throw new Error("Solo los usuarios premium pueden tener mas de tres publicacion a la vez!")
       
     } else {
       const newPost = await Post.create(postData);
