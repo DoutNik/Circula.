@@ -8,6 +8,7 @@ import {
   likePost,
   clearDetail,
   getAllLikes,
+  getAllPosts,
 } from "../../redux/actions";
 import { motion } from "framer-motion";
 
@@ -18,19 +19,35 @@ import Swal from "sweetalert2";
 import style from "./Detail.module.css";
 
 const Detail = ({ userData }) => {
-  const myUserId = userData.id;
+  const myUserId = Number(userData.id);
   const { id } = useParams();
-  const likedPostId = id;
+  const likedPostId = Number(id);
   const dispatch = useDispatch();
   const post = useSelector((state) => state.selectedPost);
   const anotherUserId = post.User?.id;
   const userName = post.User?.username;
   const myPostId = useSelector((state) => state.selectedPostToInteract);
+  const allPosts2 = useSelector((state) => state.allPostsCopy);
 
   const allLikes = useSelector((state) => state.allLikes);
   const [liked, setLiked] = useState(false);
+  const [userPosts, setUserPosts] = useState([]);
+  const [showPostSelector, setShowPostSelector] = useState(false);
+  const [selectedPostId, setSelectedPostId] = useState(null);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Filter user posts when userData or allPosts changes
+    if (userData) {
+      const filteredUserPosts = allPosts2.filter(
+        (post) => post.UserId === userData.id
+      );
+      setUserPosts(filteredUserPosts);
+    }
+  }, [userData, allPosts2]);
+  console.log("User Posts:", userPosts);
+  console.log("allLikes", allLikes);
 
   const filteredMatches = useSelector((state) => state.matches).filter(
     (match) => {
@@ -42,7 +59,17 @@ const Detail = ({ userData }) => {
 
   // Comprueba si likedPostId está en la lista de likedPosts
   const isPostLiked = allLikes.some(
-    (like) => like.myPostId == myPostId && like.likedPostId == id
+    (like) => like.likedPostId === likedPostId && like.myUserId === myUserId
+  );
+
+  const usedProductIds = allLikes
+    .filter(
+      (like) => like.likedPostId === likedPostId && like.myUserId === myUserId
+    )
+    .map((like) => like.myPostId);
+
+  const hasAvailableProduct = userPosts.some(
+    (post) => !usedProductIds.includes(post.id)
   );
 
   const isMatched = filteredMatches.length > 0;
@@ -54,6 +81,7 @@ const Detail = ({ userData }) => {
   useEffect(() => {
     dispatch(getMatches());
     dispatch(getAllLikes());
+    dispatch(getAllPosts());
   }, [dispatch]);
 
   useEffect(() => {
@@ -63,42 +91,24 @@ const Detail = ({ userData }) => {
     }; //limpia el detail
   }, []);
 
-  const handleLikeClick = () => {
+  const handleLikeClick = async () => {
     if (myPostId) {
-      if (!liked) {
-        if (!isMatched) {
-          dispatch(likePost(myUserId, likedPostId, myPostId, anotherUserId));
-          setLiked(true);
-        }
-      }
-      setTimeout(function () {
+      if (!liked && !isMatched && !isPostLiked) {
+        await dispatch(
+          likePost(myUserId, likedPostId, myPostId, anotherUserId)
+        );
+
+        setLiked(true);
+
         Swal.fire({
           title: "Solicitud de canje enviada",
           text: "Tu solicitud de canje ha sido enviada con éxito.",
           icon: "success",
-          confirmButtonText: "Ok",
         });
-      }, 500);
+      }
     } else {
-      setTimeout(function () {
-        Swal.fire({
-          title: "Aviso",
-          text: "Debes seleccionar una de tus publicaciones para intercambiar.",
-          icon: "info",
-          showCancelButton: true,
-          confirmButtonText: "Aceptar",
-          cancelButtonText: "Cancelar",
-        }).then((result) => {
-          if (result.isConfirmed) {
-            const isLocalhost = window.location.hostname === "localhost";
-            const redirectURL = isLocalhost
-              ? "http://localhost:5173/#/login"
-              : "https://locanjeamos.com.ar/#/login";
-            window.location.href = redirectURL;
-            Swal.close();
-          }
-        });
-      }, 500);
+      setSelectedPostId(null);
+      setShowPostSelector(true);
     }
   };
   const settings = {
@@ -160,8 +170,107 @@ const Detail = ({ userData }) => {
     }
   };
 
+  const isPostAlreadyRequested = (postId) => {
+    return allLikes.some((like) => like.myPostId == postId);
+  };
+
+  let disabledReason = "";
+
+  if (liked) disabledReason = "Ya enviaste una solicitud de canje";
+  else if (myUserId === anotherUserId)
+    disabledReason = "No puedes canjear tu propia publicación";
+  else if (isMatched) disabledReason = "Este canje ya fue realizado";
+  else if (!hasAvailableProduct)
+    disabledReason = "Intentaste este canje con todos tus productos";
+
   return (
     <>
+      {showPostSelector && (
+        <div className={style.modalOverlay}>
+          <div className={style.modal}>
+            <h2>Elegí una publicación para el canje</h2>
+
+            <div className={style.postsContainer}>
+              {userPosts.map((post) => {
+                const requested = isPostAlreadyRequested(post.id);
+
+                return (
+                  <div
+                    key={post.id}
+                    className={`${style.postRow} 
+        ${selectedPostId === post.id ? style.selected : ""}
+        ${requested ? style.disabled : ""}`}
+                    onClick={() => {
+                      if (!requested) {
+                        setSelectedPostId(post.id);
+                      }
+                    }}
+                  >
+                    {post.image && (
+                      <img
+                        src={post.image[0]}
+                        className={style.rowImg}
+                        alt="Publication"
+                      />
+                    )}
+
+                    <div className={style.rowInfo}>
+                      <h3>{post.title}</h3>
+                    </div>
+
+                    {requested ? (
+                      <div className={style.requestedLabel}>
+                        Solicitud de canje enviada
+                      </div>
+                    ) : (
+                      <div className={style.rowSelect}>
+                        {selectedPostId === post.id ? "✓" : ""}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <div className={style.modalButtons}>
+              <button
+                className={style.cancelButton}
+                onClick={() => setShowPostSelector(false)}
+              >
+                Cancelar
+              </button>
+
+              <button
+                className={style.confirmButton}
+                onClick={() => {
+                  if (!selectedPostId) return;
+
+                  dispatch(
+                    likePost(
+                      myUserId,
+                      likedPostId,
+                      selectedPostId,
+                      anotherUserId
+                    )
+                  );
+
+                  dispatch(getAllLikes()); // ← actualizar estado
+
+                  setSelectedPostId(null);
+                  setShowPostSelector(false);
+
+                  Swal.fire({
+                    title: "Solicitud de canje enviada",
+                    text: "Tu solicitud de canje ha sido enviada con éxito.",
+                    icon: "success",
+                  });
+                }}
+              >
+                Confirmar canje
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <motion.div
         initial={{
           opacity: 0,
@@ -214,43 +323,48 @@ const Detail = ({ userData }) => {
           {post && post.description && <h4>{post.description}</h4>}
         </div>
 
-        
-
         <div className={style.buttons}>
           <Link to="/">
             <button className={style.back}>Principal</button>
           </Link>
-          <button
-            className={style.button}
-            onClick={handleLikeClick}
-            disabled={
-              liked || myUserId === anotherUserId || isMatched || isPostLiked
-            }
-          >
-            Canjear
-          </button>
+
+          <div className={style.tooltipWrapper}>
+            <button
+              className={style.button}
+              onClick={handleLikeClick}
+              disabled={
+                myUserId === anotherUserId || isMatched || !hasAvailableProduct
+              }
+            >
+              Canjear
+            </button>
+
+            {disabledReason && (
+              <span className={style.tooltip}>{disabledReason}</span>
+            )}
+          </div>
         </div>
       </motion.div>
       <div className={style.navigationButtons}>
-          <button onClick={handleNextClick}>
-            <img
-              width="24"
-              height="24"
-              src="https://img.icons8.com/ios-filled/50/back.png"
-              alt="back"
-              className={style.arrow}
-            />
-          </button>
-          <button onClick={handlePrevClick}>
-            <img
-              width="24"
-              height="24"
-              src="https://img.icons8.com/ios-filled/50/forward.png"
-              alt="forward"
-              className={style.arrow}
-            />
-          </button>
-        </div>
+        <button onClick={handleNextClick}>
+          <img
+            width="24"
+            height="24"
+            src="https://img.icons8.com/ios-filled/50/back.png"
+            alt="back"
+            className={style.arrow}
+          />
+        </button>
+        <button onClick={handlePrevClick}>
+          <img
+            width="24"
+            height="24"
+            src="https://img.icons8.com/ios-filled/50/forward.png"
+            alt="forward"
+            className={style.arrow}
+          />
+        </button>
+      </div>
     </>
   );
 };

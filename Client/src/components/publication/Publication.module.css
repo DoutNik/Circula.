@@ -2,7 +2,8 @@
   display: grid;
   width: 250px;
   height: 65px;
-  grid-template-columns: 1fr 2fr 1fr 0.5fr;
+  grid-template-columns: 60px 1fr auto;
+  align-items: center;
   box-shadow: 0px 5px 10px rgba(128, 128, 128, 0.3);
   border-radius: 10px;
   padding: 10px;
@@ -22,17 +23,22 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-align: left;
+  text-align: center;
   padding-left: 5px;
   font-size: 12px;
   align-self: center;
   color: rgb(45, 45, 45);
 }
 
-.publication .trash {
-  opacity: 75%;
+.trash {
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.75;
+  justify-self: end;
 }
 
-.publication .trash:hover {
-  opacity: 90%;
+.trash:hover {
+  opacity: 1;
+  transform: scale(1.05);
 }

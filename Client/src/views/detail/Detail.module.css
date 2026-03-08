@@ -26,6 +26,7 @@
   transition: all 1.6s ease;
 }
 
+
 .button:before,
 .button:after {
   position: absolute;
@@ -242,8 +243,10 @@
 }
 
 .buttons {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  align-items: center;
+  margin-left: 22%;
+  gap: 70px;
 }
 
 .detail .back {
@@ -272,6 +275,159 @@
   background-color: gray;
   cursor: not-allowed;
   opacity: 0.6;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  width: 800px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.postsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.postRow {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px;
+  border-radius: 8px;
+  border: 2px solid #ddd;
+  cursor: pointer;
+  transition: 0.2s;
+  background: white;
+}
+
+.postRow:hover {
+  background: #f5f5f5;
+}
+
+.rowImg {
+  width: 80px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.rowInfo {
+  flex: 1;
+}
+
+.rowSelect {
+  margin-left: auto;
+  font-size: 20px;
+  font-weight: bold;
+  color: #00c853;
+}
+
+.selected {
+  border: 2px solid #00c853;
+  background: #f1fff5;
+}
+
+.modalButtons {
+  margin-top: 25px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 50px;
+}
+
+
+
+.tooltip {
+  position: absolute;
+  visibility: hidden;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.tooltipWrapper:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* botón cancelar */
+.cancelButton {
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  background: #e0e0e0;
+  color: #333;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.cancelButton:hover {
+  background: #d5d5d5;
+  transform: translateY(-1px);
+}
+
+/* botón confirmar */
+.confirmButton {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #00c853, #00e676);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 200, 83, 0.3);
+  transition: all 0.25s ease;
+}
+
+.confirmButton:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 8px 18px rgba(0, 200, 83, 0.4);
+}
+
+.confirmButton:active {
+  transform: scale(0.96);
+}
+
+.disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.requestedLabel {
+  margin-left: auto;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ff6f00;
 }
 
 @media (max-width: 768px) {
