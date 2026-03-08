@@ -29,8 +29,10 @@ const Avatar = ({ userData, setAuth, toggleDarkMode }) => {
   };
 
   useEffect(() => {
-    premium();
-  }, []);
+    if (userData?.id) {
+      premium();
+    }
+  }, [userData]);
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -68,10 +70,14 @@ const Avatar = ({ userData, setAuth, toggleDarkMode }) => {
         )}
 
         <img
-          key={userData?.image}
           src={userData?.image || "/default-avatar.png"}
           alt="Foto de perfil"
           className={style.photo}
+          referrerPolicy="no-referrer"
+          onError={(e) => {
+            e.currentTarget.onerror = null; // evita loop
+            e.currentTarget.src = "/default-avatar.png";
+          }}
         />
         {isPremium && (
           <img
