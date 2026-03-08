@@ -19,9 +19,9 @@ import Swal from "sweetalert2";
 import style from "./Detail.module.css";
 
 const Detail = ({ userData }) => {
-  const myUserId = userData.id;
+  const myUserId = Number(userData.id);
   const { id } = useParams();
-  const likedPostId = id;
+  const likedPostId = Number(id);
   const dispatch = useDispatch();
   const post = useSelector((state) => state.selectedPost);
   const anotherUserId = post.User?.id;
@@ -48,7 +48,6 @@ const Detail = ({ userData }) => {
   }, [userData, allPosts2]);
   console.log("User Posts:", userPosts);
   console.log("allLikes", allLikes);
-  
 
   const filteredMatches = useSelector((state) => state.matches).filter(
     (match) => {
@@ -60,7 +59,17 @@ const Detail = ({ userData }) => {
 
   // Comprueba si likedPostId está en la lista de likedPosts
   const isPostLiked = allLikes.some(
-    (like) => like.myPostId == myPostId && like.likedPostId == id
+    (like) => like.likedPostId === likedPostId && like.myUserId === myUserId
+  );
+
+  const usedProductIds = allLikes
+    .filter(
+      (like) => like.likedPostId === likedPostId && like.myUserId === myUserId
+    )
+    .map((like) => like.myPostId);
+
+  const hasAvailableProduct = userPosts.some(
+    (post) => !usedProductIds.includes(post.id)
   );
 
   const isMatched = filteredMatches.length > 0;
@@ -82,25 +91,26 @@ const Detail = ({ userData }) => {
     }; //limpia el detail
   }, []);
 
-const handleLikeClick = () => {
-  if (myPostId) {
-    if (!liked && !isMatched) {
-      dispatch(likePost(myUserId, likedPostId, myPostId, anotherUserId));
-      dispatch(getAllLikes());
+  const handleLikeClick = async () => {
+    if (myPostId) {
+      if (!liked && !isMatched && !isPostLiked) {
+        await dispatch(
+          likePost(myUserId, likedPostId, myPostId, anotherUserId)
+        );
 
-      setLiked(true);
+        setLiked(true);
 
-      Swal.fire({
-        title: "Solicitud de canje enviada",
-        text: "Tu solicitud de canje ha sido enviada con éxito.",
-        icon: "success",
-      });
+        Swal.fire({
+          title: "Solicitud de canje enviada",
+          text: "Tu solicitud de canje ha sido enviada con éxito.",
+          icon: "success",
+        });
+      }
+    } else {
+      setSelectedPostId(null);
+      setShowPostSelector(true);
     }
-  } else {
-    setSelectedPostId(null);
-    setShowPostSelector(true);
-  }
-};
+  };
   const settings = {
     dots: true,
     infinite: true,
@@ -163,6 +173,15 @@ const handleLikeClick = () => {
   const isPostAlreadyRequested = (postId) => {
     return allLikes.some((like) => like.myPostId == postId);
   };
+
+  let disabledReason = "";
+
+  if (liked) disabledReason = "Ya enviaste una solicitud de canje";
+  else if (myUserId === anotherUserId)
+    disabledReason = "No puedes canjear tu propia publicación";
+  else if (isMatched) disabledReason = "Este canje ya fue realizado";
+  else if (!hasAvailableProduct)
+    disabledReason = "Intentaste este canje con todos tus productos";
 
   return (
     <>
@@ -308,15 +327,22 @@ const handleLikeClick = () => {
           <Link to="/">
             <button className={style.back}>Principal</button>
           </Link>
-          <button
-            className={style.button}
-            onClick={handleLikeClick}
-            disabled={
-              liked || myUserId === anotherUserId || isMatched || isPostLiked
-            }
-          >
-            Canjear
-          </button>
+
+          <div className={style.tooltipWrapper}>
+            <button
+              className={style.button}
+              onClick={handleLikeClick}
+              disabled={
+                myUserId === anotherUserId || isMatched || !hasAvailableProduct
+              }
+            >
+              Canjear
+            </button>
+
+            {disabledReason && (
+              <span className={style.tooltip}>{disabledReason}</span>
+            )}
+          </div>
         </div>
       </motion.div>
       <div className={style.navigationButtons}>

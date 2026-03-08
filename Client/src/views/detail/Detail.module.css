@@ -26,6 +26,7 @@
   transition: all 1.6s ease;
 }
 
+
 .button:before,
 .button:after {
   position: absolute;
@@ -242,8 +243,10 @@
 }
 
 .buttons {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  align-items: center;
+  margin-left: 22%;
+  gap: 70px;
 }
 
 .detail .back {
@@ -347,6 +350,33 @@
   display: flex;
   justify-content: flex-end;
   gap: 50px;
+}
+
+
+
+.tooltip {
+  position: absolute;
+  visibility: hidden;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.tooltipWrapper:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 /* botón cancelar */
