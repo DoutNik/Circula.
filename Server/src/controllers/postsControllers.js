@@ -1,6 +1,7 @@
-const { Post, User } = require("../DB_config");
-const { transporter } = require("../config/mailer")
-const { postCreated } = require("../utils/mailObjects")
+const { Post, User, Like, Matches } = require("../DB_config");
+const { transporter } = require("../config/mailer");
+const { postCreated } = require("../utils/mailObjects");
+const { Op } = require("sequelize");
 
 exports.getAllPosts = async () => {
   try {
@@ -17,10 +18,10 @@ exports.getAllPosts = async () => {
 exports.getAllDisabled = async () => {
   try {
     const disabledPosts = await Post.findAll({
-      where: {paranoid: false}
-    })
+      where: { paranoid: false },
+    });
 
-    return disabledPosts
+    return disabledPosts;
   } catch (error) {
     throw "Ocurrió un error al traer las publicaciones: " + error;
   }
@@ -30,10 +31,10 @@ exports.getAllExisting = async () => {
   try {
     const existingPosts = await Post.findAll({
       paranoid: false,
-      order: [['id', 'ASC']],
-    })
+      order: [["id", "ASC"]],
+    });
 
-    return existingPosts
+    return existingPosts;
   } catch (error) {
     throw "Ocurrió un error al traer las publicaciones: " + error;
   }
@@ -42,7 +43,7 @@ exports.getAllExisting = async () => {
 exports.getPostById = async (id) => {
   try {
     const postById = await Post.findByPk(id, {
-      include: User, 
+      include: User,
     });
 
     if (!postById) {
@@ -54,7 +55,6 @@ exports.getPostById = async (id) => {
     throw error;
   }
 };
-
 
 exports.getPostsByCategory = async (category) => {
   try {
@@ -75,25 +75,26 @@ exports.createPost = async (postData) => {
     const posteos = await Post.findAll({
       where: {
         UserId: postData.UserId,
-        Deshabilitado: null
-      }
+        Deshabilitado: null,
+      },
     });
 
     const usuario = await User.findByPk(postData.UserId);
 
-    if(posteos.length >= 3 && usuario.plan != "premium") {
-      throw new Error("Solo los usuarios premium pueden tener mas de tres publicacion a la vez!")
-      
+    if (posteos.length >= 3 && usuario.plan != "premium") {
+      throw new Error(
+        "Solo los usuarios premium pueden tener mas de tres publicacion a la vez!",
+      );
     } else {
       const newPost = await Post.create(postData);
-      const postUser = await User.findByPk(postData.UserId)
-      await transporter.sendMail(postCreated(postUser.email, postData))
+      const postUser = await User.findByPk(postData.UserId);
+      await transporter.sendMail(postCreated(postUser.email, postData));
       return newPost;
     }
   } catch (error) {
     throw new Error(error.message);
     // throw error;
-    }
+  }
 };
 
 exports.updatePost = async (id, updatedData) => {
@@ -118,25 +119,46 @@ exports.deletePost = async (id) => {
 
     if (!post) {
       throw new Error("Post not found");
-    } else {
-      await post.destroy();
     }
 
+    // eliminar likes relacionados
+    await Like.destroy({
+      where: {
+        [Op.or]: [
+          { myPostId: id },
+          { likedPostId: id }
+        ]
+      }
+    });
+
+    // eliminar matches relacionados
+    await Matches.destroy({
+      where: {
+        [Op.or]: [
+          { PostId1: id },
+          { PostId2: id }
+        ]
+      }
+    });
+
+    // eliminar el post
+    await post.destroy();
 
     return true;
+
   } catch (error) {
+    console.error(error);
     throw error;
   }
 };
 
-exports.getPostsByProvince = async(provincia) => {
-    const posts = await Post.findAll();
-    const provinceFilter = posts.filter((post) => {
-      return post.ubication.startsWith(`${provincia}`);
-    });
-    return provinceFilter;
-}
-
+exports.getPostsByProvince = async (provincia) => {
+  const posts = await Post.findAll();
+  const provinceFilter = posts.filter((post) => {
+    return post.ubication.startsWith(`${provincia}`);
+  });
+  return provinceFilter;
+};
 
 exports.getPostsByLocality = async (localidad) => {
   const posts = await Post.findAll();
@@ -144,19 +166,19 @@ exports.getPostsByLocality = async (localidad) => {
     return post.ubication.endsWith(`${localidad}`);
   });
   return localityFilter;
-}
+};
 
 exports.restorePost = async (id) => {
   try {
-    const postDisabled = await Post.findByPk(id, {paranoid:false})
+    const postDisabled = await Post.findByPk(id, { paranoid: false });
 
-    if(!postDisabled) {
-      throw new Error("La publicacion que intenta restaurar no se encuentra.")
+    if (!postDisabled) {
+      throw new Error("La publicacion que intenta restaurar no se encuentra.");
     }
-    
-    await postDisabled.restore()
+
+    await postDisabled.restore();
     return postDisabled;
   } catch (error) {
-    throw (error)
+    throw error;
   }
 };

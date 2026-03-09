@@ -5,15 +5,23 @@
 
 .like {
   display: grid;
-  justify-self: center;
-  grid-template-columns: 1fr 2fr;
-  width: 250px;
+  grid-template-columns: 70px minmax(0, 1fr) 70px;
+  align-items: center;
+  width: 100%;
+  max-width: 320px;
   box-shadow: 0px 5px 10px rgba(128, 128, 128, 0.3);
   border-radius: 10px;
   margin-top: 20px;
   padding: 10px;
-  padding-top: 10px;
-  padding-bottom: 10px;
+}
+
+.like img {
+  width: 60px;
+  height: 60px;
+  border-radius: 10px;
+  border: 2px solid grey;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
 .likes {
@@ -53,4 +61,28 @@
   height: 60px;
   border-radius: 50%;
   border: 3px solid grey;
+}
+
+.names {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.names h4 {
+  width: 100%;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.myProduct {
+  grid-column: 1;
+}
+
+.wantedProduct {
+  grid-column: 3;
 }

@@ -37,6 +37,7 @@ const Publication = ({ userData }) => {
         }
       });
     });
+    dispatch(getAllPosts());
   } catch (error) {
     console.error("Error al eliminar la publicación", error);
   }

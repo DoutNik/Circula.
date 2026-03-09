@@ -357,7 +357,6 @@
 .tooltip {
   position: absolute;
   visibility: hidden;
-  left: 50%;
   transform: translateX(-50%);
   background-color: #333;
   color: white;
@@ -449,6 +448,7 @@
 
   .buttons {
     padding-bottom: 60px;
+    margin-left: 15%;
   }
 
   .detail h4 {
