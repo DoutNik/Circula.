@@ -21,7 +21,6 @@ const Filters = () => {
   const selectedCategory = useSelector((state) => state.selectedCategory);
   const dispatch = useDispatch();
   const allPostsCopy = useSelector((state) => state.allPostsCopy);
-  const selectedImage = useSelector((state) => state.selectedPostImage);
 
   const handleProvinceChange = (event) => {
     const province = event.target.value;
@@ -110,17 +109,6 @@ const Filters = () => {
         }}
         className={style.filters}
       >
-        <Link to="/login">
-          {selectedImage ? (
-            <img src={selectedImage} className={style.product} alt="Product" />
-          ) : (
-            <img
-              src={imgBase}
-              className={style.product}
-              alt="Imagen Predeterminada"
-            />
-          )}
-        </Link>
         <span>Filtros</span>
         <select value={selectedProvince} onChange={handleProvinceChange}>
           <option value="" disabled>Provincia</option>

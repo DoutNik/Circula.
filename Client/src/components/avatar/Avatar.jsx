@@ -9,7 +9,7 @@ import axios from "axios";
 
 const Avatar = ({ userData, setAuth, toggleDarkMode }) => {
   const [isPremium, setPremium] = useState(false);
-
+  const imageUrl = userData.image.split("=")[0] + "=s200-c";
   const premium = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -70,14 +70,10 @@ const Avatar = ({ userData, setAuth, toggleDarkMode }) => {
         )}
 
         <img
-          src={userData?.image || "/default-avatar.png"}
+          src={imageUrl}
           alt="Foto de perfil"
           className={style.photo}
           referrerPolicy="no-referrer"
-          onError={(e) => {
-            e.currentTarget.onerror = null; // evita loop
-            e.currentTarget.src = "/default-avatar.png";
-          }}
         />
         {isPremium && (
           <img

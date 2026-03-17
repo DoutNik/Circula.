@@ -25,7 +25,7 @@ const Register = ({ setAuth }) => {
   // Constantes para Cloudinary.
 
   const preset_key = "postsimages";
-  const cloud_name = "dlahgnpwp";
+  const cloud_name = "dsc4kqz3g";
   const folderName = "usersProfilePic";
 
   const [imageError, setImageError] = useState(null);

@@ -15,9 +15,9 @@
 
 .avatar {
   border-radius: 50%;
+  width: 25px;
+  height: 25px;
 }
-
-
 
 .navbarOff {
   display: grid;
@@ -137,6 +137,6 @@
   .navbarOff {
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
     bottom: 0;
-    top: auto; 
+    top: auto;
   }
 }

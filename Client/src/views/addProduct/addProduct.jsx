@@ -2,14 +2,13 @@
 // eslint-disable react/prop-types */
 import React, { useState, useEffect, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import {motion} from 'framer-motion';
+import { motion } from "framer-motion";
 import Header from "../../components/header/Header";
 import style from "./AddProduct.module.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { validateDescription, validateTitle } from './validation'
-import Swal from "sweetalert2"; 
-
+import { validateDescription, validateTitle } from "./validation";
+import Swal from "sweetalert2";
 
 export default function AddProduct({ userData }) {
   const { id } = userData;
@@ -35,7 +34,7 @@ export default function AddProduct({ userData }) {
   // Constantes para Cloudinary.
 
   const preset_key = "postsimages";
-  const cloud_name = "dlahgnpwp";
+  const cloud_name = "dsc4kqz3g";
   const folderName = "postimages";
 
   const [files, setFiles] = useState([]);
@@ -43,25 +42,28 @@ export default function AddProduct({ userData }) {
   const [selectedIndices, setSelectedIndices] = useState([]);
   const [errors, setErrors] = useState({});
 
-  const onDrop = useCallback((acceptedFiles) => {
+  const onDrop = useCallback(
+    (acceptedFiles) => {
+      if (files.length + acceptedFiles.length > 3) {
+        Swal.fire({
+          title: "¡Límite de imágenes alcanzado!",
+          text: "No puedes cargar más de 3 imágenes.",
+          icon: "warning",
+        });
+        return;
+      }
 
-    if (files.length + acceptedFiles.length > 3) {
-      Swal.fire({
-        title: "¡Límite de imágenes alcanzado!",
-        text: "No puedes cargar más de 3 imágenes.",
-        icon: "warning",
-      });
-      return;
-    }
-
-    const updatedFiles = [...files, ...acceptedFiles];
-    setFiles(updatedFiles);
-  }, [files]);
+      const updatedFiles = [...files, ...acceptedFiles];
+      setFiles(updatedFiles);
+    },
+    [files],
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     maxFiles: 3,
-    accept: {'image/*': []}
+    maxSize: 5 * 1024 * 1024, // 5MB
+    accept: { "image/*": [] },
   });
 
   useEffect(() => {
@@ -81,7 +83,7 @@ export default function AddProduct({ userData }) {
       })
       .catch((error) => {
         console.error(
-          `Error: ${error.status}: ${error.statusText || "Ocurrió un error"}`
+          `Error: ${error.status}: ${error.statusText || "Ocurrió un error"}`,
         );
       });
   }, []);
@@ -91,7 +93,7 @@ export default function AddProduct({ userData }) {
     setSelectedProvince(selectedProvince);
 
     fetch(
-      `https://apis.datos.gob.ar/georef/api/localidades?provincia=${selectedProvince}&max=500`
+      `https://apis.datos.gob.ar/georef/api/localidades?provincia=${selectedProvince}&max=500`,
     )
       .then((res) => (res.ok ? res.json() : Promise.reject(res)))
       .then((json) => {
@@ -101,7 +103,7 @@ export default function AddProduct({ userData }) {
         console.error(
           `Error al obtener las localidades: ${error.status}: ${
             error.statusText || "Ocurrió un error"
-          }`
+          }`,
         );
       });
   };
@@ -154,13 +156,13 @@ export default function AddProduct({ userData }) {
     setFormData({ ...formData, [name]: value });
     let error = "";
 
-  if (name === "title") {
-    error = validateTitle(value);
-  } else if (name === "description") {
-    error = validateDescription(value);
-}
-setErrors({ ...errors, [name]: error });
-};
+    if (name === "title") {
+      error = validateTitle(value);
+    } else if (name === "description") {
+      error = validateDescription(value);
+    }
+    setErrors({ ...errors, [name]: error });
+  };
 
   const handleFile = (event) => {
     const selectedFiles = event.target.files;
@@ -179,7 +181,6 @@ setErrors({ ...errors, [name]: error });
   };
 
   const handleDeleteImage = (event, index) => {
-
     const updatedFiles = [...files];
     updatedFiles.splice(index, 1); // Eliminar el archivo del estado
     setFiles(updatedFiles);
@@ -193,85 +194,95 @@ setErrors({ ...errors, [name]: error });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+      const signRes = await axios.get("posts/cloudinary/signature");
+
+
     setFormData({
       ...formData,
-      disabled: true
-    })
+      disabled: true,
+    });
 
     // Subir imágenes a Cloudinary y obtener las URLs.
-    const uploadPromises = files.map((file) => {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", preset_key);
-      formData.append("folder", folderName);
+    const uploadPromises = files.map(async (file) => {
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("api_key", signRes.data.apiKey);
+        formData.append("timestamp", signRes.data.timestamp);
+        formData.append("signature", signRes.data.signature);
+        formData.append("folder", "postimages");
+        
 
-      return axios
-        .post(
-          `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload/`,
-          formData
-        )
-        .then((res) => res.data.secure_url)
-        .catch((error) => {
-          console.log("Error al subir las imágenes: " + error);
-          return null;
-        });
+        const res = await axios.post(
+          `https://api.cloudinary.com/v1_1/${signRes.data.cloudName}/image/upload`,
+          formData,
+        );
+
+        // Optimización automática
+        return res.data.secure_url.replace(
+          "/upload/",
+          "/upload/q_auto,f_auto/",
+        );
+      } catch (error) {
+        console.error("Error al subir imagen:", error);
+        return null;
+      }
     });
 
     const imageUrls = await Promise.all(uploadPromises);
     const errors = {};
 
     const titleError = validateTitle(formData.title);
-      if (titleError) {
-        errors.title = titleError;
-      }
-    
-      const descriptionError = validateDescription(formData.description);
-      if (descriptionError) {
-        errors.description = descriptionError;
-      }
-    
-      if (
-        formData.title.trim() === "" ||
-        imageUrls.length === 0 ||  // Reemplaza imageUrls2 por imageUrls
-        selectedProvince === "" ||
-        localidad === "" ||
-        selectedCategory === ""
-      ) {
-        Swal.fire({
-          title: "Campos obligatorios",
-          text: "Todos los campos marcados con * son obligatorios.",
-          icon: "warning",
-        });
-        setFormData({
-          ...formData,
-          disabled: false,
-        })  
-        return;
-      }
-      setErrors(errors);
-    
-      const errorKeys = Object.keys(errors);
-    
-      if (errorKeys.length > 0) {
-        const errorMessage = errorKeys.map((key) => {
-          if (key === "requiredFields") {
-            return errors[key];
-          }
-          return `Hay un error en el campo ${key}`;
-        });
-      
-        Swal.fire({
-          title: "Errores en el formulario",
-          text: errorMessage.join("\n"),
-          icon: "error",
-        });
-        setFormData({
-          ...formData,
-          disabled: false,
-        })  
-        return;
-      }
+    if (titleError) {
+      errors.title = titleError;
+    }
+
+    const descriptionError = validateDescription(formData.description);
+    if (descriptionError) {
+      errors.description = descriptionError;
+    }
+
+    if (
+      formData.title.trim() === "" ||
+      imageUrls.length === 0 || // Reemplaza imageUrls2 por imageUrls
+      selectedProvince === "" ||
+      localidad === "" ||
+      selectedCategory === ""
+    ) {
+      Swal.fire({
+        title: "Campos obligatorios",
+        text: "Todos los campos marcados con * son obligatorios.",
+        icon: "warning",
+      });
+      setFormData({
+        ...formData,
+        disabled: false,
+      });
+      return;
+    }
+    setErrors(errors);
+
+    const errorKeys = Object.keys(errors);
+
+    if (errorKeys.length > 0) {
+      const errorMessage = errorKeys.map((key) => {
+        if (key === "requiredFields") {
+          return errors[key];
+        }
+        return `Hay un error en el campo ${key}`;
+      });
+
+      Swal.fire({
+        title: "Errores en el formulario",
+        text: errorMessage.join("\n"),
+        icon: "error",
+      });
+      setFormData({
+        ...formData,
+        disabled: false,
+      });
+      return;
+    }
 
     // Filtrar los resultados nulos, en caso de que haya habido errores.
     const validImageUrls = imageUrls.filter((url) => url !== null);
@@ -284,27 +295,23 @@ setErrors({ ...errors, [name]: error });
       const newPost = {
         title: formData.title,
         description: formData.description,
-        image: validImageUrls, 
+        image: validImageUrls,
         ubication: `${selectedProvince}, ${localidad}`,
         category: selectedCategory,
         UserId: id,
       };
 
-      const response = await axios.post(
-        "/posts/",
-        newPost
-      );
+      const response = await axios.post("/posts/", newPost);
 
       if (response) {
         Swal.fire({
           icon: "success",
           title: "🎉 ¡Hecho! 🎉",
-          html: '<p>Tu publicación ha sido creada correctamente. Puedes verla en tu perfil o visualizarla en el inicio.</p>',
-          allowOutsideClick: false
+          html: "<p>Tu publicación ha sido creada correctamente. Puedes verla en tu perfil o visualizarla en el inicio.</p>",
+          allowOutsideClick: false,
         }).then(() => {
           navigate("/login");
-
-           });
+        });
 
         setFiles([]);
         setSelectedCategory("");
@@ -319,14 +326,13 @@ setErrors({ ...errors, [name]: error });
         console.log("Hubo un error al crear la publicación.");
       }
     } catch (error) {
-
       console.error("Error al enviar los datos al servidor:", error);
       console.log("Hubo un error al crear la publicación.");
 
       const handlePremium = async () => {
         try {
           let paymentData;
-      
+
           if (userData) {
             paymentData = {
               userId: userData.id,
@@ -346,9 +352,9 @@ setErrors({ ...errors, [name]: error });
               description: "Usuario premium",
             };
           }
-      
+
           const response = await axios.post("/plans/create-order", paymentData);
-      
+
           if (response) {
             window.location.href = response.data.response.body.init_point;
           } else {
@@ -361,7 +367,10 @@ setErrors({ ...errors, [name]: error });
 
       if (error.response && error.response.data && error.response.data.error) {
         const errorMessage = error.response.data.error;
-        if (errorMessage === "Solo los usuarios premium pueden tener mas de una publicacion a la vez!") {
+        if (
+          errorMessage ===
+          "Solo los usuarios premium pueden tener mas de una publicacion a la vez!"
+        ) {
           const payResponse = await Swal.fire({
             title: "¡Ups!",
             text: "Solo los usuarios premium pueden tener más de una publicación a la vez.",
@@ -374,25 +383,25 @@ setErrors({ ...errors, [name]: error });
               handlePremium(true);
             },
           });
-    
+
           if (payResponse.dismiss === Swal.DismissReason.cancel) {
             Swal.fire({
-              icon: 'info',
-              title: 'Acción cancelada',
-              text: 'No te has vuelto Premium. Si decides hacerlo más tarde, ¡siempre estamos aquí!',
+              icon: "info",
+              title: "Acción cancelada",
+              text: "No te has vuelto Premium. Si decides hacerlo más tarde, ¡siempre estamos aquí!",
             });
           }
         } else {
           Swal.fire({
-            icon: 'warning',
-            title: 'Usuario Premium',
+            icon: "warning",
+            title: "Usuario Premium",
             text: errorMessage,
           });
         }
       } else {
         console.error("Error inesperado:", error);
       }
-    
+
       setFormData({
         ...formData,
         disabled: false,
@@ -400,22 +409,25 @@ setErrors({ ...errors, [name]: error });
     }
   };
 
-  const Banner = "https://res.cloudinary.com/dlahgnpwp/image/upload/v1699885578/emailAssets/er00zffd102eyze13aug.jpg";
-  const Banner2 = "https://res.cloudinary.com/dlahgnpwp/image/upload/v1699885578/emailAssets/cyzzxxg8vkfxaqzolq9m.jpg";
+  const Banner =
+    "https://res.cloudinary.com/dlahgnpwp/image/upload/v1699885578/emailAssets/er00zffd102eyze13aug.jpg";
+  const Banner2 =
+    "https://res.cloudinary.com/dlahgnpwp/image/upload/v1699885578/emailAssets/cyzzxxg8vkfxaqzolq9m.jpg";
 
   return (
     <>
       <Header banner1={Banner} banner2={Banner2}></Header>
       <motion.div
-      initial={{
-        opacity: 0,
-        scale: 0.8,
-      }}
-      animate={{
-        opacity: 1,
-        scale: 1,
-      }}
-      className={style.container}>
+        initial={{
+          opacity: 0,
+          scale: 0.8,
+        }}
+        animate={{
+          opacity: 1,
+          scale: 1,
+        }}
+        className={style.container}
+      >
         <h3>Crear publicación</h3>
         <form className={style.create}>
           <div className={style.part1}>
@@ -423,27 +435,31 @@ setErrors({ ...errors, [name]: error });
               Titulo*
               <input
                 className={style.input}
-                type='text'
-                name='title'
+                type="text"
+                name="title"
                 value={formData.title}
                 onChange={handleChange}
-                placeholder='Inserte titulo'
+                placeholder="Inserte titulo"
                 disabled={formData.disabled}
               />
-              {errors.title && <div className={style.errorMessage}>{errors.title}</div>}
+              {errors.title && (
+                <div className={style.errorMessage}>{errors.title}</div>
+              )}
             </label>
             <label>
               Descripción
               <textarea
                 className={style.input}
-                type='text'
-                name='description'
+                type="text"
+                name="description"
                 onChange={handleChange}
                 value={formData.description}
-                placeholder='Inserte descripcion'
+                placeholder="Inserte descripcion"
                 disabled={formData.disabled}
               />
-              {errors.description && <div className={style.errorMessage}>{errors.description}</div>}
+              {errors.description && (
+                <div className={style.errorMessage}>{errors.description}</div>
+              )}
             </label>
             <label>
               Imagen*
@@ -463,9 +479,18 @@ setErrors({ ...errors, [name]: error });
                   <div style={thumbsContainer}>
                     {files.map((file, index) => (
                       <div key={index}>
-                      <img style={img} src={URL.createObjectURL(file)} alt={`Imagen ${index}`} />
-                      <button type="button" onClick={() => handleDeleteImage(index)}>✖️</button>
-                    </div>
+                        <img
+                          style={img}
+                          src={URL.createObjectURL(file)}
+                          alt={`Imagen ${index}`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteImage(index)}
+                        >
+                          ✖️
+                        </button>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -474,8 +499,11 @@ setErrors({ ...errors, [name]: error });
           </div>
           <div className={style.part2}>
             <label>Provincia*</label>
-            <select onChange={handleProvinceChange} disabled={formData.disabled}>
-              <option value='Elige una provincia'>Provincia</option>
+            <select
+              onChange={handleProvinceChange}
+              disabled={formData.disabled}
+            >
+              <option value="Elige una provincia">Provincia</option>
               {sortedProvinces.map((province) => (
                 <option key={province.id} value={province.nombre}>
                   {province.nombre}
@@ -484,8 +512,12 @@ setErrors({ ...errors, [name]: error });
             </select>
             <span></span>
             <label>Localidad*</label>
-            <select id='selectLocalidades' onChange={handleLocalidadChange} disabled={formData.disabled}>
-              <option value='Elige una localidad'>Localidad</option>
+            <select
+              id="selectLocalidades"
+              onChange={handleLocalidadChange}
+              disabled={formData.disabled}
+            >
+              <option value="Elige una localidad">Localidad</option>
               {sortedLocalities.map((locality) => (
                 <option key={locality.id} value={locality.nombre}>
                   {locality.nombre}
@@ -495,12 +527,12 @@ setErrors({ ...errors, [name]: error });
             <span></span>
             <label>Categoría*</label>
             <select
-              name='category'
+              name="category"
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               disabled={formData.disabled}
             >
-              <option value='Elige una categoría'>Categoría</option>
+              <option value="Elige una categoría">Categoría</option>
               {categories.map((category, index) => (
                 <option key={index} value={category}>
                   {category}
@@ -510,16 +542,22 @@ setErrors({ ...errors, [name]: error });
             <span></span>
           </div>
         </form>
-        <button type='submit' onClick={handleSubmit} className={style.button} disabled={formData.disabled}>
+        <button
+          type="submit"
+          onClick={handleSubmit}
+          className={style.button}
+          disabled={formData.disabled}
+        >
           Crear
         </button>
-        {formData.disabled && <div className={style.loaderContainer}>
-          <span>Cargando publicación...</span>
-          <div className={style.loader}></div>
-        </div>}
+        {formData.disabled && (
+          <div className={style.loaderContainer}>
+            <span>Cargando publicación...</span>
+            <div className={style.loader}></div>
+          </div>
+        )}
         <h5 className={style.message}>Los campos con * son obligatorios</h5>
       </motion.div>
     </>
   );
 }
-

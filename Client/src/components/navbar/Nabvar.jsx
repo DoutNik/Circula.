@@ -3,16 +3,12 @@ import Logo from "../../assets/locan.png";
 import style from "./Nabvar.module.css";
 import { logoutUser } from "../logButtons/LogoutButton";
 
-
 const NavBar = ({ isAuthenticated, userData }) => {
   const location = useLocation();
+  const imageUrl = userData?.image.split("=")[0];
 
   return (
-    <div
-      className={
-        isAuthenticated ? style.navbar : style.navbarOff
-      }
-    >
+    <div className={isAuthenticated ? style.navbar : style.navbarOff}>
       <Link to="/" className={style.linkLogo}>
         <img src={Logo} className={style.logo} alt="Locan" />
       </Link>
@@ -135,7 +131,12 @@ const NavBar = ({ isAuthenticated, userData }) => {
       >
         {isAuthenticated ? (
           <button className={style.iconos}>
-            <img src={(userData && userData.image)} width="24" height="24" className={style.avatar}></img>
+            <img
+              src={imageUrl}
+              alt="Foto de perfil"
+              className={style.avatar}
+              referrerPolicy="no-referrer"
+            />
             {userData && userData.username}
           </button>
         ) : (
@@ -149,20 +150,18 @@ const NavBar = ({ isAuthenticated, userData }) => {
             Iniciar sesión
           </button>
         )}
-        
       </Link>
 
-      {isAuthenticated ? 
-        (
+      {isAuthenticated ? (
         <button className={style.logout} onClick={logoutUser}>
-            <img
-              width="24"
-              height="24"
-              src="https://img.icons8.com/fluency-systems-filled/48/exit.png"
-              alt="exit"
-            />
-            Salir
-          </button>
+          <img
+            width="24"
+            height="24"
+            src="https://img.icons8.com/fluency-systems-filled/48/exit.png"
+            alt="exit"
+          />
+          Salir
+        </button>
       ) : null}
     </div>
   );
