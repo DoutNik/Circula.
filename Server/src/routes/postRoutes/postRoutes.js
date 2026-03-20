@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const cloudinary = require("../../config/Cloudinary.js");
 
 const postsController = require("../../controllers/postsControllers.js");
 
@@ -94,7 +95,7 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/deletePost/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -120,6 +121,32 @@ router.put('/restorePost/:id', async (req, res) => {
   } catch (error) {
     return res.status(400).json({ error: error.message })
   }
+});
+
+router.put('/disablePost/:id', async (req, res) => {
+  const { id } = req.params
+  try {
+    const disabledPost = await postsController.disablePost(id);
+    return res.status(200).json({disabledPost});
+  } catch (error) {
+    return res.status(400).json({ error: error.message })
+  }
+});
+
+router.get("/cloudinary/signature", (req, res) => {
+  const timestamp = Math.round(Date.now() / 1000);
+
+  const signature = cloudinary.utils.api_sign_request(
+    { timestamp, folder: "postimages" },
+    process.env.API_SECRET
+  );
+
+  res.json({
+    timestamp,
+    signature,
+    apiKey: process.env.API_KEY,
+    cloudName: process.env.CLOUD_NAME,
+  });  
 });
 
 

@@ -20,12 +20,4 @@ const messaging = getMessaging(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-onAuthStateChanged(auth, user => {
-  if (user) {
-    console.log( user, "se ha logueado");
-  } else {
-    console.log("No user is signed in.");
-  }
-});
-
 export { app, messaging, getToken, onMessage, auth, db };

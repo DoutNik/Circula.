@@ -5,8 +5,6 @@ import PostsLiked from "../../components/likedPosts/PostsLiked";
 import Matchs from "../../components/matchs/Matchs";
 import Header from "../../components/header/Header";
 import RecivedLikes from "../../components/recivedLikes/recivedLikes";
-import { useDispatch } from "react-redux";
-import { getUserById } from "../../redux/actions";
 import axios from "axios";
 
 const Exchanges = ({ userData }) => {
