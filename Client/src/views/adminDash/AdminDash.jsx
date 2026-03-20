@@ -15,6 +15,7 @@ import {
   sortPostsByID,
   sortPostsByStatus,
   resetPostsFilter,
+  disablePost,
 } from "../../redux/actions";
 import style from "./AdminDash.module.css";
 import Swal from "sweetalert2";
@@ -81,19 +82,19 @@ const AdminDash = () => {
       await dispatch(deleteUser(id));
       const Toast = Swal.mixin({
         toast: true,
-        position: 'top-end',
+        position: "top-end",
         showConfirmButton: false,
         timer: 1000,
         timerProgressBar: true,
         didOpen: (toast) => {
-          toast.addEventListener('mouseleave', Swal.resumeTimer);
-        }
+          toast.addEventListener("mouseleave", Swal.resumeTimer);
+        },
       });
 
       Toast.fire({
-        icon: 'warning',
-        iconColor: 'red',
-        title: '⛔ Usuario Deshabilitado ⛔',
+        icon: "warning",
+        iconColor: "red",
+        title: "⛔ Usuario Deshabilitado ⛔",
       });
       await dispatch(getAllExistingUsers());
     } catch (error) {
@@ -106,18 +107,18 @@ const AdminDash = () => {
       await dispatch(restoreUser(id));
       const Toast = Swal.mixin({
         toast: true,
-        position: 'top-end',
+        position: "top-end",
         showConfirmButton: false,
         timer: 1000,
         timerProgressBar: true,
         didOpen: (toast) => {
-          toast.addEventListener('mouseleave', Swal.resumeTimer);
-        }
+          toast.addEventListener("mouseleave", Swal.resumeTimer);
+        },
       });
 
       Toast.fire({
-        icon: 'success',
-        title: '✅ Usuario Reactivado ✅',
+        icon: "success",
+        title: "✅ Usuario Reactivado ✅",
       });
       await dispatch(getAllExistingUsers());
     } catch (error) {
@@ -125,25 +126,51 @@ const AdminDash = () => {
     }
   };
 
-  const handleDisablePost = async (id) => {
+  const handleDeletePost = async (id) => {
     try {
       await dispatch(deletePost(id));
 
       const Toast = Swal.mixin({
         toast: true,
-        position: 'top-end',
+        position: "top-end",
         showConfirmButton: false,
-        timer: 1000,
+        timer: 2000,
         timerProgressBar: true,
         didOpen: (toast) => {
-          toast.addEventListener('mouseleave', Swal.resumeTimer);
-        }
+          toast.addEventListener("mouseleave", Swal.resumeTimer);
+        },
       });
 
       Toast.fire({
-        icon: 'warning',
-        iconColor: 'red',
-        title: '⛔Publicacion deshabilitada⛔',
+        icon: "warning",
+        iconColor: "red",
+        title: "⛔Publicacion Eliminada⛔",
+      });
+      await dispatch(getAllExistingPosts());
+    } catch (error) {
+      console.error("Hubo un problema al eliminar la publicacion: ", error);
+    }
+  };
+
+  const handleDisablePost = async (id) => {
+    try {
+      await dispatch(disablePost(id));
+
+      const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+          toast.addEventListener("mouseleave", Swal.resumeTimer);
+        },
+      });
+
+      Toast.fire({
+        icon: "warning",
+        iconColor: "red",
+        title: "⛔Publicacion deshabilitada⛔",
       });
       await dispatch(getAllExistingPosts());
     } catch (error) {
@@ -156,18 +183,18 @@ const AdminDash = () => {
       await dispatch(restorePost(id));
       const Toast = Swal.mixin({
         toast: true,
-        position: 'top-end',
+        position: "top-end",
         showConfirmButton: false,
         timer: 1000,
         timerProgressBar: true,
         didOpen: (toast) => {
-          toast.addEventListener('mouseleave', Swal.resumeTimer);
-        }
+          toast.addEventListener("mouseleave", Swal.resumeTimer);
+        },
       });
 
       Toast.fire({
-        icon: 'succes',
-        title: '✅ Publicacion Reactivada ✅',
+        icon: "succes",
+        title: "✅ Publicacion Reactivada ✅",
       });
       await dispatch(getAllExistingPosts());
     } catch (error) {
@@ -315,8 +342,10 @@ const AdminDash = () => {
             {allUsers.map((user) => (
               <div key={user.id} className={style.element}>
                 <h4>ID: {user.id}</h4>
-                <h4>{user.username} <h5>{user.email}</h5></h4>
-                
+                <h4>
+                  {user.username} <h5>{user.email}</h5>
+                </h4>
+
                 {user.Deshabilitado ? (
                   <span style={{ color: "crimson", fontSize: 16 }}>
                     Deshabilitado
@@ -379,6 +408,16 @@ const AdminDash = () => {
                 ) : (
                   <span style={{ color: "#3ec762", fontSize: 16 }}>Activa</span>
                 )}
+                <button
+                  onClick={() => handleDeletePost(post.id)}
+                >
+                  <img
+                    width="20"
+                    height="20"
+                    src="https://img.icons8.com/fluency/48/delete-forever.png"
+                    alt="Eliminar"
+                  />
+                </button>
                 <button
                   onClick={() => handleDisablePost(post.id)}
                   disabled={post.Deshabilitado}

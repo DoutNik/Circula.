@@ -182,3 +182,18 @@ exports.restorePost = async (id) => {
     throw error;
   }
 };
+
+exports.disablePost = async (id) => {
+  try {
+    const post = await Post.findByPk(id);
+
+    if (!post) {
+      throw new Error("La publicación que intenta deshabilitar no se encuentra.");
+    }
+
+    await post.destroy(); // Soft delete si paranoid: true
+    return post;
+  } catch (error) {
+    throw error;
+  }
+};

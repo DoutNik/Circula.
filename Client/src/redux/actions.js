@@ -389,6 +389,16 @@ export function restorePost(id) {
   };
 }
 
+export function disablePost(id) {
+  return async (dispatch) => {
+    const result = await axios.put(`/posts/disablePost/${id}`);
+    dispatch({
+      type: DISABLE_POST,
+      payload: result.data,
+    });
+  };
+}
+
 export const sortPostsByID = (order) => {
   return {
     type: SORT_POSTS_BY_ID,

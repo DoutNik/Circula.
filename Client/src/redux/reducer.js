@@ -28,6 +28,7 @@ import {
   UPDATE_POST,
   DELETE_POST,
   RESTORE_POST,
+  DISABLE_POST,
   RESET_FILTERS,
   CARGAR_HISTORIAL_MENSAJES,
   OTHER_USER_DATA,
@@ -123,7 +124,7 @@ function rootReducer(state = initialState, action) {
         users = state.allExistingUsersCopy;
       } else {
         users = state.allExistingUsersCopy.filter(
-          (user) => user.plan === action.payload
+          (user) => user.plan === action.payload,
         );
       }
 
@@ -138,7 +139,7 @@ function rootReducer(state = initialState, action) {
 
       if (action.payload === "Activos") {
         users = state.allExistingUsersCopy.filter(
-          (user) => !user.Deshabilitado
+          (user) => !user.Deshabilitado,
         );
       } else if (action.payload === "Deshabilitados") {
         users = state.allExistingUsersCopy.filter((user) => user.Deshabilitado);
@@ -162,7 +163,7 @@ function rootReducer(state = initialState, action) {
       return {
         ...state,
         allUsers: state.allUsers.map((user) =>
-          user.id === action.payload.id ? action.payload : user
+          user.id === action.payload.id ? action.payload : user,
         ),
       };
 
@@ -170,7 +171,7 @@ function rootReducer(state = initialState, action) {
       return {
         ...state,
         allUsers: state.allUsers.filter(
-          (user) => user.id !== action.payload.id
+          (user) => user.id !== action.payload.id,
         ),
       };
 
@@ -208,19 +209,19 @@ function rootReducer(state = initialState, action) {
 
       if (state.selectedCategory) {
         filteredAllPosts = filteredAllPosts.filter(
-          (post) => post.category === state.selectedCategory
+          (post) => post.category === state.selectedCategory,
         );
       }
 
       if (state.selectedProvince) {
         filteredAllPosts = filteredAllPosts.filter((post) =>
-          post.ubication.includes(state.selectedProvince)
+          post.ubication.includes(state.selectedProvince),
         );
       }
 
       if (state.selectedLocality) {
         filteredAllPosts = filteredAllPosts.filter((post) =>
-          post.ubication.includes(state.selectedLocality)
+          post.ubication.includes(state.selectedLocality),
         );
       }
 
@@ -276,7 +277,7 @@ function rootReducer(state = initialState, action) {
 
       if (action.payload === "Activas") {
         posts = state.allExistingPostsCopy.filter(
-          (post) => !post.Deshabilitado
+          (post) => !post.Deshabilitado,
         );
       } else if (action.payload === "Deshabilitadas") {
         posts = state.allExistingPostsCopy.filter((post) => post.Deshabilitado);
@@ -329,19 +330,19 @@ function rootReducer(state = initialState, action) {
 
       if (state.selectedCategory) {
         filteredPosts = filteredPosts.filter(
-          (post) => post.category === state.selectedCategory
+          (post) => post.category === state.selectedCategory,
         );
       }
 
       if (state.selectedProvince) {
         filteredPosts = filteredPosts.filter((post) =>
-          post.ubication.includes(state.selectedProvince)
+          post.ubication.includes(state.selectedProvince),
         );
       }
 
       if (state.selectedLocality) {
         filteredPosts = filteredPosts.filter((post) =>
-          post.ubication.includes(state.selectedLocality)
+          post.ubication.includes(state.selectedLocality),
         );
       }
 
@@ -360,7 +361,7 @@ function rootReducer(state = initialState, action) {
       return {
         ...state,
         allPosts: state.allPosts.map((post) =>
-          post.id === action.payload.id ? action.payload : post
+          post.id === action.payload.id ? action.payload : post,
         ),
       };
 
@@ -368,7 +369,7 @@ function rootReducer(state = initialState, action) {
       return {
         ...state,
         allPosts: state.allPosts.filter(
-          (post) => post.id !== action.payload.id
+          (post) => post.id !== action.payload.id,
         ),
       };
 
@@ -394,6 +395,16 @@ function rootReducer(state = initialState, action) {
       };
     }
 
+case DISABLE_POST: {
+  const post = state.allPosts.find(p => p.id === action.payload.id);
+
+  return {
+    ...state,
+    allPosts: state.allPosts.filter(p => p.id !== action.payload.id),
+    disabledPosts: [...state.allDisabledPosts, post],
+  };
+}
+
     case GET_ALL_LIKES:
       return {
         ...state,
@@ -405,12 +416,12 @@ function rootReducer(state = initialState, action) {
 
       // Filtra los likes que deben eliminarse
       const updatedLikes = state.allLikes.filter(
-        (like) => like.likedPostId == deletedLikeId
+        (like) => like.likedPostId == deletedLikeId,
       );
 
       // Filtra los matches que deben eliminarse
       const updatedMatches = state.matches.filter((match) =>
-        match.some((like) => like.id !== deletedLikeId)
+        match.some((like) => like.id !== deletedLikeId),
       );
 
       // Actualiza el estado con los likes y matches filtrados
@@ -429,11 +440,11 @@ function rootReducer(state = initialState, action) {
     case LIKED_POSTS:
       const userId = action.payload;
       const filteredLikes = state.allLikes.filter(
-        (like) => like.myUserId === userId
+        (like) => like.myUserId === userId,
       );
       const likedPostIds = filteredLikes.map((like) => like.likedPostId);
       const likedPosts = state.allPosts.filter((post) =>
-        likedPostIds.includes(post.id)
+        likedPostIds.includes(post.id),
       );
       return {
         ...state,
