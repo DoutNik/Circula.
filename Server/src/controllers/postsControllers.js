@@ -1,4 +1,4 @@
-const { Post, User, Like, Matches } = require("../DB_config");
+const { conn: sequelize, Post, User, Like, Matches } = require("../DB_config");
 const { transporter } = require("../config/mailer");
 const { postCreated } = require("../utils/mailObjects");
 const { Op } = require("sequelize");
@@ -114,40 +114,55 @@ exports.updatePost = async (id, updatedData) => {
 };
 
 exports.deletePost = async (id) => {
+  const transaction = await sequelize.transaction();
+
   try {
-    const post = await Post.findByPk(id);
+    // 🔒 Lock para evitar race conditions
+    const post = await Post.findByPk(id, {
+      transaction,
+      lock: transaction.LOCK.UPDATE,
+      paranoid: false, // por si estaba soft-deleted
+    });
 
     if (!post) {
       throw new Error("Post not found");
     }
 
-    // eliminar likes relacionados
-    await Like.destroy({
-      where: {
-        [Op.or]: [
-          { myPostId: id },
-          { likedPostId: id }
-        ]
-      }
+    // 🧹 Borrar dependencias primero (orden importante)
+    await Promise.all([
+      Like.destroy({
+        where: {
+          [Op.or]: [{ myPostId: id }, { likedPostId: id }],
+        },
+        force: true,
+        transaction,
+      }),
+
+      Matches.destroy({
+        where: {
+          [Op.or]: [{ PostId1: id }, { PostId2: id }],
+        },
+        force: true,
+        transaction,
+      }),
+    ]);
+
+    // 💀 Hard delete del post
+    await post.destroy({
+      force: true,
+      transaction,
     });
 
-    // eliminar matches relacionados
-    await Matches.destroy({
-      where: {
-        [Op.or]: [
-          { PostId1: id },
-          { PostId2: id }
-        ]
-      }
-    });
+    await transaction.commit();
 
-    // eliminar el post
-    await post.destroy();
-
-    return true;
+    return {
+      success: true,
+      deletedId: id,
+    };
 
   } catch (error) {
-    console.error(error);
+    await transaction.rollback();
+    console.error("HARD DELETE POST ERROR:", error);
     throw error;
   }
 };
