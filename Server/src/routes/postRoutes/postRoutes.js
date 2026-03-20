@@ -123,6 +123,16 @@ router.put('/restorePost/:id', async (req, res) => {
   }
 });
 
+router.put('/disablePost/:id', async (req, res) => {
+  const { id } = req.params
+  try {
+    const disabledPost = await postsController.disablePost(id);
+    return res.status(200).json({disabledPost});
+  } catch (error) {
+    return res.status(400).json({ error: error.message })
+  }
+});
+
 router.get("/cloudinary/signature", (req, res) => {
   const timestamp = Math.round(Date.now() / 1000);
 

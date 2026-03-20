@@ -30,6 +30,7 @@ export const CLEAR_DETAIL = "CLEAR_DETAIL"
 export const UPDATE_POST = "UPDATE_POST"
 export const DELETE_POST = "DELETE_POST"
 export const RESTORE_POST = "RESTORE_POST"
+export const DISABLE_POST = "DISABLE_POST"
 export const SELECTED_POST = "SELECTED_POST"
 export const RESET_FILTERS = "RESET_FILTERS"
 
