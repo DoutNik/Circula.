@@ -150,6 +150,7 @@ const NavBar = ({ isAuthenticated, userData }) => {
             Iniciar sesión
           </button>
         )}
+        
       </Link>
 
       {isAuthenticated ? (
