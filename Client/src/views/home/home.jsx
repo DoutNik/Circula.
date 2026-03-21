@@ -59,13 +59,16 @@ const Home = ({}) => {
   };
 
   const Banner =
-    "https://res.cloudinary.com/dlahgnpwp/image/upload/v1699885578/emailAssets/er00zffd102eyze13aug.jpg";
+    "https://res.cloudinary.com/dsc4kqz3g/image/upload/v1774028273/Gemini_Generated_Image_viplreviplrevipl_bjtaot.png";
   const Banner2 =
-    "https://res.cloudinary.com/dlahgnpwp/image/upload/v1699885578/emailAssets/cyzzxxg8vkfxaqzolq9m.jpg";
+    "https://res.cloudinary.com/dsc4kqz3g/image/upload/v1774028269/Gemini_Generated_Image_v0bhrqv0bhrqv0bh_rcvuvc.png";
+
+    const Banner3 =
+    "https://res.cloudinary.com/dsc4kqz3g/image/upload/v1774028258/bannerCircula1_dwhtft.jpg";
 
   return (
     <>
-      <Header banner1={Banner} banner2={Banner2}></Header>
+      <Header banner1={Banner} banner2={Banner2} banner3={Banner3}></Header>
 
       <div className={style.button}>
         {showModal && <VideoModal onClose={toggleModal} />}

@@ -1,6 +1,6 @@
 .myProfile {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 30px;
   margin-top: 30px;
   margin-bottom: 100px;
@@ -13,25 +13,23 @@
 
 .publications {
   display: grid;
-  align-content: flex-start;
-  width: 300px;
-  height: fit-content;
+  grid-template-columns: 1fr;
   box-shadow: 0px 5px 10px rgba(127, 126, 126, 0.3);
   border-radius: 10px;
-  padding: 30px;
-  justify-self: right;
+  margin-top: 50px;
+  padding: 20px;
+  margin-bottom: 100px;
 }
 
 .publicationsPremium {
   display: grid;
-  align-content: flex-start;
-  width: 300px;
-  height: fit-content;
+  grid-template-columns: 1fr;
   box-shadow: 0px 5px 10px rgba(127, 126, 126, 0.3);
   border: 2px solid goldenrod;
   border-radius: 10px;
+  margin-top: 50px;
   padding: 30px;
-  justify-self: right;
+  margin-bottom: 100px;
 }
 
 .agregar {
