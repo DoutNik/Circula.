@@ -59,7 +59,7 @@ const Home = ({}) => {
   };
 
   const Banner =
-    "https://res.cloudinary.com/dsc4kqz3g/image/upload/v1774028273/Gemini_Generated_Image_viplreviplrevipl_bjtaot.png";
+    "https://res.cloudinary.com/dsc4kqz3g/image/upload/v1774028276/Gemini_Generated_Image_xdf9d9xdf9d9xdf9_ofj0jc.png";
   const Banner2 =
     "https://res.cloudinary.com/dsc4kqz3g/image/upload/v1774028269/Gemini_Generated_Image_v0bhrqv0bhrqv0bh_rcvuvc.png";
 
