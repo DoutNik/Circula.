@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllPosts } from "../../redux/actions";
 import VideoModal from "../../components/videoModal/VideoModal";
-import Cards from "../../components/cards/Cards";
+import Cards from "../../components/cards/cards";
 import Filters from "../../components/filters/filters";
 import Header from "../../components/header/Header";
 import AllCards from "../../components/allCards/AllCards";
