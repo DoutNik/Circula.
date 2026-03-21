@@ -4,73 +4,106 @@ import { getAllPosts, deletePost } from "../../redux/actions";
 
 import style from "./Publication.module.css";
 
-const Publication = ({ userData }) => {
+const Publication = ({ userData, isPremium }) => {
   const dispatch = useDispatch();
+
   const allPosts = useSelector((state) => state.allPostsCopy);
   const matches = useSelector((state) => state.matches);
-  const [userPosts, setUserPosts] = useState([]);
+
+  const [openMenuId, setOpenMenuId] = useState(null);
 
   useEffect(() => {
     dispatch(getAllPosts());
   }, [dispatch]);
 
   useEffect(() => {
-    // Filter user posts when userData or allPosts changes
-    if (userData) {
-      const filteredUserPosts = allPosts.filter((post) => post.UserId === userData.id);
-      setUserPosts(filteredUserPosts);
-    }
-  }, [userData, allPosts]);
+    const handleClickOutside = () => setOpenMenuId(null);
+    document.addEventListener("click", handleClickOutside);
+
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
+
+  // 🎯 Filtrado directo (sin estado local)
+  const userPosts = allPosts.filter((post) => post.UserId === userData?.id);
 
   const handlePostDelete = async (postId) => {
     try {
       await dispatch(deletePost(postId));
-      const updatedPosts = userPosts.filter((post) => post.id !== postId);
-      setUserPosts(updatedPosts);
+      await dispatch(getAllPosts());
+
+      // 🔥 limpiar matches relacionados
       const matchesToDelete = matches.filter((match) =>
-      match.match.some((m) => m.myPostId == postId || m.likedPostId == postId)
-    );
-    matchesToDelete.forEach((match) => {
-      match.match.forEach((m) => {
-        if (m.myPostId === postId || m.likedPostId === postId) {
-          dispatch(deleteMatch(match.id, m.id)); // Utiliza la acción deleteMatch con los IDs correspondientes
-        }
+        match.match.some(
+          (m) => m.myPostId == postId || m.likedPostId == postId,
+        ),
+      );
+
+      matchesToDelete.forEach((match) => {
+        match.match.forEach((m) => {
+          if (m.myPostId === postId || m.likedPostId === postId) {
+            dispatch(deleteMatch(match.id, m.id));
+          }
+          
+        });
       });
-    });
-    dispatch(getAllPosts());
-  } catch (error) {
-    console.error("Error al eliminar la publicación", error);
-  }
-};
+    } catch (error) {
+      console.error("Error al eliminar la publicación", error);
+    }
+  };
 
-return (
-  <>
-    {userPosts.map((post) => (
-      <div key={post.id} className={style.publication}>
-        {post.image && (
-          <img
-            src={post.image[0]}
-            className={style.img}
-            alt="Publication Image"
-          />
-        )}
-        {post.title && <h3>{post.title}</h3>}
+  return (
+    <>
+      {userPosts.map((post) => (
+        <div key={post.id} className={style.publication}>
+          {/* 🖼️ Imagen */}
+          <img src={post.image?.[0]} className={style.img} alt={post.title} />
 
-        <button
-          className={style.trash}
-          onClick={() => handlePostDelete(post.id)}
-        >
-          <img
-            width="24"
-            height="24"
-            src="https://img.icons8.com/color/48/delete-forever.png"
-            alt="delete-forever"
-          />
-        </button>
-      </div>
-    ))}
-  </>
-);
+          {/* 📄 Info */}
+          <div className={style.info}>
+            <h3 className={style.title}>{post.title}</h3>
+
+            <div className={style.meta}>
+              ❤️ {post.likesCount || 0} interesados
+            </div>
+
+            {!isPremium && (post.likesCount || 0) > 0 && (
+              <span className={style.premiumHint}>
+                🔒 Ver quiénes — Premium
+              </span>
+            )}
+          </div>
+
+          {/* ⚙️ Opciones */}
+          <div className={style.actions}>
+            <button
+              className={style.menuBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpenMenuId(openMenuId === post.id ? null : post.id);
+              }}
+            >
+              ⋮
+            </button>
+
+            {openMenuId === post.id && (
+              <div className={style.menu}>
+                <button className={style.menuItem}>✏️ Editar</button>
+
+                <button className={style.menuItem}>⏸️ Pausar</button>
+
+                <button
+                  className={style.menuItemDanger}
+                  onClick={() => handlePostDelete(post.id)}
+                >
+                  🗑️ Eliminar
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+    </>
+  );
 };
 
 export default Publication;

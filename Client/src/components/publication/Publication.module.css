@@ -1,44 +1,106 @@
 .publication {
   display: grid;
-  width: 250px;
-  height: 65px;
-  grid-template-columns: 60px 1fr auto;
+  grid-template-columns: 90px 1fr auto;
   align-items: center;
-  box-shadow: 0px 5px 10px rgba(128, 128, 128, 0.3);
-  border-radius: 10px;
-  padding: 10px;
-  margin-top: 20px;
-  justify-self: center;
+
+  height: 110px;
+
+  padding: 12px 16px;
+  margin-top: 18px;
+
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 1, 10, 0.563);
 }
 
 .img {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  border: 3px solid #4ecdc4;
+  width: 90px;
+  height: 90px;
   object-fit: cover;
+  border-radius: 10px;
 }
 
-.publication h3 {
-  white-space: nowrap;
+.info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+}
+
+.title {
+  font-weight: 600;
+  font-size: 1.1rem;
+
   overflow: hidden;
+  white-space: nowrap;
   text-overflow: ellipsis;
-  text-align: center;
-  padding-left: 5px;
-  font-size: 12px;
-  align-self: center;
-  color: rgb(45, 45, 45);
 }
 
-.trash {
+.meta {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.premiumHint {
+  font-size: 0.85rem;
+  color: #ff8800;
+  font-weight: 600;
+}
+
+.actions {
+  position: relative;
+}
+
+.menu {
+  position: absolute;
+  right: 0;
+  top: 42px;
+
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  z-index: 10;
+}
+
+.menuItem {
+  padding: 12px 18px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.menuItem:hover {
+  background: #f5f5f5;
+}
+
+.menuBtn {
+  font-size: 28px;
+  font-weight: bold;
+
   background: none;
   border: none;
   cursor: pointer;
-  opacity: 0.75;
-  justify-self: end;
+
+  padding: 6px 10px;
+  border-radius: 8px;
 }
 
-.trash:hover {
-  opacity: 1;
-  transform: scale(1.05);
+.menuBtn:hover {
+  background: #f2f2f2;
 }
+
+.menuItemDanger {
+  composes: menuItem;
+  color: #e53935;
+}
+
+.menuItemDanger:hover {
+  background: #ffeaea;
+}
+

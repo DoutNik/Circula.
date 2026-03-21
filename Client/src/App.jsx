@@ -6,7 +6,7 @@ import { Routes, Route } from "react-router-dom";
 import { messaging, getToken, onMessage } from "./firebase";
 
 import AddProduct from "./views/addProduct/addProduct";
-import Chats from "./views/chats/Chats";
+import Chats from "./views/chats/chats";
 import Messages from "./views/Messages/Messages";
 import Exchanges from "./views/exchanges/exchanges";
 import Home from "./views/home/Home";
