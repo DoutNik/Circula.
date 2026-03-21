@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllPosts, deletePost, deleteMatch } from "../../redux/actions";
+import { getAllPosts, deletePost } from "../../redux/actions";
 
 import style from "./Publication.module.css";
 
@@ -32,7 +32,7 @@ const Publication = ({ userData, isPremium }) => {
       await dispatch(getAllPosts());
 
       // 🔥 eliminar matches relacionados
-      const matchesToDelete = matches.filter((match) =>
+/*       const matchesToDelete = matches.filter((match) =>
         match.match.some(
           (m) => m.myPostId == postId || m.likedPostId == postId,
         ),
@@ -44,7 +44,7 @@ const Publication = ({ userData, isPremium }) => {
             dispatch(deleteMatch(match.id, m.id));
           }
         });
-      });
+      }); */
     } catch (error) {
       console.error("Error al eliminar la publicación", error);
     }
