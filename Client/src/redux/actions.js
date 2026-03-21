@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "../api/api";
 import {
   GET_ALL_USERS,
   GET_ALL_DISABLED_USERS,
@@ -49,7 +49,7 @@ import {
 
 export function getAllUsers() {
   return async function (dispatch) {
-    const response = await axios("/users/allUsers");
+    const response = await api("/users/allUsers");
     return dispatch({
       type: GET_ALL_USERS,
       payload: response.data,
@@ -59,7 +59,7 @@ export function getAllUsers() {
 
 export function getAllDisabledUsers() {
   return async function (dispatch) {
-    const response = await axios.get("/users/allDisabledUsers");
+    const response = await api.get("/users/allDisabledUsers");
     return dispatch({
       type: GET_ALL_DISABLED_USERS,
       payload: response.data,
@@ -69,7 +69,7 @@ export function getAllDisabledUsers() {
 
 export function getAllExistingUsers() {
   return async function (dispatch) {
-    const response = await axios.get("/users/allExistingUsers");
+    const response = await api.get("/users/allExistingUsers");
     return dispatch({
       type: GET_ALL_EXISTING_USERS,
       payload: response.data,
@@ -79,7 +79,7 @@ export function getAllExistingUsers() {
 
 export function getUserById(id) {
   return async function (dispatch) {
-    const response = await axios(`/users/${id}`);
+    const response = await api(`/users/${id}`);
     return dispatch({
       type: GET_USER_BY_ID,
       payload: response.data,
@@ -112,7 +112,7 @@ export function createGoogleUser(user) {
 
   console.log("actions entrega",user);
   return async (dispatch) => {
-    const result = await axios.post(
+    const result = await api.post(
       "/users/registerGoogle",
       user
     );
@@ -125,7 +125,7 @@ export function createGoogleUser(user) {
 
 export function createUser(user) {
   return async (dispatch) => {
-    const result = await axios.post("/users/register", user);
+    const result = await api.post("/users/register", user);
     dispatch({
       type: CREATE_USER,
       payload: result.data,
@@ -135,7 +135,7 @@ export function createUser(user) {
 
 export function updateUser(id, user) {
   return async (dispatch) => {
-    const result = await axios.put(`/users/${id}`, user);
+    const result = await api.put(`/users/${id}`, user);
     dispatch({
       type: UPDATE_USER,
       payload: result.data,
@@ -145,7 +145,7 @@ export function updateUser(id, user) {
 
 export function deleteUser(id) {
   return async (dispatch) => {
-    const result = await axios.delete(`/users/${id}`);
+    const result = await api.delete(`/users/${id}`);
     dispatch({
       type: DELETE_USER,
       payload: result.data,
@@ -161,7 +161,7 @@ export function resetUsersFilter() {
 
 export function restoreUser(id) {
   return async (dispatch) => {
-    const result = await axios.put(`/users/restoreUser/${id}`);
+    const result = await api.put(`/users/restoreUser/${id}`);
     dispatch({
       type: RESTORE_USER,
       payload: result.data,
@@ -171,7 +171,7 @@ export function restoreUser(id) {
 
 export function getAllPosts() {
   return async function (dispatch) {
-    const response = await axios("/posts");
+    const response = await api("/posts");
     return dispatch({
       type: GET_ALL_POSTS,
       payload: response.data,
@@ -181,7 +181,7 @@ export function getAllPosts() {
 
 export function getAllDisabledPosts() {
   return async function (dispatch) {
-    const response = await axios.get("/posts/allDisabledPosts");
+    const response = await api.get("/posts/allDisabledPosts");
     return dispatch({
       type: GET_ALL_DISABLED_POSTS,
       payload: response.data,
@@ -191,7 +191,7 @@ export function getAllDisabledPosts() {
 
 export function getAllExistingPosts() {
   return async function (dispatch) {
-    const response = await axios.get("/posts/allExistingPosts");
+    const response = await api.get("/posts/allExistingPosts");
     return dispatch({
       type: GET_ALL_EXISTING_POSTS,
       payload: response.data,
@@ -201,7 +201,7 @@ export function getAllExistingPosts() {
 
 export function getPostById(id) {
   return async function (dispatch) {
-    const response = await axios(`/posts/${id}`);
+    const response = await api(`/posts/${id}`);
     return dispatch({
       type: GET_POST_BY_ID,
       payload: response.data,
@@ -212,7 +212,7 @@ export function getPostById(id) {
 export const likePost = (myUserId, likedPostId, myPostId, anotherUserId) => {
   return async (dispatch) => {
     try {
-      const response = await axios.post("/likes", {
+      const response = await api.post("/likes", {
         myUserId: myUserId,
         likedPostId: likedPostId,
         myPostId: myPostId,
@@ -251,7 +251,7 @@ export function likedPosts(userId) {
 
 export function getAllLikes() {
   return async function (dispatch) {
-    const response = await axios("/likes/allLikes");
+    const response = await api("/likes/allLikes");
     return dispatch({
       type: GET_ALL_LIKES,
       payload: response.data,
@@ -261,7 +261,7 @@ export function getAllLikes() {
 
 export function deleteLike(likeId) {
   return async (dispatch) => {
-    const result = await axios.delete(`/likes/${likeId}`);
+    const result = await api.delete(`/likes/${likeId}`);
     console.log(result)
     dispatch({
       type: DELETE_LIKE,
@@ -282,7 +282,7 @@ export const clearDetail = () => {
 export const getMatches = (userId) => {
   return async (dispatch) => {
     try {
-      const response = await axios.get(`/matches/${userId}`);
+      const response = await api.get(`/matches/${userId}`);
       const matches = response.data;
       dispatch({ type: GET_MATCHES, payload: matches });
     } catch (error) {
@@ -332,7 +332,7 @@ export function selectLocality(localidad) {
 
 export function getPostByCategory(category) {
   return async function (dispatch) {
-    const response = await axios(`/posts/categories/${category}`);
+    const response = await api(`/posts/categories/${category}`);
     return dispatch({
       type: GET_POST_BY_CATEGORY,
       payload: response.data,
@@ -342,7 +342,7 @@ export function getPostByCategory(category) {
 
 export function getPostByProvince(provincia) {
   return async function (dispatch) {
-    const response = await axios(`/posts/provincia/${provincia}`);
+    const response = await api(`/posts/provincia/${provincia}`);
     return dispatch({
       type: GET_POST_BY_PROVINCE,
       payload: response.data,
@@ -352,7 +352,7 @@ export function getPostByProvince(provincia) {
 
 export function getPostByLocality(localidad) {
   return async function (dispatch) {
-    const response = await axios(`/posts/localidad/${localidad}`);
+    const response = await api(`/posts/localidad/${localidad}`);
     return dispatch({
       type: GET_POST_BY_LOCALITY,
       payload: response.data,
@@ -362,7 +362,7 @@ export function getPostByLocality(localidad) {
 
 export function updatePost(id, post) {
   return async (dispatch) => {
-    const result = await axios.put(`/posts/${id}`, post);
+    const result = await api.put(`/posts/${id}`, post);
     dispatch({
       type: UPDATE_POST,
       payload: result.data,
@@ -372,7 +372,7 @@ export function updatePost(id, post) {
 
 export function deletePost(id) {
   return async (dispatch) => {
-    const result = await axios.delete(`/posts/deletePost/${id}`);
+    const result = await api.delete(`/posts/deletePost/${id}`);
     dispatch({
       type: DELETE_POST,
       payload: result.data,
@@ -382,7 +382,7 @@ export function deletePost(id) {
 
 export function restorePost(id) {
   return async (dispatch) => {
-    const result = await axios.put(`/posts/restorePost/${id}`);
+    const result = await api.put(`/posts/restorePost/${id}`);
     dispatch({
       type: RESTORE_POST,
       payload: result.data,
@@ -392,7 +392,7 @@ export function restorePost(id) {
 
 export function disablePost(id) {
   return async (dispatch) => {
-    const result = await axios.put(`/posts/disablePost/${id}`);
+    const result = await api.put(`/posts/disablePost/${id}`);
     dispatch({
       type: DISABLE_POST,
       payload: result.data,
@@ -429,7 +429,7 @@ export function resetFilters() {
 export function messagesHistory(chatId) {
   return async (dispatch) => {
     try {
-      const response = await axios.get(`/messages/${chatId}`);
+      const response = await api.get(`/messages/${chatId}`);
       dispatch({
         type: CARGAR_HISTORIAL_MENSAJES,
         payload: response.data
@@ -443,7 +443,7 @@ export function messagesHistory(chatId) {
 export function createMessage(chatId, userId, content) {
   return async () => {
     try {
-      await axios.post(`/messages/${chatId}`, {
+      await api.post(`/messages/${chatId}`, {
         chatId,
         userId,
         content, 
@@ -458,7 +458,7 @@ export function createMessage(chatId, userId, content) {
 export function createChat(userId, anotherUserId) {
   return async (dispatch) => {
     try {
-    const chatId = await axios.post("/chats/create", {
+    const chatId = await api.post("/chats/create", {
       userId,
       anotherUserId,
     })
@@ -478,7 +478,7 @@ export function createChat(userId, anotherUserId) {
 
 export function getAllChats() {
   return async function (dispatch) {
-    const response = await axios("/chats/allChats");
+    const response = await api("/chats/allChats");
     return dispatch({
       type: GET_ALL_CHATS,
       payload: response.data,
@@ -488,7 +488,7 @@ export function getAllChats() {
 
 export function getAllMessages() {
   return async function (dispatch) {
-    const response = await axios("/messages/allMessages");
+    const response = await api("/messages/allMessages");
     return dispatch({
       type: GET_ALL_MESSAGES,
       payload: response.data,
@@ -498,7 +498,7 @@ export function getAllMessages() {
 
 export function createPost(post) {
   return async (dispatch) => {
-    const result = await axios.post("/posts", post);
+    const result = await api.post("/posts", post);
     dispatch({
       type: CREATE_POST,
       payload: result.data,

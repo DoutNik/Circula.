@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import style from "./ForgotPassword.module.css";
-import axios from "axios";
+import api from "../../api/api";
 import Swal from 'sweetalert2';
 
 const ForgotPassword = () => {
@@ -46,7 +46,7 @@ const handleSubmit = async (event) => {
   setError({}); // limpia errores si todo está bien
 
   try {
-    await axios.post("/users/forgot-password", {
+    await api.post("/users/forgot-password", {
       email: input.email,
     });
 

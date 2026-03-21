@@ -6,7 +6,7 @@ import Avatar from "../../components/avatar/Avatar";
 import Publication from "../../components/publication/Publication";
 import Header from "../../components/header/Header";
 import style from "./MyProfile.module.css";
-import axios from "axios";
+import api from "../../api/api";
 
 const MyProfile = ({ userData, setAuth, toggleDarkMode }) => {
   const [isPremium, setPremium] = useState(false);
@@ -14,7 +14,7 @@ const MyProfile = ({ userData, setAuth, toggleDarkMode }) => {
   const premium = async () => {
     try {
       const token = localStorage.getItem("token");
-      const usuario = await axios.get("/users/userId", {
+      const usuario = await api.get("/users/userId", {
         headers: {
           token: token,
         },

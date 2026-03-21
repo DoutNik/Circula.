@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import style from "./PayModal.module.css";
-import axios from "axios";
+import api from "../../api/api";
 
 const payModal = ({ userData, user, isOpen, onClose }) => {
 
@@ -29,7 +29,7 @@ const payModal = ({ userData, user, isOpen, onClose }) => {
         };
       }
   
-      const response = await axios.post("/plans/create-order", paymentData);
+      const response = await api.post("/plans/create-order", paymentData);
   
       if (response) {
         window.location.href = response.data.response.body.init_point;

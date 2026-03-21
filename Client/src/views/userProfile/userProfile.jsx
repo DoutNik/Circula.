@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import style from "./UserProfile.module.css";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/api";
 
 const UserProfile = ({ id }) => {
   const { userId } = useParams();
@@ -11,7 +11,7 @@ const UserProfile = ({ id }) => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get("/users/anotherUserId", {
+        const response = await api.get("/users/anotherUserId", {
           params: { id: userId },
         });
         // Verifica si hay datos en la respuesta antes de actualizar el estado
@@ -36,9 +36,9 @@ const UserProfile = ({ id }) => {
         rating: value,
       };
 
-      const newRating = await axios.post("/reviews/", newReview);
+      const newRating = await api.post("/reviews/", newReview);
       if (newRating) {
-        const response = await axios.get(`/reviews/averageRating/${userId}`);
+        const response = await api.get(`/reviews/averageRating/${userId}`);
         if (response) {
           userData.averageRating = response.data.averageRating;
         }

@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import style from "./recivedLikes.module.css";
-import axios from "axios"; // Import axios
+import api from "../../api/api";
 
 const RecivedLikes = ({ userData }) => {
   const userId = userData.id;
@@ -27,7 +27,7 @@ const RecivedLikes = ({ userData }) => {
 
   const getPosts = async () => {
     try {
-      const response = await axios.get("/likes/getLikesRecibidos", {
+      const response = await api.get("/likes/getLikesRecibidos", {
         params: {
           myUserId: userData.id,
         },
@@ -36,7 +36,7 @@ const RecivedLikes = ({ userData }) => {
       if (response) {
         // Utiliza Promise.all para esperar a que todas las solicitudes se completen
         const postRequests = response.data.map(async (id) => {
-          const post = await axios.get(`/posts/${id}`);
+          const post = await api.get(`/posts/${id}`);
           return post.data; // Accede a la propiedad data
         });
 

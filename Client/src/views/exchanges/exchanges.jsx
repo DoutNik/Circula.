@@ -5,7 +5,7 @@ import PostsLiked from "../../components/likedPosts/PostsLiked";
 import Matchs from "../../components/matchs/Matchs";
 import Header from "../../components/header/Header";
 import RecivedLikes from "../../components/recivedLikes/recivedLikes";
-import axios from "axios";
+import api from "../../api/api";
 
 const Exchanges = ({ userData }) => {
   const [isPremium, setPremium] = useState(false);
@@ -13,7 +13,7 @@ const Exchanges = ({ userData }) => {
   const premium = async () => {
     try {
       const token = localStorage.getItem("token");
-      const usuario = await axios.get("/users/userId", {
+      const usuario = await api.get("/users/userId", {
         headers: {
           token: token,
         },

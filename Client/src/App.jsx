@@ -1,6 +1,5 @@
 /* eslint-disable no-unused-vars */
-import axios from "axios";
-
+import api from "./api/api";
 import { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { messaging, getToken, onMessage } from "./firebase";
@@ -49,8 +48,8 @@ const App = () => {
     }
   };
 
-  /* axios.defaults.baseURL = "http://localhost:3001/"; */
-  axios.defaults.baseURL = "https://circula-pvpn.onrender.com";
+  /* api.defaults.baseURL = "http://localhost:3001/"; */
+  api.defaults.baseURL = "https://circula-pvpn.onrender.com";
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
@@ -86,13 +85,13 @@ const App = () => {
 
       try {
         // 🧠 2️⃣ Intentamos verificar el token
-        const verifyResponse = await axios.get("/users/verify", {
+        const verifyResponse = await api.get("/users/verify", {
           headers: { token },
         });
 
         if (verifyResponse.data === true) {
           // 🧠 3️⃣ Si es válido, obtenemos los datos del usuario
-          const userResponse = await axios.get("/users/userId", {
+          const userResponse = await api.get("/users/userId", {
             headers: { token },
           });
 
@@ -155,7 +154,7 @@ const App = () => {
     const premium = async () => {
       try {
         const token = localStorage.getItem("token");
-        const usuario = await axios.get("/users/userId", {
+        const usuario = await api.get("/users/userId", {
           headers: {
             token: token,
           },

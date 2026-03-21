@@ -12,7 +12,7 @@ import {
   signInWithPopup,
 } from "firebase/auth";
 import { auth } from "../../firebase.js";
-import axios from "axios";
+import api from "../../api/api.js";
 import Swal from "sweetalert2";
 
 //import LoginButton from '../../components/logButtons/LoginButton';
@@ -32,7 +32,7 @@ const Login = ({ setAuth, userData }) => {
     const user = result.user;
 
     // Enviar datos al backend para registro/login social
-    const response = await axios.post("/users/social-login", {
+    const response = await api.post("/users/social-login", {
       username: user.displayName || user.email.split("@")[0],
       email: user.email,
       image: user.photoURL,
@@ -67,7 +67,7 @@ const Login = ({ setAuth, userData }) => {
       const user = result.user;
 
       // Enviar datos al backend para registro/login social
-      const response = await axios.post("/users/social-login", {
+      const response = await api.post("/users/social-login", {
         username: user.displayName,
         email: user.email,
         image: user.photoURL,
@@ -111,7 +111,7 @@ const Login = ({ setAuth, userData }) => {
       };
 
       // 1️⃣ Llamás al backend para autenticar
-      const response = await axios.post("/users/login", loginUser);
+      const response = await api.post("/users/login", loginUser);
 
       if (response.data && response.data.token && response.data.firebaseToken) {
         // 2️⃣ Guardás tu JWT local

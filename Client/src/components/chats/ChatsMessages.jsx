@@ -1,5 +1,5 @@
 import io from "socket.io-client";
-import axios from "axios";
+import api from "../../api/api";
 
 import { useEffect, useState, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
@@ -38,7 +38,7 @@ const ChatsMessages = ({ chatId, userData }) => {
   useEffect(() => {
     const fetchMessageHistory = async () => {
       try {
-        const response = await axios(`/messages/${chatId}`);
+        const response = await api.get(`/messages/${chatId}`);
         setMessageHistory(response.data);
       } catch (error) {
         console.error("Error fetching message history:", error);
