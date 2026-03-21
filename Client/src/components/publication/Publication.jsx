@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllPosts, deletePost } from "../../redux/actions";
+import { getAllPosts, deletePost, deleteMatch } from "../../redux/actions";
 
 import style from "./Publication.module.css";
 
