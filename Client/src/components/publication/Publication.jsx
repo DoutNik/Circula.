@@ -32,7 +32,7 @@ const Publication = ({ userData, isPremium }) => {
       await dispatch(getAllPosts());
 
       // 🔥 eliminar matches relacionados
-      const matchesToDelete = matches.filter((match) =>
+/*       const matchesToDelete = matches.filter((match) =>
         match.match.some(
           (m) => m.myPostId == postId || m.likedPostId == postId,
         ),
@@ -44,7 +44,7 @@ const Publication = ({ userData, isPremium }) => {
             dispatch(deleteMatch(match.id, m.id));
           }
         });
-      });
+      }); */
     } catch (error) {
       console.error("Error al eliminar la publicación", error);
     }
