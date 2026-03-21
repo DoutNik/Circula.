@@ -24,9 +24,8 @@ const Register = ({ setAuth }) => {
 
   // Constantes para Cloudinary.
 
-  const preset_key = "postsimages";
+  const preset_key = "userProfilePictures";
   const cloud_name = "dsc4kqz3g";
-  const folderName = "usersProfilePic";
 
   const [imageError, setImageError] = useState(null);
   const [provinceError, setProvinceError] = useState(null);
@@ -207,7 +206,6 @@ const Register = ({ setAuth }) => {
         const formData = new FormData();
         formData.append("file", imageFile);
         formData.append("upload_preset", preset_key);
-        formData.append("folder", folderName);
 
         const responseImage = await api.post(
           `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload/`,
