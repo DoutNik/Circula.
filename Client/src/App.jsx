@@ -9,7 +9,7 @@ import AddProduct from "./views/addProduct/addProduct";
 import Chats from "./views/chats/chats";
 import Messages from "./views/Messages/Messages";
 import Exchanges from "./views/exchanges/exchanges";
-import Home from "./views/home/Home";
+import Home from "./views/home/home";
 import Detail from "./views/detail/Detail";
 import Navbar from "./components/navbar/Nabvar";
 import MyProfile from "./views/myProfile/myProfile";
