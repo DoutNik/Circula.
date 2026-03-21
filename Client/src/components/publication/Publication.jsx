@@ -90,13 +90,12 @@ const Publication = ({ userData, isPremium }) => {
                 <button className={style.menuItem}>✏️ Editar</button>
 
                 <button className={style.menuItem}>⏸️ Pausar</button>
-
-                <button
-                  className={style.menuItemDanger}
-                  onClick={() => handlePostDelete(post.id)}
-                >
-                  🗑️ Eliminar
-                </button>
+    });
+    dispatch(getAllPosts());
+  } catch (error) {
+    console.error("Error al eliminar la publicación", error);
+  }
+};
               </div>
             )}
           </div>
