@@ -60,7 +60,7 @@ const matchMail = (firstUser, secondUser, firstPost, secondPost) => {
 const passwordForgot = (email, id) => {
 
   const idUsuario = id
-  const urlPersonalizada = `https://www.locanjeamos.com.ar/#/resetpassword/${idUsuario}`;
+  const urlPersonalizada = `https://circula-pvpn.onrender.com/#/resetpassword/${idUsuario}`;
   // const urlPersonalizada = `http://localhost:5173/#/resetpassword/${idUsuario}`;
   const forgotTemplateWithLink = forgotTemplate.replace("{{reset_password_link}}", urlPersonalizada);
   

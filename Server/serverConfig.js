@@ -42,8 +42,7 @@ app.use(express.json());
 
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://locanjeamos.com.ar',
-  'https://lo-canjeamos-production.up.railway.app'
+  'https://circula-pvpn.onrender.com'
 ];
 app.use(cors({
   origin: function (origin, callback) {
