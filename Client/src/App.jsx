@@ -49,8 +49,8 @@ const App = () => {
     }
   };
 
-  axios.defaults.baseURL = "http://localhost:3001/";
-  //axios.defaults.baseURL = "https://lo-canjeamos-production.up.railway.app/";
+  /* axios.defaults.baseURL = "http://localhost:3001/"; */
+  axios.defaults.baseURL = "https://circula-pvpn.onrender.com";
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
