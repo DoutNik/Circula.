@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllPosts, deletePost } from "../../redux/actions";
+import { getAllPosts, deletePost, deleteMatch } from "../../redux/actions";
 
 import style from "./Publication.module.css";
 
@@ -23,7 +23,7 @@ const Publication = ({ userData, isPremium }) => {
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
-  // 🎯 Filtrado directo (sin estado local)
+  // 🎯 Posts del usuario
   const userPosts = allPosts.filter((post) => post.UserId === userData?.id);
 
   const handlePostDelete = async (postId) => {
@@ -31,7 +31,7 @@ const Publication = ({ userData, isPremium }) => {
       await dispatch(deletePost(postId));
       await dispatch(getAllPosts());
 
-      // 🔥 limpiar matches relacionados
+      // 🔥 eliminar matches relacionados
       const matchesToDelete = matches.filter((match) =>
         match.match.some(
           (m) => m.myPostId == postId || m.likedPostId == postId,
@@ -43,7 +43,6 @@ const Publication = ({ userData, isPremium }) => {
           if (m.myPostId === postId || m.likedPostId === postId) {
             dispatch(deleteMatch(match.id, m.id));
           }
-          
         });
       });
     } catch (error) {
@@ -90,12 +89,16 @@ const Publication = ({ userData, isPremium }) => {
                 <button className={style.menuItem}>✏️ Editar</button>
 
                 <button className={style.menuItem}>⏸️ Pausar</button>
-    });
-    dispatch(getAllPosts());
-  } catch (error) {
-    console.error("Error al eliminar la publicación", error);
-  }
-};
+
+                <button
+                  className={style.menuItem}
+                  onClick={() => {
+                    handlePostDelete(post.id);
+                    setOpenMenuId(null);
+                  }}
+                >
+                  🗑️ Eliminar
+                </button>
               </div>
             )}
           </div>
