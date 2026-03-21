@@ -49,7 +49,7 @@ const App = () => {
   };
 
   /* api.defaults.baseURL = "http://localhost:3001/"; */
-  api.defaults.baseURL = "https://circula-pvpn.onrender.com";
+  api.defaults.baseURL = "https://circula.onrender.com";
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
