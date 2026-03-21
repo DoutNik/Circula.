@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import style from "./Avatar.module.css";
 import PayModal from "../payModal/PayModal";
-import axios from "axios";
+import api from "../../api/api";
 
 const Avatar = ({ userData, setAuth, toggleDarkMode }) => {
   const [isPremium, setPremium] = useState(false);
@@ -13,7 +13,7 @@ const Avatar = ({ userData, setAuth, toggleDarkMode }) => {
   const premium = async () => {
     try {
       const token = localStorage.getItem("token");
-      const usuario = await axios.get("/users/userId", {
+      const usuario = await api.get("/users/userId", {
         headers: {
           token: token,
         },

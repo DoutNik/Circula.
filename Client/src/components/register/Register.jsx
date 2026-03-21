@@ -2,7 +2,7 @@ import Logo from "../../assets/locan.png";
 import React from "react";
 import { useState, useEffect } from "react";
 import style from "./Register.module.css";
-import axios from "axios";
+import api from "../../api/api.js";
 import {
   validateUsername,
   validateEmail,
@@ -209,7 +209,7 @@ const Register = ({ setAuth }) => {
         formData.append("upload_preset", preset_key);
         formData.append("folder", folderName);
 
-        const responseImage = await axios.post(
+        const responseImage = await api.post(
           `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload/`,
           formData
         );
@@ -226,7 +226,7 @@ const Register = ({ setAuth }) => {
         origin: "DB",
       };
 
-      const response = await axios.post("/users/register", newUser);
+      const response = await api.post("/users/register", newUser);
 
       if (response) {
         // Guardar JWT local

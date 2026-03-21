@@ -5,7 +5,7 @@ import { useDropzone } from "react-dropzone";
 import { motion } from "framer-motion";
 import Header from "../../components/header/Header";
 import style from "./AddProduct.module.css";
-import axios from "axios";
+import App from "../../App";
 import { useNavigate } from "react-router-dom";
 import { validateDescription, validateTitle } from "./validation";
 import Swal from "sweetalert2";
@@ -194,7 +194,7 @@ export default function AddProduct({ userData }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-      const signRes = await axios.get("posts/cloudinary/signature");
+      const signRes = await api.get("posts/cloudinary/signature");
 
 
     setFormData({
@@ -213,7 +213,7 @@ export default function AddProduct({ userData }) {
         formData.append("folder", "postimages");
         
 
-        const res = await axios.post(
+        const res = await api.post(
           `https://api.cloudinary.com/v1_1/${signRes.data.cloudName}/image/upload`,
           formData,
         );
@@ -301,7 +301,7 @@ export default function AddProduct({ userData }) {
         UserId: id,
       };
 
-      const response = await axios.post("/posts/", newPost);
+      const response = await api.post("/posts/", newPost);
 
       if (response) {
         Swal.fire({
@@ -353,7 +353,7 @@ export default function AddProduct({ userData }) {
             };
           }
 
-          const response = await axios.post("/plans/create-order", paymentData);
+          const response = await api.post("/plans/create-order", paymentData);
 
           if (response) {
             window.location.href = response.data.response.body.init_point;

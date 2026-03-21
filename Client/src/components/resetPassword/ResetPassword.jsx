@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import style from "./ResetPassword.module.css"
-import axios from "axios";
+import api from "../../api/api";
 import { validatePassw, validateRepeat } from "./validate";
 import Swal from 'sweetalert2';
 
@@ -40,7 +40,7 @@ const ResetPassword = () => {
     if (error.password || error.passwordRepeat) {
       return;
     }
-    await axios
+    await api
       .post(`/users/reset-password/${id}`, { password: input.password }) 
       .then((res) => {
         if (res.data) {
