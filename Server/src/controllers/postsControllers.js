@@ -88,7 +88,10 @@ exports.createPost = async (postData) => {
     } else {
       const newPost = await Post.create(postData);
       const postUser = await User.findByPk(postData.UserId);
-      await transporter.sendMail(postCreated(postUser.email, postData));
+      transporter
+        .sendMail(postCreated(postUser.email, postData))
+        .catch((err) => console.error("Email error:", err));
+
       return newPost;
     }
   } catch (error) {
@@ -159,7 +162,6 @@ exports.deletePost = async (id) => {
       success: true,
       deletedId: id,
     };
-
   } catch (error) {
     await transaction.rollback();
     console.error("HARD DELETE POST ERROR:", error);
@@ -203,7 +205,9 @@ exports.disablePost = async (id) => {
     const post = await Post.findByPk(id);
 
     if (!post) {
-      throw new Error("La publicación que intenta deshabilitar no se encuentra.");
+      throw new Error(
+        "La publicación que intenta deshabilitar no se encuentra.",
+      );
     }
 
     await post.destroy(); // Soft delete si paranoid: true

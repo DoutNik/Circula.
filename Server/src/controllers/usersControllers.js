@@ -8,7 +8,9 @@ const nodemailer = require("nodemailer");
 const admin = require("../config/firebaseAdmin");
 const { ADMIN_USERS } = process.env;
 
-const adminList = process.env.ADMIN_USERS.split(",").map(email => email.trim());
+const adminList = process.env.ADMIN_USERS.split(",").map((email) =>
+  email.trim(),
+);
 
 exports.getAllUser = async () => {
   try {
@@ -92,7 +94,9 @@ exports.createUser = async (user) => {
     });
 
     // Enviar mail
-    await transporter.sendMail(registerMail(user));
+    transporter
+      .sendMail(registerMail(user))
+      .catch((err) => console.error("Email error:", err));
 
     // Crear usuario en Firebase (solo si es registro normal o Google)
     await admin.auth().createUser({
@@ -181,8 +185,6 @@ exports.loginUser = async (user) => {
   console.log(adminList);
   console.log(usuario.email, rolCalculado);
   console.log(usuario.rol);
-  
-  
 
   // actualizar rol si cambió
   if (usuario.rol !== rolCalculado) {
@@ -286,7 +288,7 @@ exports.forgotPassword = async (email) => {
     if (!usuario) {
       throw new Error("El usuario no existe");
     }
-    await transporter.sendMail(passwordForgot(email, usuario.id));
+     transporter.sendMail(passwordForgot(email, usuario.id)).catch((err) => console.error("Email error:", err));
     return "El mail fue enviado correctamente";
   } catch (error) {
     throw error;

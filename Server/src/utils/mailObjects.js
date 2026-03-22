@@ -16,7 +16,7 @@ const registerMail = (user) => {
 
 const postCreated = (email, PostData) => {
   const { title, description, category, ubication, image } = PostData;
-  const urlPersonalizada = `https://www.locanjeamos.com.ar/#/login`;
+  const urlPersonalizada = `https://circula-pvpn.onrender.com/#/login`;
   // const urlPersonalizada = `http://localhost:5173/#/login`;
   const notificationEmail = postTemplate
   .replace('{{title}}', title)
@@ -38,7 +38,7 @@ const matchMail = (firstUser, secondUser, firstPost, secondPost) => {
   const firstMail = firstUser.email;
   const secondMail = secondUser.email;
   
-  const urlPersonalizada = `https://locanjeamos.com.ar/#/exchanges`;
+  const urlPersonalizada = `https://circula-pvpn.onrender.com/#/exchanges`;
   const currentDateTime = new Date().toLocaleString();
 
   const notificationEmail = matchTemplate
