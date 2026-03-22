@@ -9,7 +9,7 @@ import api from "../../api/api";
 
 const Avatar = ({ userData, setAuth, toggleDarkMode }) => {
   const [isPremium, setPremium] = useState(false);
-  const imageUrl = userData.image.split("=")[0] + "=s200-c";
+  const imageUrl = userData.image.split("=")[0];
   const premium = async () => {
     try {
       const token = localStorage.getItem("token");

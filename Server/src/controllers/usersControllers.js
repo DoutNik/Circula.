@@ -137,10 +137,6 @@ exports.socialRegisterOrLogin = async (user) => {
     } else {
       usuario = usuarios[0];
 
-        console.log(adminList);
-  console.log(usuario.email, rolCalculado);
-  console.log(usuario.rol);
-
       // Verificar si el rol cambió y actualizar
       if (usuario.rol !== rolCalculado) {
         await usuario.update({ rol: rolCalculado });
