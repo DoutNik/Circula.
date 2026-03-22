@@ -5,7 +5,7 @@ import { useDropzone } from "react-dropzone";
 import { motion } from "framer-motion";
 import Header from "../../components/header/Header";
 import style from "./AddProduct.module.css";
-import App from "../../App";
+import api from "../../api/api";
 import { useNavigate } from "react-router-dom";
 import { validateDescription, validateTitle } from "./validation";
 import Swal from "sweetalert2";
