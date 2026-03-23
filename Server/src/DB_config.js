@@ -45,6 +45,22 @@ const { Post, User, Like, Message, Chat, Review } = sequelize.models;
 User.hasMany(Post);
 Post.belongsTo(User);
 
+//Like - Post
+Like.belongsTo(Post, {
+  foreignKey: "likedPostId",
+  as: "TargetPost",
+});
+
+Like.belongsTo(Post, {
+  foreignKey: "myPostId",
+  as: "MyPost",
+});
+
+Post.hasMany(Like, {
+  foreignKey: "likedPostId",
+  as: "ReceivedLikes",
+});
+
 // User - Chat
 User.belongsToMany(Chat, {
   through: "UserChat",

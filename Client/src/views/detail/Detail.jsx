@@ -46,8 +46,6 @@ const Detail = ({ userData }) => {
       setUserPosts(filteredUserPosts);
     }
   }, [userData, allPosts2]);
-  console.log("User Posts:", userPosts);
-  console.log("allLikes", allLikes);
 
   const filteredMatches = useSelector((state) => state.matches).filter(
     (match) => {
