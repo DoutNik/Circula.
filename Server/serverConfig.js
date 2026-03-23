@@ -1,6 +1,7 @@
 const express = require("express");
 const { createServer } = require("node:http");
 const { Server } = require("socket.io");
+const config = require("./src/config/dotenv");
 
 const router = require("./src/routes/routes");
 const { Message } = require("./src/DB_config");
@@ -40,27 +41,27 @@ const mercadopago = require("mercadopago");
 app.use(morgan("dev"));
 app.use(express.json());
 
-const allowedOrigins = [
-  'http://localhost:5173',
-  'https://circula-pvpn.onrender.com'
-];
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'token']
-}));
-
-
-
+app.use(
+  cors({
+    origin: config.frontendUrl,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: [
+      "Origin",
+      "X-Requested-With",
+      "Content-Type",
+      "Accept",
+      "token",
+    ],
+  })
+);
 
 
 app.use(router);
 
 module.exports = httpServer;
+
+
+
+
+

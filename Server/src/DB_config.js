@@ -2,20 +2,26 @@ require("dotenv").config();
 const { Sequelize } = require("sequelize");
 const fs = require("fs");
 const path = require("path");
+const config = require("./config/dotenv");
 
-const { DB_USER, DB_PASSWORD, DB_HOST, DB_DEPLOY } = process.env;
+let sequelize;
 
-/* const sequelize = new Sequelize(`postgres:${DB_USER}:${DB_PASSWORD}@${DB_HOST}/locanjeamos`,
-  {
+if (config.isProd) {
+  // ☁️ Producción
+  sequelize = new Sequelize(config.db.deploy, {
     logging: false,
     native: false,
-  }
-);  */
-
-const sequelize = new Sequelize(DB_DEPLOY, {
-   logging: false,
-   native: false,
-});
+  });
+} else {
+  // 🧪 Local
+  sequelize = new Sequelize(
+    `postgres://${config.db.user}:${config.db.password}@${config.db.host}/${config.db.name}`,
+    {
+      logging: false,
+      native: false,
+    }
+  );
+}
 
 const basename = path.basename(__filename);
 
