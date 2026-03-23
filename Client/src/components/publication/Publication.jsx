@@ -63,11 +63,6 @@ const Publication = ({ userData, isPremium }) => {
               ❤️ {post.likesCount || 0} interesados
             </div>
 
-            {!isPremium && (post.likesCount || 0) > 0 && (
-              <span className={style.premiumHint}>
-                🔒 Ver quiénes — Premium
-              </span>
-            )}
           </div>
 
           {/* ⚙️ Opciones */}

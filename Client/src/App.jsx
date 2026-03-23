@@ -48,8 +48,7 @@ const App = () => {
     }
   };
 
-  /* api.defaults.baseURL = "http://localhost:3001/"; */
-  api.defaults.baseURL = "https://circula.onrender.com";
+api.defaults.baseURL = import.meta.env.VITE_API_URL;
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {

@@ -2,20 +2,35 @@ require("dotenv").config();
 const { Sequelize } = require("sequelize");
 const fs = require("fs");
 const path = require("path");
+const config = require("./config/dotenv");
 
-const { DB_USER, DB_PASSWORD, DB_HOST, DB_DEPLOY } = process.env;
+let sequelize;
+console.log("DATABASE_URL:", config.db.deploy);
 
-/* const sequelize = new Sequelize(`postgres:${DB_USER}:${DB_PASSWORD}@${DB_HOST}/locanjeamos`,
-  {
+if (config.isProd) {
+  // ☁️ Producción (Render)
+  sequelize = new Sequelize(config.db.deploy, {
+    dialect: "postgres",
+    protocol: "postgres",
     logging: false,
     native: false,
-  }
-);  */
-
-const sequelize = new Sequelize(DB_DEPLOY, {
-   logging: false,
-   native: false,
-});
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
+    },
+  });
+} else {
+  // 🧪 Local
+  sequelize = new Sequelize(
+    `postgres://${config.db.user}:${config.db.password}@${config.db.host}/${config.db.name}`,
+    {
+      logging: false,
+      native: false,
+    }
+  );
+}
 
 const basename = path.basename(__filename);
 
