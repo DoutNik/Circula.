@@ -5,13 +5,45 @@ const { Op } = require("sequelize");
 
 exports.getAllPosts = async () => {
   try {
-    const posts = await Post.findAll({
-      include: User, //trae toda la informacion del usuario, hay que elegir las porpiedades necesarias en vez de TODAS como esta configurado ahora
+    const Posts = await Post.findAll({
+      paranoid: false, // trae activos y deshabilitados
+
+      attributes: {
+        include: [
+          [
+            sequelize.fn("COUNT", sequelize.col("ReceivedLikes.id")),
+            "likesCount",
+          ],
+        ],
+      },
+
+      include: [
+        {
+          model: Like,
+          as: "ReceivedLikes",
+          attributes: [],
+          required: false,
+
+          include: [
+            {
+              model: Post,
+              as: "MyPost",
+              attributes: [],
+              required: true,
+              where: { Deshabilitado: null }, // 🔥 solo likes válidos
+            },
+          ],
+        },
+      ],
+
+      order: [["id", "ASC"]],
+      group: ["Post.id"],
     });
 
-    return posts;
+    return Posts;
+
   } catch (error) {
-    throw error;
+    throw "Ocurrió un error al traer las publicaciones: " + error;
   }
 };
 
@@ -216,3 +248,6 @@ exports.disablePost = async (id) => {
     throw error;
   }
 };
+
+
+

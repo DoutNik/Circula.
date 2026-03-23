@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllPosts, deletePost, deleteMatch } from "../../redux/actions";
+import { getAllPosts, deletePost } from "../../redux/actions";
 
 import style from "./Publication.module.css";
 
@@ -8,8 +8,6 @@ const Publication = ({ userData, isPremium }) => {
   const dispatch = useDispatch();
 
   const allPosts = useSelector((state) => state.allPostsCopy);
-  const matches = useSelector((state) => state.matches);
-
   const [openMenuId, setOpenMenuId] = useState(null);
 
   useEffect(() => {
