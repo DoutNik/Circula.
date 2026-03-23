@@ -11,7 +11,7 @@ module.exports = {
   port: process.env.PORT || 3001,
 
   db: {
-    deploy: process.env.DB_DEPLOY,
+    deploy: process.env.DATABASE_URL,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     host: process.env.DB_HOST,
