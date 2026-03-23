@@ -5,12 +5,21 @@ const path = require("path");
 const config = require("./config/dotenv");
 
 let sequelize;
+console.log("DATABASE_URL:", config.db.deploy);
 
 if (config.isProd) {
-  // ☁️ Producción
+  // ☁️ Producción (Render)
   sequelize = new Sequelize(config.db.deploy, {
+    dialect: "postgres",
+    protocol: "postgres",
     logging: false,
     native: false,
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
+    },
   });
 } else {
   // 🧪 Local
