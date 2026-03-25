@@ -1,5 +1,215 @@
-Auto logout
-Firbase authentication
-Log with google, facebook or local account
-matchmaking sistem
-pay premium account
+🔄 Circula — Plataforma de Economía Circular por Intercambio
+
+Circula es una aplicación web full-stack que permite a las personas intercambiar bienes en desuso por otros que realmente necesitan, sin utilizar dinero como medio obligatorio.
+
+La plataforma busca transformar objetos olvidados en valor real, promoviendo un modelo de consumo más sustentable, accesible y colaborativo.
+
+🌐 Aplicación en producción:
+https://circula.onrender.com
+
+🌎 Visión
+
+Circula nace con la idea de el acceso a bienes útiles mediante un sistema de canje directo entre usuarios.
+
+En lugar de depender exclusivamente del dinero, la plataforma permite que cualquier persona con algo que ya no utiliza pueda obtener algo que sí necesita.
+
+Este enfoque impulsa:
+
+♻️ Economía circular real
+🌱 Reducción del desperdicio
+🤝 Colaboración entre individuos
+💸 Acceso a bienes sin barreras económicas
+🏘️ Fortalecimiento de comunidades locales
+
+Aunque actualmente se centra en el intercambio, su arquitectura permite evolucionar hacia un ecosistema completo que incluya marketplace, donaciones, compra-venta y funcionalidades sociales.
+
+🇦🇷 Público objetivo
+
+Actualmente orientada a residentes de Argentina, contemplando:
+
+Todas las provincias
+Ciudades grandes y pequeñas
+Intercambios locales y regionales
+
+El sistema está preparado para escalar a nivel internacional.
+
+✨ Funcionalidades principales
+
+🔐 Autenticación y cuentas
+Registro de usuarios
+Inicio de sesión tradicional
+Login social con Google y Facebook
+Autenticación segura mediante Firebase + JWT
+Gestión de sesiones
+
+📦 Publicación de productos
+Creación de publicaciones con imágenes
+Gestión de productos propios
+Estado activo/inactivo
+Eliminación y moderación
+Almacenamiento de imágenes en la nube
+
+🤝 Sistema de intercambio (core de la plataforma)
+Sistema propio de matchmaking
+Interacciones entre publicaciones de distintos usuarios
+Likes entre productos
+Base para acuerdos de canje directo
+Modelo pensado para transacciones sin dinero
+
+💬 Comunicación
+Chat en tiempo real entre usuarios
+Soporte para negociación del intercambio
+Implementado con WebSockets (Socket.IO)
+
+🔔 Notificaciones
+Sistema de notificaciones para eventos relevantes
+Integración con Firebase
+Preparado para notificaciones push
+
+⭐ Sistema Premium
+Funcionalidades avanzadas para usuarios pagos
+Base para monetización futura de la plataforma
+
+🔍 Descubrimiento
+Búsqueda de productos
+Filtros avanzados
+Exploración por ubicación
+Geolocalización
+
+🛡️ Seguridad y comunidad
+Sistema de reportes
+Moderación de contenido
+Control de comportamiento abusivo
+Base para reputación de usuarios
+
+💎 Diferencial frente a otras plataformas
+La mayoría de los marketplaces digitales se basan en dinero.
+Circula se basa en valor de uso.
+
+Esto permite:
+
+Acceso universal a bienes
+Inclusión económica
+Reutilización eficiente de recursos
+Interacciones más humanas y colaborativas
+
+El enfoque combina características de:
+
+Marketplace
+Red social
+Plataforma de intercambio
+Sistema de economía circular
+🏗️ Arquitectura
+
+Aplicación full-stack desacoplada:
+
+Frontend y backend independientes
+API REST para comunicación principal
+WebSockets para tiempo real
+Progressive Web App (PWA)
+Escalable a microservicios en el futuro
+
+🛠️ Stack Tecnológico
+
+🖥️ Frontend
+Vite
+React
+Redux (gestión de estado global)
+CSS Modules
+Progressive Web App
+
+⚙️ Backend
+Node.js
+Express
+Arquitectura basada en API REST
+
+🗄️ Base de datos
+PostgreSQL
+Sequelize ORM
+
+🔐 Autenticación
+Firebase Authentication
+JWT para autorización backend
+
+⚡ Tiempo real
+Socket.IO (chat y eventos en vivo)
+
+☁️ Servicios externos
+Firebase (auth y notificaciones)
+Cloudinary (gestión de imágenes)
+MercadoPago (infraestructura de pagos)
+Nodemailer (emails)
+Morgan (logging)
+Nodemon (desarrollo)
+
+🚀 Infraestructura
+Hosting en Render
+Base de datos local y remota
+Variables de entorno para configuración segura
+
+⚙️ Instalación local
+Requisitos
+Node.js
+PostgreSQL
+Cuenta Firebase configurada
+Variables de entorno
+Conexión a servicios externos
+
+1. Clonar repositorio
+git clone <repo-url>
+cd circula
+
+2. Configurar variables de entorno
+
+Crear archivos .env en frontend y backend con:
+
+Credenciales de base de datos
+Configuración de Firebase
+Secretos JWT
+Credenciales de Cloudinary
+Configuración de MercadoPago
+URLs de API
+
+3. Base de datos
+
+Crear una base PostgreSQL local y configurar la conexión en el backend.
+
+4. Instalar dependencias y ejecutar
+
+Backend
+cd server
+npm install
+npm start
+
+Frontend
+cd client
+npm install
+npm run dev
+
+🚀 Estado del proyecto
+🟢 Aplicación en producción
+🛠️ Desarrollo activo
+📈 En evolución hacia producto escalable
+💡 Nacido como proyecto de práctica y transformado en iniciativa con potencial de startup
+🔮 Futuro de Circula
+
+La arquitectura está preparada para evolucionar hacia:
+
+Marketplace híbrido (intercambio + compra/venta)
+Sistema de donaciones
+Red social de objetos
+Expansión internacional
+Aplicaciones móviles nativas
+Economía circular a gran escala
+
+👨‍💻 Autor
+Desarrollado por Charly Klema y Maximiliano Valli
+Proyecto personal orientado a resolver un problema real y con potencial de crecimiento como plataforma tecnológica.
+
+⚠️ Aviso
+Circula se encuentra en desarrollo activo.
+Las funcionalidades pueden evolucionar o modificarse con el tiempo.
+
+📄 Licencia
+
+Todos los derechos reservados ©
