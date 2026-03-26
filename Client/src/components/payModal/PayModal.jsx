@@ -14,8 +14,8 @@ const payModal = ({ userData, user, isOpen, onClose }) => {
           userId: userData.id,
           title: "Premium",
           quantity: 1,
-          price: 1500,
-          currency_id: "ARG",
+          price: 2000,
+          currency_id: "ARS",
           description: "Usuario premium",
         };
       } else {
@@ -23,8 +23,8 @@ const payModal = ({ userData, user, isOpen, onClose }) => {
           userId: user.id,
           title: "Premium",
           quantity: 1,
-          price: 1500,
-          currency_id: "ARG",
+          price: 2000,
+          currency_id: "ARS",
           description: "Usuario premium",
         };
       }
@@ -32,7 +32,9 @@ const payModal = ({ userData, user, isOpen, onClose }) => {
       const response = await api.post("/plans/create-order", paymentData);
   
       if (response) {
-        window.location.href = response.data.response.body.init_point;
+        console.log(response);
+        
+        window.location.href = response.data.init_point;
       } else {
         console.error("Init point not found in the response");
       }
@@ -67,7 +69,7 @@ const payModal = ({ userData, user, isOpen, onClose }) => {
           <p>👀 Mirá quien quiere canjear con vos 👀</p>
 
           <button className={style.pay} onClick={handlePremium}>Sé premium</button>
-          <h6>Un pago de $1500 ARS</h6>
+          <h6>Un pago de $2000 ARS</h6>
         </div>
       </motion.div>
     )

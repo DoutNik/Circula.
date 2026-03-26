@@ -2,8 +2,6 @@ const express = require("express");
 const router = express.Router();
 const plansController = require("../../controllers/plansController");
 
-let purchaseUserId = "";
-
 router.post('/create-order', async(req, res) =>{
     const paymentData = req.body
     try{
@@ -41,15 +39,14 @@ router.get('/pending', async(req, res) =>{
     }
 })
 
-router.post('/webhook', async(req, res) =>{
-    const data = req.query
-
-    try{
-        const response = await plansController.webhook(data);
-        return res.json(response); 
-    } catch(error){
-        return res.status(400).json(error.message)
-    }
-})
+router.post("/webhook", async (req, res) => {
+  try {
+    await plansController.webhook(req.body);
+    res.sendStatus(200);
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
 
 module.exports = router;
