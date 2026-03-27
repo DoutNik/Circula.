@@ -168,9 +168,13 @@ const Detail = ({ userData }) => {
     }
   };
 
-  const isPostAlreadyRequested = (postId) => {
-    return allLikes.some((like) => like.myPostId == postId);
-  };
+const isPostAlreadyRequested = (myPostId, likedPostId) => {
+  return allLikes.some(
+    (like) =>
+      like.myPostId == myPostId &&
+      like.likedPostId == likedPostId
+  );
+};
 
   let disabledReason = "";
 
@@ -181,6 +185,9 @@ const Detail = ({ userData }) => {
   else if (!hasAvailableProduct)
     disabledReason = "Intentaste este canje con todos tus productos";
 
+  console.log(allLikes);
+  
+
   return (
     <>
       {showPostSelector && (
@@ -190,7 +197,7 @@ const Detail = ({ userData }) => {
 
             <div className={style.postsContainer}>
               {userPosts.map((post) => {
-                const requested = isPostAlreadyRequested(post.id);
+                const requested = isPostAlreadyRequested(post.id, likedPostId);
 
                 return (
                   <div

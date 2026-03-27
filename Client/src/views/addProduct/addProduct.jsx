@@ -121,26 +121,27 @@ export default function AddProduct({ userData }) {
 
   //Manejo de las categorías.
   const [selectedCategory, setSelectedCategory] = useState("");
-  const categories = [
-    "🧁 Alimentos",
-    "⚱️ Antiguedades",
-    "🎨 Arte y artesanías",
-    "⚽️ Articulos deportivos",
-    "📺 Audio y video",
-    "📷 Cámaras y accesorios",
-    "📱 Celulares",
-    "💻 Computadoras",
-    "🔌Electrodomésticos",
-    "🛠️ Herramientas",
-    "🎸 Instrumentos musicales",
-    "💍 Joyas y relojes",
-    "🪑 Muebles y hogar",
-    "🚗 Rodados con motor",
-    "🚲 Rodados sin motor",
-    "👕 Ropa e indumentaria",
-    "🛒 Varios",
-    "🎮 Videojuegos",
-  ];
+const categories = [
+  "🧁 Alimentos",
+  "🍹 Bebidas",
+  "⚱️ Antiguedades",
+  "🎨 Arte y artesanías",
+  "⚽️ Articulos deportivos",
+  "📺 Audio y video",
+  "📷 Cámaras y accesorios",
+  "📱 Celulares",
+  "💻 Computadoras",
+  "🔌Electrodomésticos",
+  "🛠️ Herramientas",
+  "🎸 Instrumentos musicales",
+  "💍 Joyas y relojes",
+  "🪑 Muebles y hogar",
+  "🚗 Rodados con motor",
+  "🚲 Rodados sin motor",
+  "👕 Ropa e indumentaria",
+  "🎮 Videojuegos",
+  "🛒 Varios",
+];
 
   const [formData, setFormData] = useState({
     title: "",
