@@ -14,7 +14,6 @@ const payModal = ({ userData, user, isOpen, onClose }) => {
           userId: userData.id,
           title: "Premium",
           quantity: 1,
-          price: 2000,
           currency_id: "ARS",
           description: "Usuario premium",
         };
@@ -23,7 +22,6 @@ const payModal = ({ userData, user, isOpen, onClose }) => {
           userId: user.id,
           title: "Premium",
           quantity: 1,
-          price: 2000,
           currency_id: "ARS",
           description: "Usuario premium",
         };
