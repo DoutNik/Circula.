@@ -33,6 +33,8 @@
 }
 
 .agregar {
+  display: grid;
+  justify-self: center;
   background-color: #4ecdc4;
   color: whitesmoke;
   width: 90px;

@@ -1,15 +1,28 @@
 /* eslint-disable no-unused-vars */
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Avatar from "../../components/avatar/Avatar";
 import Publication from "../../components/publication/Publication";
 import Header from "../../components/header/Header";
 import style from "./MyProfile.module.css";
 import api from "../../api/api";
+import Swal from "sweetalert2";
+import { handlePremiumPurchase } from "../../services/paymentService";
+import { use } from "react";
 
 const MyProfile = ({ userData, setAuth, toggleDarkMode }) => {
   const [isPremium, setPremium] = useState(false);
+  const [postCount, setPostCount] = useState(0);
+
+  const getPostCount = async () => {
+    try {
+      const res = await api.get(`/posts/userPosts/${userData.id}`);
+      setPostCount(res.data.length);
+    } catch (error) {
+      console.error("Error al obtener posteos:", error);
+    }
+  };
 
   const premium = async () => {
     try {
@@ -31,10 +44,41 @@ const MyProfile = ({ userData, setAuth, toggleDarkMode }) => {
 
   useEffect(() => {
     premium();
+    getPostCount();
   }, []);
-  
-  const Banner3 = "https://res.cloudinary.com/dlahgnpwp/image/upload/v1699885578/emailAssets/itncfxbtlnpm7e6tsffu.jpg";
-  const Banner4 = "https://res.cloudinary.com/dlahgnpwp/image/upload/v1699885577/emailAssets/pql2ueup71odoj5lm7wk.jpg";  
+
+  const Banner3 =
+    "https://res.cloudinary.com/dlahgnpwp/image/upload/v1699885578/emailAssets/itncfxbtlnpm7e6tsffu.jpg";
+  const Banner4 =
+    "https://res.cloudinary.com/dlahgnpwp/image/upload/v1699885577/emailAssets/pql2ueup71odoj5lm7wk.jpg";
+
+  const navigate = useNavigate();
+
+const handleAddClick = async () => {
+  if (postCount >= 3 && !isPremium) {
+    await Swal.fire({
+      title: "🚫 Límite alcanzado",
+      text: "Solo los usuarios premium pueden tener más de 3 publicaciones.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "💎 Hacerse Premium",
+      cancelButtonText: "Cancelar",
+      showLoaderOnConfirm: true,
+      preConfirm: async () => {
+        try {
+          await handlePremiumPurchase(userData.id);
+        } catch (error) {
+          Swal.showValidationMessage("Error al iniciar el pago");
+        }
+      },
+      allowOutsideClick: () => !Swal.isLoading(),
+    });
+
+    return;
+  }
+
+  navigate("/addProduct");
+};
 
   return (
     <>
@@ -59,11 +103,13 @@ const MyProfile = ({ userData, setAuth, toggleDarkMode }) => {
         </div>
         <div className={style.publications}>
           <h3>Publicaciones</h3>
-          <Link to="/addProduct">
-            <button className={style.agregar}>Agregar</button>
-          </Link>
+          <button className={style.agregar} onClick={handleAddClick}>
+            Agregar
+          </button>
+          <p>{postCount}/3 publicaciones usadas</p>
           <Publication userData={userData}></Publication>
         </div>
+        
       </motion.div>
     </>
   );

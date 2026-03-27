@@ -18,7 +18,7 @@ router.get("/allDisabledPosts", async (req, res) => {
     const response = await postsController.getAllDisabled();
     return res.status(200).json(response);
   } catch (error) {
-    return res.status(400).json(error.message)
+    return res.status(400).json(error.message);
   }
 });
 
@@ -27,7 +27,7 @@ router.get("/allExistingPosts", async (req, res) => {
     const response = await postsController.getAllExisting();
     return res.status(200).json(response);
   } catch (error) {
-    return res.status(400).json(error.message)
+    return res.status(400).json(error.message);
   }
 });
 
@@ -113,23 +113,23 @@ router.delete("/deletePost/:id", async (req, res) => {
   }
 });
 
-router.put('/restorePost/:id', async (req, res) => {
-  const { id } = req.params
+router.put("/restorePost/:id", async (req, res) => {
+  const { id } = req.params;
   try {
     const restoredPost = await postsController.restorePost(id);
-    return res.status(200).json({restoredPost});
+    return res.status(200).json({ restoredPost });
   } catch (error) {
-    return res.status(400).json({ error: error.message })
+    return res.status(400).json({ error: error.message });
   }
 });
 
-router.put('/disablePost/:id', async (req, res) => {
-  const { id } = req.params
+router.put("/disablePost/:id", async (req, res) => {
+  const { id } = req.params;
   try {
     const disabledPost = await postsController.disablePost(id);
-    return res.status(200).json({disabledPost});
+    return res.status(200).json({ disabledPost });
   } catch (error) {
-    return res.status(400).json({ error: error.message })
+    return res.status(400).json({ error: error.message });
   }
 });
 
@@ -138,7 +138,7 @@ router.get("/cloudinary/signature", (req, res) => {
 
   const signature = cloudinary.utils.api_sign_request(
     { timestamp, folder: "postimages" },
-    process.env.API_SECRET
+    process.env.API_SECRET,
   );
 
   res.json({
@@ -146,8 +146,17 @@ router.get("/cloudinary/signature", (req, res) => {
     signature,
     apiKey: process.env.API_KEY,
     cloudName: process.env.CLOUD_NAME,
-  });  
+  });
 });
 
+router.get("/userPosts/:userId", async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const userPosts = await postsController.getPostsByUserId(userId);
+    return res.status(200).json(userPosts);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
 
 module.exports = router;

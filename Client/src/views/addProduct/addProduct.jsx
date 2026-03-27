@@ -338,8 +338,7 @@ export default function AddProduct({ userData }) {
               userId: userData.id,
               title: "Premium",
               quantity: 1,
-              price: 1500,
-              currency_id: "ARG",
+              currency_id: "ARS",
               description: "Usuario premium",
             };
           } else {
@@ -347,8 +346,7 @@ export default function AddProduct({ userData }) {
               userId: user.id,
               title: "Premium",
               quantity: 1,
-              price: 1500,
-              currency_id: "ARG",
+              currency_id: "ARS",
               description: "Usuario premium",
             };
           }
