@@ -20,6 +20,9 @@ import ForgotPassword from "./components/forgotPassword/ForgotPassword";
 import ResetPassword from "./components/resetPassword/ResetPassword";
 import UserProfile from "./views/userProfile/userProfile";
 import useAutoLogout from "./hooks/useAutoLogout";
+import PaymentSuccess from "./views/payment/paymentSuccess";
+import PaymentFailure from "./views/payment/paymentFailure";
+import PaymentPending from "./views/payment/paymentPending";
 
 import "./App.css";
 import ReviewForm from "./components/formReview/FormReview";
@@ -48,7 +51,7 @@ const App = () => {
     }
   };
 
-api.defaults.baseURL = import.meta.env.VITE_API_URL;
+  api.defaults.baseURL = import.meta.env.VITE_API_URL;
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
@@ -114,7 +117,7 @@ api.defaults.baseURL = import.meta.env.VITE_API_URL;
         // 🧠 5️⃣ Si el token está vencido o da error en el servidor
         console.error(
           "⚠️ Token inválido o expirado:",
-          error.response?.data || error.message
+          error.response?.data || error.message,
         );
         setIsAuthenticated(false);
         localStorage.removeItem("token");
@@ -267,6 +270,11 @@ api.defaults.baseURL = import.meta.env.VITE_API_URL;
           path="/UserProfile/:userId"
           element={<UserProfile id={userData}></UserProfile>}
         />
+
+        <Route path="/success" element={<PaymentSuccess />} />
+        <Route path="/failure" element={<PaymentFailure />} />
+        <Route path="/pending" element={<PaymentPending />} />
+
       </Routes>
     </>
   );

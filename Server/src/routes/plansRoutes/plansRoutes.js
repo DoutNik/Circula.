@@ -13,7 +13,7 @@ router.post('/create-order', async(req, res) =>{
     }
 })
 
-router.get('/success', async(req, res) =>{
+router.get('/payment-success', async(req, res) =>{
     console.log(req.body)
     try{
         await plansController.successfullPurchase(purchaseUserId);
