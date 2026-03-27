@@ -1,64 +1,67 @@
 const { User } = require("../DB_config");
 require("dotenv").config();
 const { ACCESS_TOKEN } = process.env;
-const { MercadoPagoConfig, Preference } = require("mercadopago");
+const { MercadoPagoConfig, Preference, Payment } = require("mercadopago");
 
 const mpClient = new MercadoPagoConfig({ accessToken: ACCESS_TOKEN });
 
-let currentUserId;
-
 exports.createOrder = async (paymentData) => {
-  const { userId, title, description, price } = paymentData;
-  currentUserId = userId;
-  try {
-    let preference = {
-      body: {
-        items: [
-          {
-            userId: userId,
-            title: title,
-            quantity: 1,
-            unit_price: price,
-            currency_id: "ARS",
-            description: description,
-          },
-        ],
-        back_urls: {
-          failure: "https://locanjeamos.com.ar/#/login",
-          pending: "https://locanjeamos.com.ar/#/login",
-          success: "https://locanjeamos.com.ar/#/login",
+  const { userId, title } = paymentData;
+
+  const preference = {
+    body: {
+      items: [
+        {
+          title,
+          quantity: 1,
+          unit_price: 2000,
+          currency_id: "ARS",
         },
-        notification_url:
-          "https://lo-canjeamos-production.up.railway.app/plans/webhook",
+      ],
+
+      external_reference: String(userId), // 🔥 CLAVE
+      
+      back_urls: {
+        success: "https://circula.onrender.com/success",
+        failure: "https://circula.onrender.com/failure",
+        pending: "https://circula.onrender.com/pending",
       },
-    };
 
-    const response = await new Preference(mpClient).create(preference);
+      auto_return: "approved",
 
-    return { response, userId };
-  } catch (error) {
-    console.error("Error al crear preferencia de MP:", error);
-    throw new Error(error.message);
-  }
+      notification_url: "https://circula-lj9f.onrender.com/plans/webhook",
+    },
+  };
+
+  const response = await new Preference(mpClient).create(preference);
+
+  return response;
 };
 
 exports.webhook = async (data) => {
   try {
-    if (data.type === "payment") {
-      const user = await User.findByPk(currentUserId);
+    if (data.type !== "payment") return;
 
-      if (!user) throw new Error("User not found");
+    const paymentId = data["data.id"];
 
-      await user.update({ plan: "premium" });
-      await user.save();
-      return true;
-    } else {
-      throw new Error("Invalid webhook event type");
-    }
+    const payment = await new Payment(mpClient).get({ id: paymentId });
+
+    // 🔥 Validaciones CRÍTICAS
+
+    if (payment.status !== "approved") return;
+
+    const userId = payment.external_reference;
+
+    const user = await User.findByPk(userId);
+    if (!user) throw new Error("User not found");
+
+    if (user.plan === "premium") return; // evitar duplicados
+
+    await user.update({ plan: "premium" });
+
+    return true;
   } catch (error) {
-    console.error("Error en webhook:", error);
-    return {
-      error: error.message,
-    };
+    console.error("Webhook error:", error);
+    return { error: error.message };
   }
 };

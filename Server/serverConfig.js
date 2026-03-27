@@ -7,6 +7,7 @@ const router = require("./src/routes/routes");
 const { Message } = require("./src/DB_config");
 
 const app = express();
+app.use(express.json());
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
@@ -39,7 +40,7 @@ const cors = require("cors");
 const mercadopago = require("mercadopago");
 
 app.use(morgan("dev"));
-app.use(express.json());
+
 
 app.use(
   cors({
