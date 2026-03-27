@@ -249,5 +249,16 @@ exports.disablePost = async (id) => {
   }
 };
 
+exports.getPostsByUserId = async (userId) => {
+  try {
+    const posts = await Post.findAll({
+      where: { UserId: userId, Deshabilitado: null },
+    });
+    return posts;
+  } catch (error) {
+    throw error;
+  }
+};
+
 
 
