@@ -1,102 +1,79 @@
-.containerP {
-    display: grid;
-  }
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 10px;
+}
 
-  .containerP a {
-    color: grey;
-    justify-self: left;
-  }
+.card {
+  background: #1e1e1e;
+  border-radius: 14px;
+  padding: 14px;
+  transition: transform 0.2s ease;
+}
 
-  .containerP h5 {
-    position: absolute;
-    justify-self: center;
-    align-self: center;
-    margin: 0px;
-    margin-top: 20px;
-    font-size: 16px;
-  }
+.card:hover {
+  transform: scale(1.02);
+}
 
-  .containerP .label {
-    margin-top: 25px;
-    margin-bottom: 0px;
-  }
-  
-  .like {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    justify-self: center;
-    width: 250px;
-    box-shadow: 0px 5px 10px rgba(128, 128, 128, 0.3);
-    border-radius: 10px;
-    margin-top: 20px;
-    padding: 10px;
-    padding-top: 10px;
-    padding-bottom: 10px;
-  }
+.like {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
 
-  .like p {
-    display: inline-flex;
-    align-self: center;
-    justify-self: left;
-    margin-left: 10px;
-    text-align: left;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    font-size: 16px;
-  }
-  
-  .likes {
-    display: grid;
-    justify-self: center;
-  }
-  
-  .containerP ul {
-    display: grid;
-    justify-self: center;
-    list-style: none;
-    padding: 10px;
-    margin: 0px;
-  }
-  
-  .containerP li {
-    display: grid;
-    align-self: center;
-    grid-template-columns: 1fr 2fr;
-  }
-  
-  .containerP h3 {
-    align-self: center;
-  }
-  
-  .containerP h4 {
-    text-align: left;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-  .containerP img {
-    justify-self: left;
-    margin-left: 10px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    border: 3px solid grey;
-  }
+.myProduct,
+.otherProduct {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 10px;
+}
 
-  .firstLike {
-    display: grid;
-  }
+.info {
+  text-align: center;
+  flex: 1;
+}
 
-  .firstLike .like {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    border: 2px solid #4ecdc4;
-  }
+.label {
+  font-size: 12px;
+  color: #aaa;
+}
 
-  .firstLike .like img {
-    border: 3px solid #4ecdc4;
-  }
+.arrow {
+  display: block;
+  margin: 6px 0;
+  font-size: 18px;
+}
 
- 
-  
+.actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.accept {
+  flex: 1;
+  background: #4caf50;
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.reject {
+  flex: 1;
+  background: #f44336;
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.state {
+  text-align: center;
+  padding: 20px;
+  color: #aaa;
+}

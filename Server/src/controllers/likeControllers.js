@@ -26,6 +26,7 @@ const getAllLikes = async () => {
     throw error;
   }
 };
+
 const getLikesRecibidos = async (myUserId) => {
   try {
     const likesRecibidos = await Like.findAll({
@@ -34,15 +35,15 @@ const getLikesRecibidos = async (myUserId) => {
       },
     });
 
-    const posts = [];
-    
-    const likes = likesRecibidos.forEach((post)=>{
-      posts.push(post.likedPostId, post.myPostId)
-    })
-
-    return posts;
+    // ✅ Devuelve estructura clara
+    return likesRecibidos.map((like) => ({
+      likedPostId: like.likedPostId, // TU producto
+      myPostId: like.myPostId,       // producto del otro
+    }));
   } catch (error) {
-    throw new Error('Error al dar obtener likes recibidos: ' + error.message);
+    throw new Error(
+      "Error al obtener likes recibidos: " + error.message
+    );
   }
 };
 

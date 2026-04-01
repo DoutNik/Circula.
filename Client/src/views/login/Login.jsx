@@ -26,39 +26,38 @@ const Login = ({ setAuth, userData }) => {
   const [error, setErrors] = useState("");
 
   const handleFacebookLogin = async () => {
-  try {
-    const provider = new FacebookAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
+    try {
+      const provider = new FacebookAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
 
-    // Enviar datos al backend para registro/login social
-    const response = await api.post("/users/social-login", {
-      username: user.displayName || user.email.split("@")[0],
-      email: user.email,
-      image: user.photoURL,
-      origin: "facebook",
-    });
+      // Enviar datos al backend para registro/login social
+      const response = await api.post("/users/social-login", {
+        username: user.displayName || user.email.split("@")[0],
+        email: user.email,
+        image: user.photoURL,
+        origin: "facebook",
+      });
 
-    // Guardar tokens
-    localStorage.setItem("token", response.data.token);
+      // Guardar tokens
+      localStorage.setItem("token", response.data.token);
 
-    Swal.fire({
-      icon: "success",
-      title: "Login exitoso",
-      text: `¡Bienvenido ${user.displayName || user.email.split("@")[0]}!`,
-    });
+      Swal.fire({
+        icon: "success",
+        title: "Login exitoso",
+        text: `¡Bienvenido ${user.displayName || user.email.split("@")[0]}!`,
+      });
 
-    setAuth(true);
-
-  } catch (error) {
-    console.error("Error Facebook login:", error);
-    Swal.fire({
-      icon: "error",
-      title: "Error al iniciar sesión",
-      text: "No se pudo autenticar con Facebook",
-    });
-  }
-};
+      setAuth(true);
+    } catch (error) {
+      console.error("Error Facebook login:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error al iniciar sesión",
+        text: "No se pudo autenticar con Facebook",
+      });
+    }
+  };
 
   const handleGoogleLogin = async () => {
     try {
@@ -86,6 +85,10 @@ const Login = ({ setAuth, userData }) => {
       });
     } catch (error) {
       console.error("Error Google login:", error);
+
+      if (error.code === "auth/popup-closed-by-user") {
+        return;
+      }
       Swal.fire({
         icon: "error",
         title: "Error al iniciar sesión",

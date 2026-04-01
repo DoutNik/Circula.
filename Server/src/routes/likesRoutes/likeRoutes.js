@@ -27,15 +27,16 @@ router.get("/allLikes", async (req, res) => {
   }
 });
 
-router.get("/getLikesRecibidos", async (req, res) => {
-  const myUserId = req.query.myUserId;
-  try{
+router.get("/getLikesRecibidos/:myUserId", async (req, res) => {
+  const { myUserId } = req.params;
+
+  try {
     const likes = await likeController.getLikesRecibidos(myUserId);
     return res.status(200).json(likes);
-  } catch(error){
+  } catch (error) {
     return res.status(400).json(error.message);
   }
-})
+});
 
 router.delete("/:likeId", async (req, res) => {
   try{

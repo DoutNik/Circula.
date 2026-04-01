@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import Confetti from "react-confetti";
 import {
   getAllPosts,
   getMatches,
@@ -18,7 +17,6 @@ const Matchs = ({ userData }) => {
   const matches = useSelector((state) => state.matches);
   const chats = useSelector((state) => state.chats);
   const allPosts = useSelector((state) => state.allPostsCopy);
-  const [showConfetti, setShowConfetti] = useState(true);
   const userId = userData.id;
 
   const dispatch = useDispatch();
@@ -135,7 +133,6 @@ const Matchs = ({ userData }) => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setShowConfetti(false);
     }, 5000);
 
     return () => clearTimeout(timer);
@@ -148,7 +145,6 @@ const Matchs = ({ userData }) => {
       ) : (
         matchedPairs.map((pair, index) => (
           <div key={index} className={style.matchs}>
-            {showConfetti && <Confetti />}
             <div className={style.match}>
               <img
                 className={style.img}
