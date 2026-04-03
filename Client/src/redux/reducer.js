@@ -39,6 +39,10 @@ import {
   GET_MATCHES,
   UPDATE_FILTERED_MATCHES,
   LIKE_POST,
+  RESPOND_LIKE,
+  LIKES_LOADING,
+  LIKES_LOADING_DONE,
+  SET_RECEIVED_LIKES,
   LIKED_POSTS,
   GET_ALL_LIKES,
   SELECTED_POST,
@@ -67,6 +71,8 @@ const initialState = {
   matches: [],
   allLikes: [],
   likedPosts: [],
+  receivedLikes: [],
+  loadingLikes: false,
   messageHistory: [],
   chats: [],
   interacciones: {},
@@ -395,15 +401,15 @@ function rootReducer(state = initialState, action) {
       };
     }
 
-case DISABLE_POST: {
-  const post = state.allPosts.find(p => p.id === action.payload.id);
+    case DISABLE_POST: {
+      const post = state.allPosts.find((p) => p.id === action.payload.id);
 
-  return {
-    ...state,
-    allPosts: state.allPosts.filter(p => p.id !== action.payload.id),
-    disabledPosts: [...state.allDisabledPosts, post],
-  };
-}
+      return {
+        ...state,
+        allPosts: state.allPosts.filter((p) => p.id !== action.payload.id),
+        disabledPosts: [...state.allDisabledPosts, post],
+      };
+    }
 
     case GET_ALL_LIKES:
       return {
@@ -431,10 +437,36 @@ case DISABLE_POST: {
         matches: updatedMatches,
       };
 
-    case "LIKE_POST":
+    case LIKE_POST:
       return {
         ...state,
         allLikes: [...state.allLikes, action.payload],
+      };
+
+    case SET_RECEIVED_LIKES:
+      return {
+        ...state,
+        receivedLikes: action.payload,
+      };
+
+    case LIKES_LOADING:
+      return {
+        ...state,
+        loadingLikes: true,
+      };
+
+    case LIKES_LOADING_DONE:
+      return {
+        ...state,
+        loadingLikes: false,
+      };
+
+    case RESPOND_LIKE:
+      return {
+        ...state,
+        receivedLikes: state.receivedLikes.filter(
+          (like) => like.id !== action.payload.likeId
+        ),
       };
 
     case LIKED_POSTS:
