@@ -23,11 +23,11 @@ if (config.isProd) {
 } else {
   // 🧪 Local
   sequelize = new Sequelize(
-    `postgres://${config.db.user}:${config.db.password}@${config.db.host}/${config.db.name}`,
+    `postgres://${config.db.user}:${config.db.password}@${config.db.host}:${config.db.port}/${config.db.name}`,
     {
       logging: false,
       native: false,
-    }
+    },
   );
 }
 
@@ -38,7 +38,7 @@ const modelDefiners = [];
 fs.readdirSync(path.join(__dirname, "/models"))
   .filter(
     (file) =>
-      file.indexOf(".") !== 0 && file !== basename && file.slice(-3) === ".js"
+      file.indexOf(".") !== 0 && file !== basename && file.slice(-3) === ".js",
   )
   .forEach((file) => {
     modelDefiners.push(require(path.join(__dirname, "/models", file)));
@@ -106,16 +106,22 @@ Message.belongsTo(User, {
 });
 
 User.hasMany(Review, {
-  foreignKey: 'userId' 
+  foreignKey: "userId",
 });
 
 Review.belongsTo(User, {
-  as: 'reviewer',
-  foreignKey: 'reviewedUserId' 
+  as: "reviewer",
+  foreignKey: "reviewedUserId",
 });
 
 module.exports = {
   ...sequelize.models,
   conn: sequelize,
+  development: {
+    username: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    host: process.env.DB_HOST,
+    dialect: "postgres",
+  },
 };
-

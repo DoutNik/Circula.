@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const likeController = require("../../controllers//likeControllers");
+const likeController = require("../../controllers/likeControllers");
 
 router.post('/', async (req, res) => {
   try {
@@ -27,15 +27,34 @@ router.get("/allLikes", async (req, res) => {
   }
 });
 
-router.get("/getLikesRecibidos", async (req, res) => {
-  const myUserId = req.query.myUserId;
-  try{
+router.get("/getLikesRecibidos/:myUserId", async (req, res) => {
+  const { myUserId } = req.params;
+
+  try {
     const likes = await likeController.getLikesRecibidos(myUserId);
     return res.status(200).json(likes);
-  } catch(error){
+  } catch (error) {
     return res.status(400).json(error.message);
   }
-})
+});
+
+router.put("/respond/:id", async (req, res) => {
+  const { action } = req.body;
+
+  try {
+    let result;
+
+    if (action === "accepted") {
+      result = await likeController.acceptLike(req.params.id);
+    } else {
+      result = await likeController.rejectLike(req.params.id);
+    }
+
+    res.json(result);
+  } catch (error) {
+    res.status(400).json(error.message);
+  }
+});
 
 router.delete("/:likeId", async (req, res) => {
   try{

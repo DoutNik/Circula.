@@ -1,21 +1,35 @@
-const { Like } = require("../DB_config");
+const { Like, Matches, User, Post } = require("../DB_config");
+const { transporter } = require("../config/mailer");
+const { matchMail } = require("../utils/mailObjects");
 
 const createLike = async (myUserId, likedPostId, myPostId, anotherUserId) => {
   try {
-    // Comprueba si ya existe un "like" recíproco para esta publicación
-    const existingLike = await Like.create({
+    // ❗ evitar duplicados
+    const existing = await Like.findOne({
+      where: {
         myUserId,
         likedPostId,
         myPostId,
-        anotherUserId,
-      });
+      },
+    });
 
-    return existingLike; // El "like" se registró con éxito
+    if (existing) {
+      throw new Error("Ya enviaste esta solicitud");
+    }
+
+    const like = await Like.create({
+      myUserId,
+      likedPostId,
+      myPostId,
+      anotherUserId,
+      status: "pending",
+    });
+
+    return like;
   } catch (error) {
-    throw new Error('Error al dar like a la publicación: ' + error.message);
+    throw new Error("Error al dar like: " + error.message);
   }
 };
-
 
 const getAllLikes = async () => {
   try {
@@ -26,24 +40,77 @@ const getAllLikes = async () => {
     throw error;
   }
 };
+
 const getLikesRecibidos = async (myUserId) => {
   try {
     const likesRecibidos = await Like.findAll({
       where: {
         anotherUserId: myUserId,
+        status: "pending", // 🔥 importante
       },
     });
 
-    const posts = [];
-    
-    const likes = likesRecibidos.forEach((post)=>{
-      posts.push(post.likedPostId, post.myPostId)
-    })
-
-    return posts;
+    return likesRecibidos.map((like) => ({
+      id: like.id, // ✅ CLAVE
+      likedPostId: like.likedPostId,
+      myPostId: like.myPostId,
+      status: like.status,
+    }));
   } catch (error) {
-    throw new Error('Error al dar obtener likes recibidos: ' + error.message);
+    throw new Error("Error al obtener likes recibidos: " + error.message);
   }
+};
+
+const acceptLike = async (likeId) => {
+  const like = await Like.findByPk(likeId);
+
+  if (!like) throw new Error("Like no encontrado");
+
+  if (like.status !== "pending") {
+    throw new Error("Ya procesado");
+  }
+
+  like.status = "accepted";
+  await like.save();
+
+  // 🔥 Crear match
+  const match = await Matches.create({
+    UserId1: like.myUserId,
+    UserId2: like.anotherUserId,
+    PostId1: like.myPostId,
+    PostId2: like.likedPostId,
+    EmailSended: true,
+  });
+
+  // 🔥 Obtener datos
+  const firstUser = await User.findByPk(like.myUserId);
+  const secondUser = await User.findByPk(like.anotherUserId);
+  const firstPost = await Post.findByPk(like.myPostId);
+  const secondPost = await Post.findByPk(like.likedPostId);
+
+  // 🔥 Email
+  transporter.sendMail(matchMail(firstUser, secondUser, firstPost, secondPost));
+
+  return match;
+};
+
+const rejectLike = async (likeId) => {
+  const like = await Like.findByPk(likeId);
+
+  if (!like) throw new Error("Like no encontrado");
+
+  like.status = "rejected";
+  await like.save();
+
+  // 🔥 eliminar relación
+  await Like.destroy({
+    where: {
+      myPostId: like.myPostId,
+      likedPostId: like.likedPostId,
+    },
+  });
+
+  return like;
 };
 
 const removeLike = async (likeId) => {
@@ -55,7 +122,9 @@ const removeLike = async (likeId) => {
 
     // Verifica si el like existe
     if (!likeToRemove) {
-      throw new Error('No se encontró el like con el likedPostId proporcionado');
+      throw new Error(
+        "No se encontró el like con el likedPostId proporcionado",
+      );
     }
 
     // Obtiene el ID del post que le dio like
@@ -66,14 +135,15 @@ const removeLike = async (likeId) => {
 
     return likedPostId; // Devuelve el ID del post que le dio like
   } catch (error) {
-    throw new Error('Error al eliminar el like: ' + error.message);
+    throw new Error("Error al eliminar el like: " + error.message);
   }
 };
-
 
 module.exports = {
   createLike,
   getAllLikes,
   getLikesRecibidos,
-  removeLike
+  removeLike,
+  rejectLike,
+  acceptLike,
 };

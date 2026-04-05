@@ -1,102 +1,129 @@
-.containerP {
-    display: grid;
-  }
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+}
 
-  .containerP a {
-    color: grey;
-    justify-self: left;
-  }
+/* CARD */
+.card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
 
-  .containerP h5 {
-    position: absolute;
-    justify-self: center;
-    align-self: center;
-    margin: 0px;
-    margin-top: 20px;
-    font-size: 16px;
-  }
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
 
-  .containerP .label {
-    margin-top: 25px;
-    margin-bottom: 0px;
-  }
-  
+/* CONTENIDO PRINCIPAL */
+.like {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* IMÁGENES */
+.like img {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid #eee;
+}
+
+/* INFO CENTRAL */
+.info {
+  flex: 1;
+  text-align: center;
+}
+
+.info h4 {
+  font-size: 14px;
+  margin: 4px 0;
+  font-weight: 600;
+  color: #333;
+}
+
+.info span {
+  display: block;
+  margin: 6px 0;
+  font-size: 18px;
+  color: #888;
+}
+
+/* BOTONES */
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.actions button {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* ACEPTAR */
+.actions button:first-child {
+  background: #22c55e;
+  color: white;
+}
+
+.actions button:first-child:hover {
+  background: #16a34a;
+}
+
+/* RECHAZAR */
+.actions button:last-child {
+  background: #ef4444;
+  color: white;
+}
+
+.actions button:last-child:hover {
+  background: #dc2626;
+}
+
+/* ESTADOS */
+.state {
+  text-align: center;
+  padding: 40px;
+  color: #777;
+  font-size: 16px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
   .like {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    justify-self: center;
-    width: 250px;
-    box-shadow: 0px 5px 10px rgba(128, 128, 128, 0.3);
-    border-radius: 10px;
-    margin-top: 20px;
-    padding: 10px;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    flex-direction: column;
+    text-align: center;
   }
 
-  .like p {
-    display: inline-flex;
-    align-self: center;
-    justify-self: left;
-    margin-left: 10px;
-    text-align: left;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    font-size: 16px;
-  }
-  
-  .likes {
-    display: grid;
-    justify-self: center;
-  }
-  
-  .containerP ul {
-    display: grid;
-    justify-self: center;
-    list-style: none;
-    padding: 10px;
-    margin: 0px;
-  }
-  
-  .containerP li {
-    display: grid;
-    align-self: center;
-    grid-template-columns: 1fr 2fr;
-  }
-  
-  .containerP h3 {
-    align-self: center;
-  }
-  
-  .containerP h4 {
-    text-align: left;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-  .containerP img {
-    justify-self: left;
-    margin-left: 10px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    border: 3px solid grey;
+  .like img {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
   }
 
-  .firstLike {
-    display: grid;
+  .info {
+    margin: 10px 0;
   }
 
-  .firstLike .like {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    border: 2px solid #4ecdc4;
+  .actions {
+    flex-direction: column;
   }
 
-  .firstLike .like img {
-    border: 3px solid #4ecdc4;
+  .actions button {
+    width: 100%;
   }
-
- 
-  
+}

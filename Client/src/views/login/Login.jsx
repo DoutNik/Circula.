@@ -27,31 +27,66 @@ const Login = ({ setAuth, userData }) => {
 
   const handleFacebookLogin = async () => {
   try {
+    Swal.fire({
+      title: "Conectando con Facebook...",
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
+    });
+
     const provider = new FacebookAuthProvider();
+    provider.addScope("email");
+    provider.addScope("public_profile");
+
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
 
-    // Enviar datos al backend para registro/login social
+    // 🔥 Fallbacks seguros
+    const email = user.email || `${user.uid}@facebook.local`;
+    const username =
+      user.displayName || email.split("@")[0];
+
     const response = await api.post("/users/social-login", {
-      username: user.displayName || user.email.split("@")[0],
-      email: user.email,
+      username,
+      email,
       image: user.photoURL,
       origin: "facebook",
     });
 
-    // Guardar tokens
     localStorage.setItem("token", response.data.token);
 
     Swal.fire({
       icon: "success",
       title: "Login exitoso",
-      text: `¡Bienvenido ${user.displayName || user.email.split("@")[0]}!`,
+      text: `¡Bienvenido ${username}!`,
     });
 
     setAuth(true);
-
   } catch (error) {
+    Swal.close();
+
     console.error("Error Facebook login:", error);
+
+    // 🔥 UX correcta
+    if (error.code === "auth/popup-closed-by-user") return;
+
+    if (error.code === "auth/account-exists-with-different-credential") {
+      Swal.fire({
+        icon: "warning",
+        title: "Cuenta existente",
+        text: "Ya existe una cuenta con este email usando otro método.",
+      });
+      return;
+    }
+
+    if (error.code === "auth/operation-not-allowed") {
+      Swal.fire({
+        icon: "error",
+        title: "Login no disponible",
+        text: "Facebook login no está habilitado.",
+      });
+      return;
+    }
+
     Swal.fire({
       icon: "error",
       title: "Error al iniciar sesión",
@@ -86,6 +121,10 @@ const Login = ({ setAuth, userData }) => {
       });
     } catch (error) {
       console.error("Error Google login:", error);
+
+      if (error.code === "auth/popup-closed-by-user") {
+        return;
+      }
       Swal.fire({
         icon: "error",
         title: "Error al iniciar sesión",
@@ -192,7 +231,6 @@ const Login = ({ setAuth, userData }) => {
           </span>
         </div> */}
       <button onClick={handleGoogleLogin}>Iniciar sesión con Google</button>
-      <button onClick={handleFacebookLogin}>Iniciar sesión con Facebook</button>
       <div className={style.buttons}>
         <span className={style.recover}>
           ¿Olvidaste la contraseña?

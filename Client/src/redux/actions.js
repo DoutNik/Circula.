@@ -31,6 +31,10 @@ import {
   GET_POST_BY_PROVINCE,
   GET_POST_BY_LOCALITY,
   LIKE_POST,
+  RESPOND_LIKE,
+  SET_RECEIVED_LIKES,
+  LIKES_LOADING,
+  LIKES_LOADING_DONE,
   LIKED_POSTS,
   GET_ALL_LIKES,
   DELETE_LIKE,
@@ -230,6 +234,59 @@ export const likePost = (myUserId, likedPostId, myPostId, anotherUserId) => {
       console.error("Error al dar like a la publicación", error);
     }
   };
+};
+
+export const respondLike = (likeId, action) => async (dispatch) => {
+  try {
+    const res = await api.put(`/likes/respond/${likeId}`, { action });
+
+    dispatch({
+      type: RESPOND_LIKE,
+      payload: { likeId, action },
+    });
+
+    return { success: true, data: res.data };
+  } catch (error) {
+    console.error(error);
+    return { success: false };
+  }
+};
+
+export const setReceivedLikes = (likes) => {
+  return {
+    type: SET_RECEIVED_LIKES,
+    payload: likes,
+  };
+};
+
+// 🔹 FETCH completo (mejor que hacerlo en el componente)
+export const fetchReceivedLikes = (userId) => async (dispatch) => {
+  try {
+    dispatch({ type: LIKES_LOADING });
+
+    const res = await api.get(`/likes/getLikesRecibidos/${userId}`);
+
+    const requests = await Promise.all(
+      res.data.map(async (like) => {
+        const [myPostRes, anotherPostRes] = await Promise.all([
+          api.get(`/posts/${like.likedPostId}`),
+          api.get(`/posts/${like.myPostId}`),
+        ]);
+
+        return {
+          ...like,
+          myPost: myPostRes.data,
+          anotherPost: anotherPostRes.data,
+        };
+      })
+    );
+
+    dispatch(setReceivedLikes(requests));
+  } catch (error) {
+    console.error("Error fetching likes:", error);
+  } finally {
+    dispatch({ type: LIKES_LOADING_DONE });
+  }
 };
 
 export function saveOtherUserData(otherUserName, otherUserImage) {

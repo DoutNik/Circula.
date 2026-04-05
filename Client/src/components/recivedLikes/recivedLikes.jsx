@@ -1,89 +1,137 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import Swal from "sweetalert2";
 import style from "./recivedLikes.module.css";
-import api from "../../api/api";
+
+import {
+  fetchReceivedLikes,
+  respondLike,
+} from "../../redux/actions";
 
 const RecivedLikes = ({ userData }) => {
-  const userId = userData.id;
   const dispatch = useDispatch();
+  const userId = userData.id;
 
-  // Use useState to manage the array of posts
-  const [arrayPost, setArrayPost] = useState([]);
-
-  // Agrega un estado local para controlar si los datos están cargados
-  const [dataLoaded, setDataLoaded] = useState(false);
+  const exchangeRequests = useSelector(
+    (state) => state.receivedLikes
+  );
+  const loading = useSelector(
+    (state) => state.loadingLikes
+  );
 
   useEffect(() => {
-    const fetchData = async () => {
-      await getPosts();
-      // Marca que los datos están cargados una vez que las acciones se completen
-      setDataLoaded(true);
-    };
-
-    fetchData();
+    dispatch(fetchReceivedLikes(userId));
   }, [dispatch, userId]);
 
-  const getPosts = async () => {
+  const showSafetyModal = () => {
+    Swal.fire({
+      title: "⚠️ Intercambio seguro",
+      html: `
+        <ul style="text-align:left">
+          <li>✔ Lugares públicos</li>
+          <li>✔ Revisar productos</li>
+          <li>✔ No entregar sin recibir</li>
+          <li>✔ Evitar zonas peligrosas</li>
+          <li>✔ Ir acompañado</li>
+        </ul>
+      `,
+    });
+  };
+
+  const handleRespond = async (likeId, action, req) => {
     try {
-      const response = await api.get("/likes/getLikesRecibidos", {
-        params: {
-          myUserId: userData.id,
-        },
+      const confirm = await Swal.fire({
+        title:
+          action === "accepted"
+            ? "¿Aceptar canje?"
+            : "¿Rechazar canje?",
+        text:
+          action === "accepted"
+            ? `${req.myPost.title} ⇄ ${req.anotherPost.title}`
+            : "Esta acción no se puede deshacer",
+        icon: action === "accepted" ? "question" : "warning",
+        showCancelButton: true,
       });
 
-      if (response) {
-        // Utiliza Promise.all para esperar a que todas las solicitudes se completen
-        const postRequests = response.data.map(async (id) => {
-          const post = await api.get(`/posts/${id}`);
-          return post.data; // Accede a la propiedad data
-        });
+      if (!confirm.isConfirmed) return;
 
-        const posteos = await Promise.all(postRequests);
+      const result = await dispatch(
+        respondLike(likeId, action)
+      );
 
-        setArrayPost(posteos);
+      if (!result?.success) throw new Error();
+
+      if (action === "accepted") {
+        await Swal.fire(
+          "¡Canje aceptado!",
+          "Se creó un chat para coordinar",
+          "success"
+        );
+
+        showSafetyModal();
+      } else {
+        Swal.fire("Canje rechazado", "", "info");
       }
     } catch (error) {
-      console.error("Error al enviar los datos al servidor:", error);
+      Swal.fire(
+        "Error",
+        "No se pudo procesar la solicitud",
+        "error"
+      );
     }
   };
 
+  if (loading) {
+    return <p>Cargando solicitudes...</p>;
+  }
+
+  if (!exchangeRequests.length) {
+    return <p>No hay solicitudes</p>;
+  }
+  console.log(exchangeRequests);
+  
+
   return (
-    <div className={style.containerP}>
-      {arrayPost &&
-        arrayPost.length > 0 &&
-        arrayPost.map((posteo, index) => (
-          <React.Fragment key={`${posteo.id}_${index}`}>
-            <motion.div
-              initial={{
-                opacity: 0,
-                y: 50,
-              }}
-              animate={{
-                opacity: 1,
-                y: 0,
-              }}
-              transition={{
-                delay: 0.2,
-              }}
-              className={index % 2 === 0 ? style.firstLike : style.likes}
+    <div className={style.container}>
+      {exchangeRequests.map((req, index) => (
+        <motion.div
+          key={req.id}
+          className={style.card}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className={style.like}>
+            <img src={req.myPost.image[0]} />
+
+            <div className={style.info}>
+              <h4>{req.myPost.title}</h4>
+              <span>⇄</span>
+              <h4>{req.anotherPost.title}</h4>
+            </div>
+
+            <img src={req.anotherPost.image[0]} />
+          </div>
+
+          <div className={style.actions}>
+            <button
+              onClick={() =>
+                handleRespond(req.id, "accepted", req)
+              }
             >
-              <div className={style.like}>
-                <img src={posteo.image && posteo.image[0]} alt={posteo.title} />
-                {index % 2 === 0 ? (
-                  <h4>{`Tú: ${posteo.title}`}</h4>
-                ) : (
-                  <Link to={`/detail/${posteo.id}`}>
-                    <h4>{posteo.title}</h4>
-                  </Link>
-                )}
-              </div>
-            </motion.div>
-            {index === 1 ||
-              (index % 2 === 0 && <p className={style.label}>por:</p>)}
-          </React.Fragment>
-        ))}
+              Aceptar
+            </button>
+
+            <button
+              onClick={() =>
+                handleRespond(req.id, "rejected", req)
+              }
+            >
+              Rechazar
+            </button>
+          </div>
+        </motion.div>
+      ))}
     </div>
   );
 };

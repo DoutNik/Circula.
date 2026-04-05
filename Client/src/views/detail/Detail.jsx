@@ -41,7 +41,7 @@ const Detail = ({ userData }) => {
     // Filter user posts when userData or allPosts changes
     if (userData) {
       const filteredUserPosts = allPosts2.filter(
-        (post) => post.UserId === userData.id
+        (post) => post.UserId === userData.id,
       );
       setUserPosts(filteredUserPosts);
     }
@@ -50,24 +50,24 @@ const Detail = ({ userData }) => {
   const filteredMatches = useSelector((state) => state.matches).filter(
     (match) => {
       return match.match.some(
-        (m) => m.myPostId == myPostId && m.likedPostId == id
+        (m) => m.myPostId == myPostId && m.likedPostId == id,
       );
-    }
+    },
   );
 
   // Comprueba si likedPostId está en la lista de likedPosts
   const isPostLiked = allLikes.some(
-    (like) => like.likedPostId === likedPostId && like.myUserId === myUserId
+    (like) => like.likedPostId === likedPostId && like.myUserId === myUserId,
   );
 
   const usedProductIds = allLikes
     .filter(
-      (like) => like.likedPostId === likedPostId && like.myUserId === myUserId
+      (like) => like.likedPostId === likedPostId && like.myUserId === myUserId,
     )
     .map((like) => like.myPostId);
 
   const hasAvailableProduct = userPosts.some(
-    (post) => !usedProductIds.includes(post.id)
+    (post) => !usedProductIds.includes(post.id),
   );
 
   const isMatched = filteredMatches.length > 0;
@@ -93,7 +93,7 @@ const Detail = ({ userData }) => {
     if (myPostId) {
       if (!liked && !isMatched && !isPostLiked) {
         await dispatch(
-          likePost(myUserId, likedPostId, myPostId, anotherUserId)
+          likePost(myUserId, likedPostId, myPostId, anotherUserId),
         );
 
         setLiked(true);
@@ -145,7 +145,7 @@ const Detail = ({ userData }) => {
       navigate(`/detail/${nextPostId}`);
     } else {
       console.log(
-        "No hay publicaciones disponibles o ya estás en la primera publicación"
+        "No hay publicaciones disponibles o ya estás en la primera publicación",
       );
     }
   };
@@ -163,13 +163,15 @@ const Detail = ({ userData }) => {
       navigate(`/detail/${prevPostId}`);
     } else {
       console.log(
-        "No hay publicaciones disponibles o ya estás en la última publicación"
+        "No hay publicaciones disponibles o ya estás en la última publicación",
       );
     }
   };
 
-  const isPostAlreadyRequested = (postId) => {
-    return allLikes.some((like) => like.myPostId == postId);
+  const isPostAlreadyRequested = (myPostId, likedPostId) => {
+    return allLikes.some(
+      (like) => like.myPostId == myPostId && like.likedPostId == likedPostId,
+    );
   };
 
   let disabledReason = "";
@@ -190,7 +192,7 @@ const Detail = ({ userData }) => {
 
             <div className={style.postsContainer}>
               {userPosts.map((post) => {
-                const requested = isPostAlreadyRequested(post.id);
+                const requested = isPostAlreadyRequested(post.id, likedPostId);
 
                 return (
                   <div
@@ -218,7 +220,8 @@ const Detail = ({ userData }) => {
 
                     {requested ? (
                       <div className={style.requestedLabel}>
-                        Solicitud de canje enviada
+                        "Ya enviaste solicitud con este producto para este
+                        artículo"{" "}
                       </div>
                     ) : (
                       <div className={style.rowSelect}>
@@ -247,8 +250,8 @@ const Detail = ({ userData }) => {
                       myUserId,
                       likedPostId,
                       selectedPostId,
-                      anotherUserId
-                    )
+                      anotherUserId,
+                    ),
                   );
 
                   dispatch(getAllLikes()); // ← actualizar estado
