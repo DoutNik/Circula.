@@ -59,76 +59,73 @@ const Matchs = ({ userData }) => {
     return <p>No tenés matches todavía</p>;
   }
 
-return (
-  <div className={style.container}>
-    {matches.map((match) => {
-      const myPost = match.posts?.find(
-        (post) => post.UserId === userId
-      );
+  return (
+    <div className={style.container}>
+      {matches.map((match) => {
+        const myPost = match.posts?.find((post) => post.UserId === userId);
 
-      const anotherPost = match.posts?.find(
-        (post) => post.UserId !== userId
-      );
+        const anotherPost = match.posts?.find((post) => post.UserId !== userId);
 
-      // 🔒 Seguridad: evitar render roto
-      if (!myPost || !anotherPost) return null;
+        // 🔒 Seguridad: evitar render roto
+        if (!myPost || !anotherPost) return null;
 
-      return (
-        <div key={match.id} className={style.matchCard}>
-          
-          {/* 🖼️ Productos */}
-          <div className={style.products}>
-            <img
-              className={style.img}
-              src={myPost.image?.[0] || "/placeholder.png"}
-              alt={myPost.title}
-            />
+        return (
+          <div key={match.id} className={style.matchCard}>
+            {/* 🔄 CONTENIDO PRINCIPAL */}
+            <div className={style.exchangeRow}>
+              {/* 🟦 TU PRODUCTO */}
+              <div className={style.product}>
+                <p className={style.label}>Ofrecés</p>
 
-            <span className={style.arrow}>⇄</span>
+                <img
+                  className={style.img}
+                  src={myPost.image?.[0] || "/placeholder.png"}
+                  alt={myPost.title}
+                />
 
-            <img
-              className={style.img}
-              src={anotherPost.image?.[0] || "/placeholder.png"}
-              alt={anotherPost.title}
-            />
-          </div>
+                <h4 className={style.title}>{myPost.title}</h4>
+              </div>
 
-          {/* 🧠 Info clara */}
-          <div className={style.info}>
-            <div className={style.block}>
-              <p className={style.label}>Tu producto</p>
-              <h4 className={style.title}>{myPost.title}</h4>
+              {/* 🔁 FLECHA */}
+              <div className={style.center}>
+                <span className={style.arrow}>⇄</span>
+              </div>
+
+              {/* 🟩 OTRO PRODUCTO */}
+              <div className={style.product}>
+                <p className={style.label}>Recibís</p>
+
+                <img
+                  className={style.img}
+                  src={anotherPost.image?.[0] || "/placeholder.png"}
+                  alt={anotherPost.title}
+                />
+
+                <h4 className={style.title}>{anotherPost.title}</h4>
+              </div>
             </div>
 
-            <span className={style.arrow}>⇄</span>
+            {/* 🎯 BOTONES ABAJO */}
+            <div className={style.actions}>
+              <button
+                className={style.chatBtn}
+                onClick={() => handleGoChat(anotherPost.UserId)}
+              >
+                💬 Chat
+              </button>
 
-            <div className={style.block}>
-              <p className={style.label}>Recibís</p>
-              <h4 className={style.title}>{anotherPost.title}</h4>
+              <button
+                className={style.profileBtn}
+                onClick={() => handleGoProfile(anotherPost.UserId)}
+              >
+                👤 Ver perfil
+              </button>
             </div>
           </div>
-
-          {/* 🎯 Acciones */}
-          <div className={style.actions}>
-            <button
-              className={style.chatBtn}
-              onClick={() => handleGoChat(anotherPost.UserId)}
-            >
-              💬 Chat
-            </button>
-
-            <button
-              className={style.profileBtn}
-              onClick={() => handleGoProfile(anotherPost.UserId)}
-            >
-              👤 Ver perfil
-            </button>
-          </div>
-        </div>
-      );
-    })}
-  </div>
-);
+        );
+      })}
+    </div>
+  );
 };
 
 export default Matchs;
