@@ -109,7 +109,6 @@ const Filters = () => {
         }}
         className={style.filters}
       >
-        <span>Filtros</span>
         <select value={selectedProvince} onChange={handleProvinceChange}>
           <option value="" disabled>Provincia</option>
           {uniqueProvinces().map((province, index) => (

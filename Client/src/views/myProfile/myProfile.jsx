@@ -12,7 +12,7 @@ import { handlePremiumPurchase } from "../../services/paymentService";
 import { use } from "react";
 
 const MyProfile = ({ userData, setAuth, toggleDarkMode }) => {
-  const [isPremium, setPremium] = useState(false);
+  const [isPremium, setPremium] = useState(null);
   const [postCount, setPostCount] = useState(0);
 
   const getPostCount = async () => {
@@ -34,18 +34,23 @@ const MyProfile = ({ userData, setAuth, toggleDarkMode }) => {
         params: { id: userData.id },
       });
 
-      if (usuario.data.plan === "premium") {
+      if (usuario?.data?.plan === "premium") {
         setPremium(true);
+      } else {
+        setPremium(false);
       }
     } catch (error) {
       console.error("Error al obtener la información del usuario:", error);
+      setPremium(false);
     }
   };
 
   useEffect(() => {
-    premium();
-    getPostCount();
-  }, []);
+    if (userData?.id) {
+      premium();
+      getPostCount();
+    }
+  }, [userData]);
 
   const Banner3 =
     "https://res.cloudinary.com/dlahgnpwp/image/upload/v1699885578/emailAssets/itncfxbtlnpm7e6tsffu.jpg";
@@ -54,31 +59,31 @@ const MyProfile = ({ userData, setAuth, toggleDarkMode }) => {
 
   const navigate = useNavigate();
 
-const handleAddClick = async () => {
-  if (postCount >= 3 && !isPremium) {
-    await Swal.fire({
-      title: "🚫 Límite alcanzado",
-      text: "Solo los usuarios premium pueden tener más de 3 publicaciones.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "💎 Hacerse Premium",
-      cancelButtonText: "Cancelar",
-      showLoaderOnConfirm: true,
-      preConfirm: async () => {
-        try {
-          await handlePremiumPurchase(userData.id);
-        } catch (error) {
-          Swal.showValidationMessage("Error al iniciar el pago");
-        }
-      },
-      allowOutsideClick: () => !Swal.isLoading(),
-    });
+  const handleAddClick = async () => {
+    if (postCount >= 3 && !isPremium) {
+      await Swal.fire({
+        title: "🚫 Límite alcanzado",
+        text: "Solo los usuarios premium pueden tener más de 3 publicaciones.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "💎 Hacerse Premium",
+        cancelButtonText: "Cancelar",
+        showLoaderOnConfirm: true,
+        preConfirm: async () => {
+          try {
+            await handlePremiumPurchase(userData.id);
+          } catch (error) {
+            Swal.showValidationMessage("Error al iniciar el pago");
+          }
+        },
+        allowOutsideClick: () => !Swal.isLoading(),
+      });
 
-    return;
-  }
+      return;
+    }
 
-  navigate("/addProduct");
-};
+    navigate("/addProduct");
+  };
 
   return (
     <>
@@ -106,10 +111,9 @@ const handleAddClick = async () => {
           <button className={style.agregar} onClick={handleAddClick}>
             Agregar
           </button>
-          <p>{postCount}/3 publicaciones usadas</p>
+          {isPremium === false && <p>{postCount}/3 publicaciones usadas</p>}
           <Publication userData={userData}></Publication>
         </div>
-        
       </motion.div>
     </>
   );

@@ -1,6 +1,6 @@
 .filters {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 0.5fr;
+  grid-template-columns: 1fr 1fr 1fr 0.5fr;
   gap: 20px;
   justify-content: center;
   justify-self: center;
@@ -22,26 +22,18 @@
   justify-self: right;
 }
 
-.filters span {
-  align-self: center;
-  font-size: 22px;
-  color: #1d1297;
-  justify-self: center;
-}
-
 .filters select {
   border-radius: 5px;
   outline: none;
   background-color: #ffe66d;
-  width: 200px;
+  width: 300px;
   height: 30px;
-  font-size: 16px;
+  font-size: 20px;
   justify-self: center;
   align-self: center;
-  color: grey;
+  color: rgb(6, 0, 0);
   border: none;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .filters a {
@@ -57,7 +49,7 @@
 
 @media (max-width: 1280px) {
   .filters {
-    grid-template-columns: 75px 75px 100px 100px 100px 75px;
+    grid-template-columns: 100px 100px 100px 75px;
     width: 640px;
   }
 
@@ -79,17 +71,13 @@
     margin-top: 20px;
     padding: 5px;
     gap: 5px;
-    grid-template-columns: 50px 70px 70px 70px 40px;
+    grid-template-columns: 70px 70px 70px 40px;
     background-color: #ffe66d;
   }
 
   option {
     text-align: right;
     max-width: fit-content;
-  }
-
-  span {
-    display: none;
   }
 
   .filters select {
