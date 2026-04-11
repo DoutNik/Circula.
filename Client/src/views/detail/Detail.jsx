@@ -19,17 +19,18 @@ import Swal from "sweetalert2";
 import style from "./Detail.module.css";
 
 const Detail = ({ userData }) => {
-  const myUserId = Number(userData.id);
+  const myUserId = userData.id;
   const { id } = useParams();
   const likedPostId = Number(id);
   const dispatch = useDispatch();
   const post = useSelector((state) => state.selectedPost);
-  const anotherUserId = post.User?.id;
-  const userName = post.User?.username;
+  const anotherUserId = post?.User?.id;
+  const userName = post?.User?.username;
   const myPostId = useSelector((state) => state.selectedPostToInteract);
   const allPosts2 = useSelector((state) => state.allPostsCopy);
 
   const allLikes = useSelector((state) => state.allLikes);
+  const matches = useSelector((state) => state.matches) || [];
   const [liked, setLiked] = useState(false);
   const [userPosts, setUserPosts] = useState([]);
   const [showPostSelector, setShowPostSelector] = useState(false);
@@ -47,13 +48,11 @@ const Detail = ({ userData }) => {
     }
   }, [userData, allPosts2]);
 
-  const filteredMatches = useSelector((state) => state.matches).filter(
-    (match) => {
-      return match.match.some(
-        (m) => m.myPostId == myPostId && m.likedPostId == id,
-      );
-    },
-  );
+ useEffect(() => {
+  if (myUserId) {
+    dispatch(getMatches(myUserId));
+  }
+}, [dispatch, myUserId]);
 
   // Comprueba si likedPostId está en la lista de likedPosts
   const isPostLiked = allLikes.some(
@@ -70,24 +69,24 @@ const Detail = ({ userData }) => {
     (post) => !usedProductIds.includes(post.id),
   );
 
-  const isMatched = filteredMatches.length > 0;
+  const isMatched = matches.some((match) =>
+  match.posts?.some((p) => p.id === likedPostId)
+);
 
-  useEffect(() => {
+useEffect(() => {
+  if (id) {
     dispatch(getPostById(id));
-  }, [id]);
+  }
+
+  return () => {
+    dispatch(clearDetail());
+  };
+}, [dispatch, id]);
 
   useEffect(() => {
-    dispatch(getMatches());
     dispatch(getAllLikes());
     dispatch(getAllPosts());
   }, [dispatch]);
-
-  useEffect(() => {
-    dispatch(getPostById(`${id}`));
-    return () => {
-      dispatch(clearDetail());
-    }; //limpia el detail
-  }, []);
 
   const handleLikeClick = async () => {
     if (myPostId) {

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { getMatches, createChat, getAllChats } from "../../redux/actions";
 
@@ -77,12 +77,13 @@ const Matchs = ({ userData }) => {
               <div className={style.product}>
                 <p className={style.label}>Ofrecés</p>
 
-                <img
-                  className={style.img}
-                  src={myPost.image?.[0] || "/placeholder.png"}
-                  alt={myPost.title}
-                />
-
+                <Link to={`/detail/${myPost.id}`}>
+                  <img
+                    className={style.img}
+                    src={myPost.image?.[0] || "/placeholder.png"}
+                    alt={myPost.title}
+                  />
+                </Link>
                 <h4 className={style.title}>{myPost.title}</h4>
               </div>
 
@@ -95,11 +96,13 @@ const Matchs = ({ userData }) => {
               <div className={style.product}>
                 <p className={style.label}>Recibís</p>
 
-                <img
-                  className={style.img}
-                  src={anotherPost.image?.[0] || "/placeholder.png"}
-                  alt={anotherPost.title}
-                />
+                <Link to={`/detail/${anotherPost.id}`}>
+                  <img
+                    className={style.img}
+                    src={anotherPost.image?.[0] || "/placeholder.png"}
+                    alt={anotherPost.title}
+                  />
+                </Link>
 
                 <h4 className={style.title}>{anotherPost.title}</h4>
               </div>
