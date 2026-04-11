@@ -8,24 +8,16 @@
   margin-top: 50px;
   border-radius: 10px;
   width: 1200px;
-  background-color: #ffe66d;
+  background-color: #9dbe0a;
   padding-top: 5px;
   padding-bottom: 5px;
 }
 
-.product {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  border: 3px solid #4ecdc4;
-  object-fit: cover;
-  justify-self: right;
-}
 
 .filters select {
   border-radius: 5px;
   outline: none;
-  background-color: #ffe66d;
+  background-color: #9dbe0a;
   width: 300px;
   height: 30px;
   font-size: 20px;
@@ -72,7 +64,7 @@
     padding: 5px;
     gap: 5px;
     grid-template-columns: 70px 70px 70px 40px;
-    background-color: #ffe66d;
+    background-color: #9dbe0a;
   }
 
   option {
@@ -84,6 +76,6 @@
     width: 75px;
     font-size: 10px;
     border: none;
-    background-color: #ffe66d;
+    background-color: #9dbe0a;
   }
 }

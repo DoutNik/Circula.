@@ -136,6 +136,7 @@ const Filters = () => {
           ))}
         </select>
         <button onClick={handleResetFilters}>
+          Reiniciar filtros
           <img
             width="24"
             height="24"
