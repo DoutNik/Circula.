@@ -58,9 +58,7 @@ const Matchs = ({ userData }) => {
   if (!matches.length) {
     return <p>No tenés matches todavía</p>;
   }
-
-  console.log(matches);
-
+  
   return (
     <div className={style.container}>
       {matches.map((match) => {
