@@ -150,12 +150,17 @@
 
 /* 👤 Perfil */
 .profileBtn {
-  flex: unset; /* 🔥 importante */
-  padding: 6px 20px;
+  display: flex;
+  align-items: center;     /* centra vertical */
+  justify-content: center; /* centra horizontal */
+  gap: 6px;                /* espacio entre img y texto */
+
+  padding: 6px;
   border-radius: 10px;
   border: 1px solid var(--border);
   background: transparent;
   color: var(--text-main);
+
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -164,6 +169,19 @@
 
 .profileBtn:hover {
   background: var(--border);
+}
+
+.profileImg {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border);
+}
+
+.profileBtnName {
+  display: flex;
+  align-items: center; /* asegura alineación vertical perfecta */
 }
 
 /* 📱 Responsive */

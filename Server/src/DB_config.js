@@ -53,7 +53,7 @@ let capsEntries = entries.map((entry) => [
 ]);
 sequelize.models = Object.fromEntries(capsEntries);
 
-const { Post, User, Like, Message, Chat, Review } = sequelize.models;
+const { Post, User, Like, Matches, Message, Chat, Review } = sequelize.models;
 
 // User - Post
 User.hasMany(Post);
@@ -83,9 +83,9 @@ Chat.belongsToMany(User, {
   through: "UserChat",
   foreignKey: "chatId",
 });
-Chat.belongsTo(User, {
-  as: "creator",
-  foreignKey: "creatorId",
+Post.belongsTo(User, {
+  as: "owner",
+  foreignKey: "UserId",
 });
 
 // Chat - Message
@@ -112,6 +112,25 @@ User.hasMany(Review, {
 Review.belongsTo(User, {
   as: "reviewer",
   foreignKey: "reviewedUserId",
+});
+
+//Matches - Post
+Matches.belongsTo(Post, {
+  as: "post1",
+  foreignKey: "PostId1",
+});
+
+Matches.belongsTo(Post, {
+  as: "post2",
+  foreignKey: "PostId2",
+});
+
+Post.hasMany(Matches, {
+  foreignKey: "PostId1",
+});
+
+Post.hasMany(Matches, {
+  foreignKey: "PostId2",
 });
 
 module.exports = {
