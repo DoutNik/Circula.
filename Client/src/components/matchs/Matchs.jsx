@@ -59,12 +59,14 @@ const Matchs = ({ userData }) => {
     return <p>No tenés matches todavía</p>;
   }
 
+  console.log(matches);
+
   return (
     <div className={style.container}>
       {matches.map((match) => {
-        const myPost = match.posts?.find((post) => post.UserId === userId);
+        const myPost = match.myPost;
 
-        const anotherPost = match.posts?.find((post) => post.UserId !== userId);
+        const anotherPost = match.anotherPost;
 
         // 🔒 Seguridad: evitar render roto
         if (!myPost || !anotherPost) return null;
@@ -121,7 +123,14 @@ const Matchs = ({ userData }) => {
                 className={style.profileBtn}
                 onClick={() => handleGoProfile(anotherPost.UserId)}
               >
-                👤 Ver perfil
+                <img
+                  className={style.profileImg}
+                  src={anotherPost.owner?.image || "/placeholder.png"}
+                  alt="Avatar"
+                />
+                <span className={style.profileBtnName}>
+                  {anotherPost.owner?.username || "Usuario"}
+                </span>
               </button>
             </div>
           </div>

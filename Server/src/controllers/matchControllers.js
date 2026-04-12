@@ -1,42 +1,59 @@
 const { User, Post, Matches } = require("../DB_config");
 const { Op } = require("sequelize");
 
-
 // Función para encontrar matches
 const findMatches = async (userId) => {
   try {
     const matches = await Matches.findAll({
       where: {
-        [Op.or]: [
-          { UserId1: userId },
-          { UserId2: userId },
-        ],
+        [Op.or]: [{ UserId1: userId }, { UserId2: userId }],
       },
+      order: [["createdAt", "DESC"]],
+      include: [
+        {
+          model: Post,
+          as: "post1",
+          attributes: ["id", "title", "image", "UserId"],
+          include: [
+            {
+              model: User,
+              as: "owner", // 🔥 CLAVE
+              attributes: ["id", "username", "image"],
+            },
+          ],
+        },
+        {
+          model: Post,
+          as: "post2",
+          attributes: ["id", "title", "image", "UserId"],
+          include: [
+            {
+              model: User,
+              as: "owner", // 🔥 CLAVE
+              attributes: ["id", "username", "image"],
+            },
+          ],
+        },
+      ],
     });
 
-    const results = await Promise.all(
-      matches.map(async (match) => {
-        const [user1, user2, post1, post2] = await Promise.all([
-          User.findByPk(match.UserId1),
-          User.findByPk(match.UserId2),
-          Post.findByPk(match.PostId1),
-          Post.findByPk(match.PostId2),
-        ]);
+    return matches.map((m) => {
+      const isMine = m.UserId1 === userId;
 
-        return {
-          id: match.id,
-          users: [user1, user2],
-          posts: [post1, post2],
-        };
-      })
-    );
+      const myPost = isMine ? m.post1 : m.post2;
+      const anotherPost = isMine ? m.post2 : m.post1;
 
-    return results;
+      return {
+        id: m.id,
+        myPost,
+        anotherPost,
+      };
+    });
   } catch (error) {
     throw new Error("Error al obtener matches: " + error.message);
   }
 };
 
 module.exports = {
-  findMatches
+  findMatches,
 };
