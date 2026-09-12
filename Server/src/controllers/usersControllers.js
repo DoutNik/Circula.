@@ -12,6 +12,32 @@ const adminList = process.env.ADMIN_USERS.split(",").map((email) =>
   email.trim(),
 );
 
+// Nunca devolver el hash de la contraseña al cliente
+const sanitizeUser = (userInstance) => {
+  if (!userInstance) return userInstance;
+  const plain =
+    typeof userInstance.toJSON === "function"
+      ? userInstance.toJSON()
+      : { ...userInstance };
+  delete plain.password;
+  return plain;
+};
+
+// Campos que un usuario puede modificar de sí mismo.
+// "rol" y "plan" quedan afuera a propósito: rol solo se calcula en el
+// backend (ver adminList) y plan solo lo cambia el webhook de pagos.
+const EDITABLE_USER_FIELDS = ["username", "image", "ubication"];
+
+const pickEditableFields = (updatedData = {}) => {
+  const result = {};
+  for (const field of EDITABLE_USER_FIELDS) {
+    if (updatedData[field] !== undefined) {
+      result[field] = updatedData[field];
+    }
+  }
+  return result;
+};
+
 exports.getAllUser = async () => {
   try {
     const users = await User.findAll();
@@ -36,7 +62,7 @@ exports.getAllDisabled = async () => {
       where: { paranoid: false },
     });
 
-    return disabledUsers;
+    return disabledUsers.map(sanitizeUser);
   } catch (error) {
     throw "Ocurrió un error al traer los usuarios: " + error;
   }
@@ -49,7 +75,7 @@ exports.getAllExisting = async () => {
       order: [["id", "ASC"]],
     });
 
-    return existingUsers;
+    return existingUsers.map(sanitizeUser);
   } catch (error) {
     throw "Ocurrió un error al traer los usuarios: " + error;
   }
@@ -114,7 +140,7 @@ exports.createUser = async (user) => {
       .auth()
       .createCustomToken(newUser.id.toString());
 
-    return { newUser, token, firebaseToken };
+    return { newUser: sanitizeUser(newUser), token, firebaseToken };
   } catch (error) {
     throw new Error("Hubo un error al crear el usuario: " + error);
   }
@@ -154,7 +180,7 @@ exports.socialRegisterOrLogin = async (user) => {
       .createCustomToken(usuario.id.toString());
 
     return {
-      usuario,
+      usuario: sanitizeUser(usuario),
       token,
       firebaseToken,
       rol: rolCalculado,
@@ -198,7 +224,7 @@ exports.loginUser = async (user) => {
     .createCustomToken(usuario.id.toString());
 
   return {
-    usuario,
+    usuario: sanitizeUser(usuario),
     token,
     firebaseToken,
     rol: rolCalculado,
@@ -209,7 +235,7 @@ exports.getUserId = async (user) => {
   try {
     const userId = await User.findByPk(user);
 
-    return userId;
+    return sanitizeUser(userId);
   } catch (error) {
     throw new Error("Error al iniciar sesión");
   }
@@ -219,7 +245,7 @@ exports.getUserById = async (id) => {
   try {
     const user = await User.findByPk(id);
 
-    return user;
+    return sanitizeUser(user);
   } catch (error) {
     throw error;
   }
@@ -239,17 +265,27 @@ exports.userLogueado = async ({ email }) => {
   }
 };
 
-exports.updateUser = async (id, updatedData) => {
+exports.updateUser = async (id, updatedData, requester) => {
   try {
     const user = await User.findByPk(id);
 
     if (!user) {
-      throw new Error("Post not found");
+      throw new Error("User not found");
     }
 
-    await user.update(updatedData);
+    // Un admin puede además cambiar el "plan" manualmente si hiciera falta,
+    // pero nunca el rol vía este endpoint (el rol se calcula solo, ver adminList).
+    let fieldsToApply = pickEditableFields(updatedData);
 
-    return user;
+    if (requester && requester.rol === "admin") {
+      if (updatedData.plan !== undefined) {
+        fieldsToApply.plan = updatedData.plan;
+      }
+    }
+
+    await user.update(fieldsToApply);
+
+    return sanitizeUser(user);
   } catch (error) {
     throw error;
   }
@@ -324,7 +360,7 @@ exports.restoreUser = async (id) => {
     }
 
     await userDisabled.restore();
-    return userDisabled;
+    return sanitizeUser(userDisabled);
   } catch (error) {
     throw error;
   }
@@ -334,7 +370,7 @@ exports.getAnotherUser = async (id) => {
   try {
     const userId = await User.findByPk(id);
 
-    return userId;
+    return sanitizeUser(userId);
   } catch (error) {
     throw new Error("Error al iniciar sesión");
   }

@@ -1,46 +1,34 @@
 const express = require("express");
 const router = express.Router();
 const plansController = require("../../controllers/plansController");
+const authorization = require("../../middleware/authorization");
 
-router.post('/create-order', async(req, res) =>{
-    const paymentData = req.body
-    try{
-        const response = await plansController.createOrder(paymentData);
-        purchaseUserId = response.userId
-        return res.status(200).json(response)
-    } catch(error){
-        return res.status(400).json(error.message)
-    }
-})
+// Requiere login: el userId del pago sale del token, nunca del body
+router.post("/create-order", authorization, async (req, res) => {
+  const { title } = req.body;
+  const userId = req.body.user;
+  try {
+    const response = await plansController.createOrder(userId, title);
+    return res.status(200).json(response);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
 
-router.get('/payment-success', async(req, res) =>{
-    console.log(req.body)
-    try{
-        await plansController.successfullPurchase(purchaseUserId);
-        return res.send("Success")
-    } catch(error){
-        return res.status(400).json(error.message)
-    }
-})
-
-router.get('/failed', async(req, res) =>{
-    try{
-        return res.sebd("Failure")
-    } catch(error){
-        return res.status(400).json(error.message)
-    }
-})
-
-router.get('/pending', async(req, res) =>{
-    try{
-        return res.send("Pending")
-    } catch(error){
-        return res.status(400).json(error.message)
-    }
-})
+// El estado real del plan lo actualiza SIEMPRE el webhook, verificando el
+// pago contra la API de Mercado Pago. Estas rutas de back_url solo sirven
+// para redirigir al usuario a una pantalla amigable; no cambian nada en la DB.
+router.get("/success", (req, res) => res.send("Success"));
+router.get("/failure", (req, res) => res.send("Failure"));
+router.get("/pending", (req, res) => res.send("Pending"));
 
 router.post("/webhook", async (req, res) => {
   try {
+    const isValid = plansController.verifyWebhookSignature(req);
+    if (!isValid) {
+      return res.sendStatus(403);
+    }
+
     await plansController.webhook(req.body);
     res.sendStatus(200);
   } catch (error) {

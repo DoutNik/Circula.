@@ -1,12 +1,10 @@
+import Swal from "sweetalert2";
 import api from "../api/api";
+
 const handlePremiumPurchase = async (userId) => {
   try {
     const paymentData = {
-      userId: userId,
       title: "Premium",
-      quantity: 1,
-      currency_id: "ARS",
-      description: "Usuario premium",
     };
 
     const response = await api.post("/plans/create-order", paymentData);

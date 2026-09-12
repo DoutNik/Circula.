@@ -12,19 +12,14 @@ import {
 
 import style from "./ChatsMessages.module.css";
 
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:3001";
+
 const ChatsMessages = ({ chatId, userData }) => {
   const dispatch = useDispatch();
   const messagesEndRef = useRef(null);
+  const socketRef = useRef(null);
   const senderId = userData.id;
   const userId = userData.id;
-
-   const socketServer = io("http://localhost:3001/", {
-    query: { chatId },
-  });
-
-/*   const socketServer = io("https://circula.onrender.com", {
-    query: { chatId },
-  }); */
 
   const chats = useSelector((state) => state.chats);
   const allUsers = useSelector((state) => state.allUsers);
@@ -58,11 +53,10 @@ const ChatsMessages = ({ chatId, userData }) => {
     }
 
     const messageData = {
-      userId: senderId,
       chatId: chatId,
       content: newMessage,
     };
-    socketServer.emit("chat message", messageData);
+    socketRef.current?.emit("chat message", messageData);
     await dispatch(createMessage(chatId, userId, newMessage));
     setNewMessage("");
     messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -75,8 +69,16 @@ const ChatsMessages = ({ chatId, userData }) => {
     }
   };
 
-  // Recibir info del servidor
+  // Conexión del socket: una sola vez por chat, autenticada con el JWT
+  // (el servidor ahora exige el token para dejar unirse a la sala del chat).
   useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    const socketServer = io(SOCKET_URL, {
+      auth: { token },
+    });
+    socketRef.current = socketServer;
+
     socketServer.emit("joinRoom", chatId);
 
     socketServer.on("chat message", (messageData) => {
@@ -89,15 +91,17 @@ const ChatsMessages = ({ chatId, userData }) => {
           { content, position, userId },
         ]);
         setTimeout(() => {
-          messagesEndRef.current.scrollIntoView({
+          messagesEndRef.current?.scrollIntoView({
             behavior: "smooth",
             block: "end",
           });
-        }, 100); // Puedes ajustar el tiempo según sea necesario
+        }, 100);
       }
     });
+
     return () => {
       socketServer.off("chat message");
+      socketServer.disconnect();
     };
   }, [chatId]);
 
@@ -106,7 +110,6 @@ const ChatsMessages = ({ chatId, userData }) => {
     dispatch(getAllUsers());
     dispatch(getAllChats());
   }, [dispatch]);
-
 
   useEffect(() => {
     if (chats.length > 0) {
