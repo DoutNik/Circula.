@@ -81,10 +81,13 @@ router.get("/localidad/:localidad", async (req, res) => {
 // va a interpretar "cloudinary"/"userPosts" como si fueran un :id (bug que
 // tenía el proyecto original).
 router.get("/cloudinary/signature", authorization, (req, res) => {
-  const timestamp = Math.round(Date.now() / 1000);
+  const timestamp = Math.floor(Date.now() / 1000);
 
   const signature = cloudinary.utils.api_sign_request(
-    { timestamp, folder: "postimages" },
+    {
+      timestamp,
+      folder: "postimages",
+    },
     process.env.API_SECRET,
   );
 

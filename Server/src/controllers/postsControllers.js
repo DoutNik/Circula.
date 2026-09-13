@@ -119,9 +119,7 @@ exports.createPost = async (postData) => {
       );
     } else {
       const newPost = await Post.create(postData);
-      const postUser = await User.findByPk(postData.UserId);
       transporter
-        .sendMail(postCreated(postUser.email, postData))
         .catch((err) => console.error("Email error:", err));
 
       return newPost;
