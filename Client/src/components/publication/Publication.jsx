@@ -4,7 +4,7 @@ import { getAllPosts, deletePost } from "../../redux/actions";
 
 import style from "./Publication.module.css";
 
-const Publication = ({ userData, isPremium }) => {
+const Publication = ({ userData, onPostDeleted }) => {
   const dispatch = useDispatch();
 
   const allPosts = useSelector((state) => state.allPostsCopy);
@@ -30,7 +30,7 @@ const Publication = ({ userData, isPremium }) => {
       await dispatch(getAllPosts());
 
       // 🔥 eliminar matches relacionados
-/*       const matchesToDelete = matches.filter((match) =>
+      /*       const matchesToDelete = matches.filter((match) =>
         match.match.some(
           (m) => m.myPostId == postId || m.likedPostId == postId,
         ),
@@ -43,6 +43,10 @@ const Publication = ({ userData, isPremium }) => {
           }
         });
       }); */
+      // Actualiza el contador 1/3 del componente MyProfile.
+      await onPostDeleted?.();
+
+      setOpenMenuId(null);
     } catch (error) {
       console.error("Error al eliminar la publicación", error);
     }
@@ -62,7 +66,6 @@ const Publication = ({ userData, isPremium }) => {
             <div className={style.meta}>
               ❤️ {post.likesCount || 0} interesados
             </div>
-
           </div>
 
           {/* ⚙️ Opciones */}

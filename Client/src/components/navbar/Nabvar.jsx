@@ -5,7 +5,7 @@ import { logoutUser } from "../logButtons/LogoutButton";
 
 const NavBar = ({ isAuthenticated, userData }) => {
   const location = useLocation();
-  const imageUrl = userData?.image.split("=")[0];
+const imageUrl = userData?.image?.split("=")[0];
 
   return (
     <div className={isAuthenticated ? style.navbar : style.navbarOff}>
@@ -124,9 +124,11 @@ const NavBar = ({ isAuthenticated, userData }) => {
       )}
 
       <Link
-        to="/login"
+        to={isAuthenticated ? "/profile" : "/login"}
         className={`${style.link} ${
-          location.pathname === "/login" ? style.active : ""
+          location.pathname === (isAuthenticated ? "/profile" : "/login")
+            ? style.active
+            : ""
         }`}
       >
         {isAuthenticated ? (
@@ -150,7 +152,6 @@ const NavBar = ({ isAuthenticated, userData }) => {
             Iniciar sesión
           </button>
         )}
-        
       </Link>
 
       {isAuthenticated ? (

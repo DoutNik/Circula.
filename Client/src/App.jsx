@@ -221,6 +221,21 @@ const App = () => {
         />
 
         <Route
+          path="/profile"
+          element={
+            isAuthenticated && userData ? (
+              <MyProfile
+                userData={userData}
+                setAuth={setAuth}
+                toggleDarkMode={toggleDarkMode}
+              />
+            ) : (
+              <Loading />
+            )
+          }
+        />
+
+        <Route
           path="/addProduct"
           element={userData ? <AddProduct userData={userData} /> : <Loading />}
         />
@@ -274,7 +289,6 @@ const App = () => {
         <Route path="/success" element={<PaymentSuccess />} />
         <Route path="/failure" element={<PaymentFailure />} />
         <Route path="/pending" element={<PaymentPending />} />
-
       </Routes>
     </>
   );

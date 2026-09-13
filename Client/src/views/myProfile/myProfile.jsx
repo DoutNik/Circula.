@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Avatar from "../../components/avatar/Avatar";
@@ -9,20 +9,21 @@ import style from "./MyProfile.module.css";
 import api from "../../api/api";
 import Swal from "sweetalert2";
 import { handlePremiumPurchase } from "../../services/paymentService";
-import { use } from "react";
 
 const MyProfile = ({ userData, setAuth, toggleDarkMode }) => {
   const [isPremium, setPremium] = useState(null);
   const [postCount, setPostCount] = useState(0);
 
-  const getPostCount = async () => {
+  const getPostCount = useCallback(async () => {
+    if (!userData?.id) return;
+
     try {
       const res = await api.get(`/posts/userPosts/${userData.id}`);
-      setPostCount(res.data.length);
+      setPostCount(Array.isArray(res.data) ? res.data.length : 0);
     } catch (error) {
       console.error("Error al obtener posteos:", error);
     }
-  };
+  }, [userData?.id]);
 
   const premium = async () => {
     try {
@@ -50,7 +51,7 @@ const MyProfile = ({ userData, setAuth, toggleDarkMode }) => {
       premium();
       getPostCount();
     }
-  }, [userData]);
+  }, [userData?.id, getPostCount]);
 
   const Banner3 =
     "https://res.cloudinary.com/dlahgnpwp/image/upload/v1699885578/emailAssets/itncfxbtlnpm7e6tsffu.jpg";
@@ -112,7 +113,7 @@ const MyProfile = ({ userData, setAuth, toggleDarkMode }) => {
             Agregar
           </button>
           {isPremium === false && <p>{postCount}/3 publicaciones usadas</p>}
-          <Publication userData={userData}></Publication>
+          <Publication userData={userData} onPostDeleted={getPostCount} />
         </div>
       </motion.div>
     </>
