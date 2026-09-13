@@ -88,10 +88,7 @@ const Publication = ({ userData, onPostDeleted }) => {
 
                 <button
                   className={style.menuItem}
-                  onClick={() => {
-                    handlePostDelete(post.id);
-                    setOpenMenuId(null);
-                  }}
+                  onClick={() => handlePostDelete(post.id)}
                 >
                   🗑️ Eliminar
                 </button>
