@@ -7,6 +7,11 @@ module.exports = (sequelize) => {
       primaryKey: true,
       autoIncrement: true
     },
+    firebaseUid: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true,
+    },
     username: {
       type: DataTypes.STRING,
       allowNull: false,

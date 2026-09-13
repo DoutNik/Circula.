@@ -247,32 +247,22 @@ const Register = ({ setAuth }) => {
       console.error("Error al enviar los datos al servidor:", error);
       console.log("Hubo un error al crear el usuario.");
 
-      if (
-        error.response &&
-        error.response.data === "El email ya se encuentra registrado"
-      ) {
-        Swal.fire({
-          icon: "warning",
-          title: "Email en uso",
-          text: "El correo electrónico ya está en uso. Por favor, elige otro.",
-        });
-      } else if (
-        error.response &&
-        error.response.data ===
-          "El nombre de usuario ya se encuentra registrado"
-      ) {
-        Swal.fire({
-          icon: "warning",
-          title: "Nombre de usuario en uso",
-          text: "El nombre de usuario ya está en uso. Por favor, elige otro.",
-        });
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Error al registrar",
-          text: "Hubo un error al registrar el usuario. Por favor, inténtalo de nuevo.",
-        });
-      }
+      // El backend manda el motivo real como texto plano en error.response.data
+      // (por ejemplo: credenciales faltantes, email inválido, contraseña débil,
+      // email/usuario ya registrado). Lo mostramos siempre en vez de un mensaje
+      // genérico, para no tener que abrir la consola para enterarse.
+      const backendMessage =
+        typeof error.response?.data === "string"
+          ? error.response.data
+          : error.response?.data?.message || error.response?.data?.error;
+
+      Swal.fire({
+        icon: "error",
+        title: "No se pudo completar el registro",
+        text:
+          backendMessage ||
+          "Hubo un error al registrar el usuario. Por favor, inténtalo de nuevo.",
+      });
 
       setInput({
         ...input,

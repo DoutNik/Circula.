@@ -1,12 +1,11 @@
-const { Post, User } = require("../DB_config");
+const { User } = require("../DB_config");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const { transporter } = require("../config/mailer");
 const { registerMail, passwordForgot } = require("../utils/mailObjects");
 const jwtGenerator = require("../utils/jwtGenerator");
-const nodemailer = require("nodemailer");
 const admin = require("../config/firebaseAdmin");
-const { ADMIN_USERS } = process.env;
+const { randomUUID } = require("crypto");
 
 const adminList = process.env.ADMIN_USERS.split(",").map((email) =>
   email.trim(),
@@ -98,17 +97,27 @@ exports.createUser = async (user) => {
   });
 
   if (existEmail) throw new Error("El email ya se encuentra registrado");
-  if (existUsername)
+  if (existUsername) {
     throw new Error("El nombre de usuario ya se encuentra registrado");
+  }
+
+  let firebaseUid;
 
   try {
     const salt = await bcrypt.genSalt(10);
     const bcryptPassword = await bcrypt.hash(user.password, salt);
+    firebaseUid = randomUUID();
 
-    // Determinar rol
     const rol = adminList.includes(user.email) ? "admin" : "user";
 
-    // Crear usuario en la DB
+    // Firebase se crea con un identificador único, no con el id SQL.
+    await admin.auth().createUser({
+      uid: firebaseUid,
+      email: user.email,
+      displayName: user.username,
+      photoURL: user.image,
+    });
+
     const newUser = await User.create({
       username: user.username,
       email: user.email,
@@ -117,32 +126,33 @@ exports.createUser = async (user) => {
       ubication: user.ubication,
       rol,
       origin: user.origin || "local",
+      firebaseUid,
     });
 
-    // Enviar mail
+    const token = jwtGenerator(newUser.id);
+    const firebaseToken = await admin.auth().createCustomToken(firebaseUid);
+
     transporter
       .sendMail(registerMail(user))
       .catch((err) => console.error("Email error:", err));
 
-    // Crear usuario en Firebase (solo si es registro normal o Google)
-    await admin.auth().createUser({
-      uid: newUser.id.toString(),
-      email: newUser.email,
-      displayName: newUser.username,
-      photoURL: newUser.image,
-    });
-
-    // JWT local
-    const token = jwtGenerator(newUser.id);
-
-    // Token Firebase personalizado
-    const firebaseToken = await admin
-      .auth()
-      .createCustomToken(newUser.id.toString());
-
     return { newUser: sanitizeUser(newUser), token, firebaseToken };
   } catch (error) {
-    throw new Error("Hubo un error al crear el usuario: " + error);
+    // Evita dejar una cuenta Firebase huérfana si luego falla la DB.
+    if (firebaseUid) {
+      await admin
+        .auth()
+        .deleteUser(firebaseUid)
+        .catch(() => {});
+    }
+
+    if (error.code === "auth/uid-already-exists") {
+      const duplicateError = new Error("El usuario ya existe en Firebase.");
+      duplicateError.statusCode = 409;
+      throw duplicateError;
+    }
+
+    throw error;
   }
 };
 
@@ -150,11 +160,13 @@ exports.socialRegisterOrLogin = async (user) => {
   try {
     let usuarios = await User.findAll({ where: { email: user.email } });
     let usuario;
+    let firebaseUid;
 
     const rolCalculado = adminList.includes(user.email) ? "admin" : "user";
 
     if (usuarios.length === 0) {
       // Crear usuario si no existe
+      firebaseUid = randomUUID();
       usuario = await User.create({
         username: user.username,
         email: user.email,
@@ -163,6 +175,7 @@ exports.socialRegisterOrLogin = async (user) => {
         ubication: user.ubication || "No especificada",
         origin: user.origin,
         rol: rolCalculado,
+        firebaseUid,
       });
     } else {
       usuario = usuarios[0];
@@ -177,7 +190,7 @@ exports.socialRegisterOrLogin = async (user) => {
 
     const firebaseToken = await admin
       .auth()
-      .createCustomToken(usuario.id.toString());
+      .createCustomToken(usuario.firebaseUid);
 
     return {
       usuario: sanitizeUser(usuario),
@@ -292,18 +305,29 @@ exports.updateUser = async (id, updatedData, requester) => {
 };
 
 exports.deleteUser = async (id) => {
-  try {
-    const user = await User.findByPk(id);
+  const user = await User.findByPk(id);
 
-    if (!user) {
-      throw new Error("User not found");
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  try {
+    if (user.firebaseUid) {
+      await admin.auth().deleteUser(user.firebaseUid);
     }
 
     await user.destroy();
 
     return true;
   } catch (error) {
-    throw error;
+    // Si Firebase ya no tenía la cuenta, igualmente elimina el usuario local.
+    if (error.code === "auth/user-not-found") {
+      await user.destroy();
+      return true;
+    }
+
+    console.error("Error al eliminar usuario:", error);
+    throw new Error("No se pudo eliminar el usuario de Firebase");
   }
 };
 
@@ -324,7 +348,9 @@ exports.forgotPassword = async (email) => {
     if (!usuario) {
       throw new Error("El usuario no existe");
     }
-     transporter.sendMail(passwordForgot(email, usuario.id)).catch((err) => console.error("Email error:", err));
+    transporter
+      .sendMail(passwordForgot(email, usuario.id))
+      .catch((err) => console.error("Email error:", err));
     return "El mail fue enviado correctamente";
   } catch (error) {
     throw error;

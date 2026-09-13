@@ -25,12 +25,14 @@ export function validatePassword(password) {
   if (password === '') {
       return "Debes completar el campo";
     }
-    if (password.length < 6 || password.length > 20) {
-      return "El nombre de usuario debe tener entre 6 y 20 caracteres";
+    if (password.length < 8 || password.length > 20) {
+      return "La contraseña debe tener entre 8 y 20 caracteres";
     }
-  // if (!/^(?=.*[a-z])(?=.*\d)[A-Za-z\d$@$!%*?&]{6,20}/.test(password)) {
-  //   return "La contraseña debe contener entre 6-20 caracteres y al menos un numero ";
-  // }
+    // Debe coincidir con la regla que exige el backend (middleware/validInfo.js):
+    // al menos una letra y un número.
+    if (!/^(?=.*[A-Za-z])(?=.*\d).+$/.test(password)) {
+      return "La contraseña debe incluir al menos una letra y un número";
+    }
   return null; // Si no hay errores de validación
 }
 ;
