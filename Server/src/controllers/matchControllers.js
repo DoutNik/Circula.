@@ -38,7 +38,7 @@ const findMatches = async (userId) => {
     });
 
     return matches.map((m) => {
-      const isMine = m.UserId1 === userId;
+      const isMine = Number(m.UserId1) === Number(userId);
 
       const myPost = isMine ? m.post1 : m.post2;
       const anotherPost = isMine ? m.post2 : m.post1;
@@ -54,6 +54,40 @@ const findMatches = async (userId) => {
   }
 };
 
+const findAllMatches = async () => {
+  return Matches.findAll({
+    order: [["createdAt", "DESC"]],
+    include: [
+      {
+        model: Post,
+        as: "post1",
+        attributes: ["id", "title", "image", "UserId"],
+        include: [
+          {
+            model: User,
+            as: "owner",
+            attributes: ["id", "username", "image"],
+          },
+        ],
+      },
+      {
+        model: Post,
+        as: "post2",
+        attributes: ["id", "title", "image", "UserId"],
+        include: [
+          {
+            model: User,
+            as: "owner",
+            attributes: ["id", "username", "image"],
+          },
+        ],
+      },
+    ],
+  });
+};
+
+
 module.exports = {
+  findAllMatches,
   findMatches,
 };

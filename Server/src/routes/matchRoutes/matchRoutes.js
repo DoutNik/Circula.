@@ -3,8 +3,18 @@ const router = express.Router();
 const matchController = require("../../controllers/matchControllers");
 const authorization = require("../../middleware/authorization");
 const isSelfOrAdmin = require("../../middleware/isSelfOrAdmin");
+const isAdmin = require("../../middleware/isAdmin");
 
-// Solo el propio usuario (o un admin) puede ver sus matches
+router.get("/all", authorization, isAdmin, async (req, res) => {
+  try {
+    const matches = await matchController.findAllMatches();
+    res.json(matches);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 router.get(
   "/:userId",
   authorization,

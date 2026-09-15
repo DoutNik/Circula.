@@ -349,6 +349,19 @@ export const getMatches = (userId) => {
   };
 };
 
+export const getAllMatches = () => async (dispatch) => {
+  try {
+    const response = await api.get("/matches/all");
+
+    dispatch({
+      type: "GET_MATCHES",
+      payload: response.data,
+    });
+  } catch (error) {
+    console.error("Error al obtener los matches", error);
+  }
+};
+
 export const updateMatchedPairs = (matchedPairs) => {
   return {
     type: UPDATE_FILTERED_MATCHES,

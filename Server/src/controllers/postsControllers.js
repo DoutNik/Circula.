@@ -119,9 +119,6 @@ exports.createPost = async (postData) => {
       );
     } else {
       const newPost = await Post.create(postData);
-      transporter
-        .catch((err) => console.error("Email error:", err));
-
       return newPost;
     }
   } catch (error) {

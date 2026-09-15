@@ -1,64 +1,87 @@
 .allCards {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  margin-top: 50px;
-  margin-bottom: 100px;
-  justify-content: center;
-  width: 1320px;
-  justify-self: center;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  width: min(100%, 82.5rem);
+  margin: clamp(1rem, 4vw, 3rem) auto clamp(3rem, 8vw, 6.25rem);
+  padding: 0 clamp(0.5rem, 2vw, 1.25rem);
+  gap: clamp(1rem, 2.5vw, 2rem);
+  justify-items: center;
 }
 
 .cards {
-  justify-self: center;
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  place-items: center;
 }
 
 .buttons {
   display: flex;
-  position: relative;
-  align-self: flex-end;
-  gap: 20px;
-  justify-self: center;
-  max-width: 600px;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.75rem, 3vw, 1.25rem);
+  width: 100%;
+  margin: 0 auto 2rem;
+  padding: 0 1rem;
 }
 
 .buttons h3 {
-  display: grid;
-  width: 60px;
+  min-width: 4rem;
+  margin: 0;
+  color: gray;
+  text-align: center;
+  font-size: clamp(0.9rem, 3vw, 1.1rem);
 }
 
-.pag {
-  background-color: #4ecdc4;
-  width: 35px;
-  height: 35px;
-  border-radius: 50%;
-  padding: 0px;
-  margin: 0px;
-  justify-self: center;
-  align-self: center;
-}
-
+.pag,
 .activePage {
-  background-color: #4ecdc4;
-  width: 35px;
-  height: 35px;
+  display: grid;
+  width: 2.25rem;
+  aspect-ratio: 1;
+  place-items: center;
+  padding: 0;
+  border: none;
   border-radius: 50%;
-  padding: 0px;
-  margin: 0px;
-  justify-self: center;
-  align-self: center;
+  background-color: #4ecdc4;
+  color: white;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: transform 200ms ease, opacity 200ms ease;
 }
 
-@media (max-width: 1280px) {
+.pag:hover {
+  transform: scale(1.08);
+}
+
+.pag:focus-visible {
+  outline: 3px solid #1a535c;
+  outline-offset: 3px;
+}
+
+.pag:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Tablets */
+@media (max-width: 768px) {
   .allCards {
-    grid-template-columns: 1fr 1fr 1fr;
-    width: auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
   }
 }
 
-@media (max-width: 768px) {
+/* Móviles */
+@media (max-width: 540px) {
   .allCards {
-    grid-template-columns: 1fr 1fr;
-    justify-self: center;
-    margin-top: 10px;
+    grid-template-columns: 1fr;
+    width: 100%;
+    padding: 0 0.75rem;
+    gap: 1rem;
+  }
+
+  .buttons {
+    margin-bottom: 1.5rem;
   }
 }

@@ -15,7 +15,6 @@ const Home = ({}) => {
   const dispatch = useDispatch();
   const allPosts = useSelector((state) => state.allPosts);
   const Posts = useSelector((state) => state.allPostsCopy);
-  const [isInstalled, setIsInstalled] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [items, setItems] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
@@ -66,32 +65,42 @@ const Home = ({}) => {
     const Banner3 =
     "https://res.cloudinary.com/dsc4kqz3g/image/upload/v1774028258/bannerCircula1_dwhtft.jpg";
 
-  return (
-    <>
-      <Header banner1={Banner} banner2={Banner2} banner3={Banner3}></Header>
+ return (
+  <>
+    <Header banner1={Banner} banner2={Banner2} banner3={Banner3} />
 
+    <main className={style.container}>
       <div className={style.button}>
         {showModal && <VideoModal onClose={toggleModal} />}
       </div>
-      <button onClick={toggleModal} className={style.open}>
-        <img
-          width="50"
-          height="50"
-          src="https://img.icons8.com/color/96/help--v1.png"
-          alt="help--v1"
-        />
-      </button>
-      <Cards allPosts={Posts}></Cards>
-      <Filters></Filters>
+
+      {!showModal && (
+        <button
+          type="button"
+          onClick={toggleModal}
+          className={style.open}
+          aria-label="Abrir ayuda"
+        >
+          <img
+            src="https://img.icons8.com/color/96/help--v1.png"
+            alt=""
+          />
+        </button>
+      )}
+
+      <Cards allPosts={Posts} />
+      <Filters />
       <AllCards
         posts={items}
         currentPage={currentPage}
         nextHandler={nextHandler}
         prevHandler={prevHandler}
-      ></AllCards>
-      <Footer></Footer>
-    </>
-  );
+      />
+    </main>
+
+    <Footer />
+  </>
+);
 };
 
 export default Home;

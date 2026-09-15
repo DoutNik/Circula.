@@ -7,7 +7,7 @@ import {
   restoreUser,
   deletePost,
   restorePost,
-  getMatches,
+  getAllMatches,
   sortUsersByID,
   sortUsersByPlan,
   sortUsersByStatus,
@@ -19,6 +19,7 @@ import {
 } from "../../redux/actions";
 import style from "./AdminDash.module.css";
 import Swal from "sweetalert2";
+import notpremium from "../../assets/not-premium.png";
 
 const AdminDash = () => {
   const dispatch = useDispatch();
@@ -38,7 +39,7 @@ const AdminDash = () => {
   useEffect(() => {
     dispatch(getAllExistingUsers());
     dispatch(getAllExistingPosts());
-    dispatch(getMatches());
+    dispatch(getAllMatches());
   }, [dispatch]);
 
   const activeUsersCounter = () => {
@@ -343,7 +344,7 @@ const AdminDash = () => {
               <div key={user.id} className={style.element}>
                 <h4>ID: {user.id}</h4>
                 <h4>
-                  {user.username} <h5>{user.email}</h5>
+                  {user.username} <span>{user.email}</span>
                 </h4>
 
                 {user.Deshabilitado ? (
@@ -365,7 +366,7 @@ const AdminDash = () => {
                   <img
                     width="24"
                     height="24"
-                    src="https://img.icons8.com/puffy-filled/32/experimental-user-puffy-filled.png"
+                    src={notpremium}
                     alt="experimental-user-puffy-filled"
                   />
                 )}
@@ -408,9 +409,7 @@ const AdminDash = () => {
                 ) : (
                   <span style={{ color: "#3ec762", fontSize: 16 }}>Activa</span>
                 )}
-                <button
-                  onClick={() => handleDeletePost(post.id)}
-                >
+                <button onClick={() => handleDeletePost(post.id)}>
                   <img
                     width="20"
                     height="20"
