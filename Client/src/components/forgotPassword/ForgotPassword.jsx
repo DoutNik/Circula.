@@ -1,110 +1,112 @@
-/* eslint-disable react/no-unescaped-entities */
-/* eslint-disable no-unused-vars */
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+
 import style from "./ForgotPassword.module.css";
 import api from "../../api/api";
-import Swal from 'sweetalert2';
-
-const ForgotPassword = () => {
-  const navigate = useNavigate();
-  const [input, setInput] = useState({
-    email: "",
-  });
-  const [error, setError] = useState({});
-  // eslint-disable-next-line no-unused-vars
 
 const validateEmail = (email) => {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
 };
 
-  const handleChange = (e) => {
-    setInput({
-      ...input,
-      [e.target.name]: e.target.value,
-    });
+const ForgotPassword = () => {
+  const navigate = useNavigate();
+
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!email.trim()) {
+      setError("El email es obligatorio.");
+      return;
+    }
+
+    if (!validateEmail(email.trim())) {
+      setError("Ingrese un email válido.");
+      return;
+    }
+
+    setError("");
+    setIsSubmitting(true);
+
+    try {
+      await api.post("/users/forgot-password", {
+        email: email.trim(),
+      });
+
+      await Swal.fire({
+        icon: "success",
+        title: "Solicitud enviada",
+        text: "Si el email está registrado, recibirá un link.",
+      });
+
+      navigate("/login");
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Ocurrió un problema. Intente nuevamente.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-const handleSubmit = async (event) => {
-  event.preventDefault();
-
-  const newErrors = {};
-
-  if (!input.email) {
-    newErrors.email = "El email es obligatorio";
-  } else if (!validateEmail(input.email)) {
-    newErrors.email = "Ingrese un email válido";
-  }
-
-  if (Object.keys(newErrors).length > 0) {
-    setError(newErrors);
-    return; // NO hace request si hay error
-  }
-
-  setError({}); // limpia errores si todo está bien
-
-  try {
-    await api.post("/users/forgot-password", {
-      email: input.email,
-    });
-
-    Swal.fire({
-      icon: "success",
-      title: "Solicitud enviada",
-      text: "Si el email está registrado, recibirá un link.",
-    });
-
-    navigate("/login");
-
-  } catch (err) {
-    Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: "Ocurrió un problema. Intente nuevamente.",
-    });
-  }
-};
-
-  useEffect(() => {}, []);
-
   return (
-    <div className={`${style.container} ${style.bgColor} ${style.fadeUp}`}>
-      <form onSubmit={handleSubmit} className={style.form}>
+    <main className={style.container}>
+      <form className={style.form} onSubmit={handleSubmit}>
         <div className={style.textContainer}>
-          <h1 className={`${style.title} ${style.fontSemiBold}`}>
-            Recuperar Contraseña
-          </h1>
+          <h1 className={style.title}>Recuperar contraseña</h1>
+          <p>Te enviaremos un enlace para restablecerla.</p>
         </div>
-        <div className={`${style.inputContainer} ${style.flexCol}`}>
-          <label className={style.label}>Ingrese su email</label>
+
+        <div className={style.inputContainer}>
+          <label className={style.label} htmlFor="email">
+            Ingrese su email
+          </label>
+
           <input
+            id="email"
             type="email"
             name="email"
-            value={input.email}
-            onChange={handleChange}
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
             className={style.input}
+            autoComplete="email"
+            disabled={isSubmitting}
+            aria-invalid={Boolean(error)}
+            aria-describedby={error ? "email-error" : undefined}
           />
-          {error.email && <span className={style.error}>{error.email}</span>}
+
+          {error && (
+            <span id="email-error" className={style.error}>
+              {error}
+            </span>
+          )}
         </div>
+
         <div className={style.buttonContainer}>
           <button
             type="submit"
-            className={`${style.button} ${style.btnStone} ${style.btnHover}`}
+            className={style.button}
+            disabled={isSubmitting}
           >
-            Enviar
+            {isSubmitting ? "Enviando..." : "Enviar"}
           </button>
-          <div className={style.registerLink}>¿No tiene una cuenta?</div>
-            <Link to="/register" className={style.textYellow}>
-              <button className={style.btnAqui}>Regístrate </button>
-            </Link>
-          
+
+          <p className={style.registerLink}>¿No tiene una cuenta?</p>
+
+          <Link to="/register" className={style.btnAqui}>
+            Regístrate
+          </Link>
         </div>
       </form>
-    </div>
+    </main>
   );
 };
 
-// Exportación del componente ForgotPassword para su uso en otros archivos
 export default ForgotPassword;

@@ -1,10 +1,10 @@
 .allCards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  width: min(100%, 82.5rem);
-  margin: clamp(1rem, 4vw, 3rem) auto clamp(3rem, 8vw, 6.25rem);
-  padding: 0 clamp(0.5rem, 2vw, 1.25rem);
-  gap: clamp(1rem, 2.5vw, 2rem);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: min(calc(100% - 2rem), 112rem);
+  margin: clamp(1rem, 3vw, 3rem) auto clamp(3rem, 7vw, 6.25rem);
+  gap: clamp(1rem, 2vw, 2rem);
+  padding: 0 clamp(0.5rem, 2vw, 1.5rem);
   justify-items: center;
 }
 
@@ -15,13 +15,18 @@
   place-items: center;
 }
 
+/* Impide que una Card exceda su columna */
+.cards > * {
+  width: min(100%, 19rem);
+}
+
 .buttons {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(0.75rem, 3vw, 1.25rem);
+  gap: clamp(0.75rem, 2vw, 1.25rem);
   width: 100%;
-  margin: 0 auto 2rem;
+  margin: 0 auto clamp(1.5rem, 4vw, 2.5rem);
   padding: 0 1rem;
 }
 
@@ -30,7 +35,7 @@
   margin: 0;
   color: gray;
   text-align: center;
-  font-size: clamp(0.9rem, 3vw, 1.1rem);
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
 }
 
 .pag,
@@ -49,7 +54,7 @@
   transition: transform 200ms ease, opacity 200ms ease;
 }
 
-.pag:hover {
+.pag:hover:not(:disabled) {
   transform: scale(1.08);
 }
 
@@ -63,17 +68,55 @@
   cursor: not-allowed;
 }
 
-/* Tablets */
-@media (max-width: 768px) {
+/* Televisores 4K y pantallas ultraanchas */
+@media (min-width: 2560px) {
   .allCards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    width: min(calc(100% - 5rem), 152rem);
   }
 }
 
-/* Móviles */
-@media (max-width: 540px) {
+/* Televisores Full HD y monitores grandes */
+@media (min-width: 1920px) and (max-width: 2559px) {
+  .allCards {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    width: min(calc(100% - 4rem), 120rem);
+  }
+}
+
+/* Monitores y notebooks grandes */
+@media (min-width: 1440px) and (max-width: 1919px) {
+  .allCards {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+/* Notebooks y netbooks grandes */
+@media (min-width: 1100px) and (max-width: 1439px) {
+  .allCards {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Netbooks y tablets horizontales */
+@media (min-width: 800px) and (max-width: 1099px) {
+  .allCards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: min(calc(100% - 1.5rem), 68rem);
+  }
+}
+
+/* Tablets verticales y celulares grandes */
+@media (min-width: 560px) and (max-width: 799px) {
+  .allCards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    gap: 1rem;
+  }
+}
+
+/* Celulares */
+@media (max-width: 559px) {
   .allCards {
     grid-template-columns: 1fr;
     width: 100%;
@@ -81,7 +124,16 @@
     gap: 1rem;
   }
 
+  .cards > * {
+    width: min(100%, 21rem);
+  }
+
   .buttons {
     margin-bottom: 1.5rem;
+  }
+
+  .pag,
+  .activePage {
+    width: 2.5rem;
   }
 }

@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   selectCategory,
@@ -12,8 +11,6 @@ import {
 } from "../../redux/actions";
 import style from "./Filters.module.css";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import imgBase from "../../assets/imgBase.jpg";
 
 const Filters = () => {
   const selectedProvince = useSelector((state) => state.selectedProvince);
@@ -59,19 +56,30 @@ const Filters = () => {
 
   const uniqueProvinces = () => {
     const filteredPosts = allPostsCopy
-      .filter((post) => !selectedLocality || post.ubication.includes(selectedLocality))
-      .filter((post) => !selectedCategory || post.category === selectedCategory);
+      .filter(
+        (post) =>
+          !selectedLocality || post.ubication.includes(selectedLocality),
+      )
+      .filter(
+        (post) => !selectedCategory || post.category === selectedCategory,
+      );
 
-    return Array.from(new Set(filteredPosts.map((post) => post.ubication.split(", ")[0])));
+    return Array.from(
+      new Set(filteredPosts.map((post) => post.ubication.split(", ")[0])),
+    );
   };
 
   const uniqueLocalities = () => {
     let filteredPosts = allPostsCopy;
     if (selectedProvince) {
-      filteredPosts = filteredPosts.filter(post => post.ubication.startsWith(selectedProvince));
+      filteredPosts = filteredPosts.filter((post) =>
+        post.ubication.startsWith(selectedProvince),
+      );
     }
     if (selectedCategory) {
-      filteredPosts = filteredPosts.filter(post => post.category === selectedCategory);
+      filteredPosts = filteredPosts.filter(
+        (post) => post.category === selectedCategory,
+      );
     }
     const localities = new Set();
     filteredPosts.forEach((post) => {
@@ -85,8 +93,14 @@ const Filters = () => {
 
   const uniqueCategories = () => {
     const filteredPosts = allPostsCopy
-      .filter((post) => !selectedProvince || post.ubication.startsWith(selectedProvince))
-      .filter((post) => !selectedLocality || post.ubication.includes(selectedLocality));
+      .filter(
+        (post) =>
+          !selectedProvince || post.ubication.startsWith(selectedProvince),
+      )
+      .filter(
+        (post) =>
+          !selectedLocality || post.ubication.includes(selectedLocality),
+      );
 
     return [...new Set(filteredPosts.map((post) => post.category))];
   };
@@ -110,27 +124,37 @@ const Filters = () => {
         className={style.filters}
       >
         <select value={selectedProvince} onChange={handleProvinceChange}>
-          <option value="" disabled>Provincia</option>
-          {uniqueProvinces().map((province, index) => (
-            <option key={index} value={province}>
+          <option value="" disabled>
+            Provincia
+          </option>
+          {uniqueProvinces().map((province) => (
+            <option key={province} value={province}>
               {province}
             </option>
           ))}
         </select>
 
-        <select value={selectedLocality} onChange={handleLocalityChange} disabled={!selectedProvince}>
-          <option value="" disabled>Localidad</option>
-          {uniqueLocalities().map((locality, index) => (
-            <option key={index} value={locality}>
+        <select
+          value={selectedLocality}
+          onChange={handleLocalityChange}
+          disabled={!selectedProvince}
+        >
+          <option value="" disabled>
+            Localidad
+          </option>
+          {uniqueLocalities().map((locality) => (
+            <option key={locality} value={locality}>
               {locality}
             </option>
           ))}
         </select>
 
         <select value={selectedCategory} onChange={handleCategoryChange}>
-          <option value="" disabled>Categoría</option>
-          {uniqueCategories().map((category, index) => (
-            <option key={index} value={category}>
+          <option value="" disabled>
+            Categoría
+          </option>
+          {uniqueCategories().map((category) => (
+            <option key={category} value={category}>
               {category}
             </option>
           ))}

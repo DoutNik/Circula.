@@ -6,21 +6,35 @@ const authorization = require("../../middleware/authorization");
 // Crear una reseña requiere login; el autor sale del token, no del body
 router.post("/", authorization, async (req, res) => {
   try {
-    const { reviewedUserId, rating } = req.body;
-    const userId = req.body.user;
+    const userId = req.authUserId;
+    const { reviewedUserId, title, description, rating } = req.body;
+
     const response = await reviewController.createReview({
       userId,
       reviewedUserId,
+      title,
+      description,
       rating,
     });
+
     return res.status(201).json(response);
   } catch (error) {
-    console.error(error);
     return res.status(400).json({ error: error.message });
   }
 });
 
-// Las reseñas y promedios son públicos: forman parte del perfil visible
+router.get("/averageRating/:userId", async (req, res) => {
+  try {
+    const response = await reviewController.getAverageRatingByUser(
+      req.params.userId,
+    );
+
+    return res.status(200).json(response);
+  } catch (error) {
+    return res.status(404).json({ error: error.message });
+  }
+});
+
 router.get("/", async (req, res) => {
   try {
     const response = await reviewController.allReviews();
@@ -33,17 +47,6 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const response = await reviewController.getReviewById(req.params.id);
-    return res.status(200).json(response);
-  } catch (error) {
-    return res.status(404).json({ error: error.message });
-  }
-});
-
-router.get("/averageRating/:userId", async (req, res) => {
-  try {
-    const response = await reviewController.getAverageRatingByUser(
-      req.params.userId,
-    );
     return res.status(200).json(response);
   } catch (error) {
     return res.status(404).json({ error: error.message });

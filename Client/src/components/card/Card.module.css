@@ -1,61 +1,98 @@
-.card {
-  width: 200px;
-  height: 250px;
-  border-radius: 10px;
-  box-shadow: 0px 5px 10px rgba(128, 128, 128, 0.3);
-  box-shadow: 0px -40px 40px 10px  rgba(0, 0, 0, 0.8) inset;
-  margin: 10px;
+.link {
+  display: block;
+  width: 100%;
+  color: inherit;
+  text-decoration: none;
 }
 
-.card img {
+.card {
   position: relative;
-  z-index: -1;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  min-height: 12rem;
+  overflow: hidden;
+  border-radius: 0.65rem;
+  background-color: #1a535c;
+  box-shadow:
+    0 0.3rem 0.65rem rgba(128, 128, 128, 0.3),
+    inset 0 -4rem 2.5rem rgba(0, 0, 0, 0.8);
+  isolation: isolate;
+  cursor: pointer;
+}
+
+.card::after {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  content: "";
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 45%,
+    rgba(0, 0, 0, 0.2) 60%,
+    rgba(0, 0, 0, 0.85) 100%
+  );
+  pointer-events: none;
+}
+
+.img {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 10px;
 }
 
-.card a {
-  justify-content: left;
-  margin-left: 10px;
-}
-
-.card p {
-  width: 90%;
+.content {
+  position: absolute;
+  z-index: 2;
+  right: clamp(0.65rem, 3vw, 1rem);
+  bottom: clamp(0.65rem, 3vw, 1rem);
+  left: clamp(0.65rem, 3vw, 1rem);
   color: whitesmoke;
-  text-shadow: 0px 5px 5px black;
-  margin: 0;
   text-align: left;
-  margin-top: -40px;
-  margin-left: 10px;
-  white-space: nowrap;
-  overflow: hidden;
+  text-shadow: 0 0.3rem 0.3rem black;
 }
 
-.card h6 {
-  width: 90%;
+.location {
+  display: -webkit-box;
+  margin: 0 0 0.3rem;
+  overflow: hidden;
   color: whitesmoke;
-  text-shadow: 0px 5px 5px black;
-  text-align: left;
-  margin: 0;
-  margin-top: -40px;
-  margin-left: 10px;
-  white-space: nowrap;
-  overflow: hidden;
+  font-size: clamp(0.68rem, 2vw, 0.8rem);
+  line-height: 1.25;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
 }
 
+.title {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: whitesmoke;
+  font-size: clamp(0.85rem, 2.5vw, 1.05rem);
+  line-height: 1.25;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* Celulares pequeños */
+@media (max-width: 360px) {
+  .card {
+    min-height: 15rem;
+  }
+}
+
+/* Celulares y tablets */
 @media (max-width: 768px) {
   .card {
-    width: 150px;
-    height: 200px;
+    min-height: 13rem;
   }
+}
 
-  .card p {
-    top: 260px
-  }
-
-  .card h6 {
-    top: 280px
+/* Monitores y televisores */
+@media (min-width: 1920px) {
+  .card {
+    min-height: 15rem;
   }
 }

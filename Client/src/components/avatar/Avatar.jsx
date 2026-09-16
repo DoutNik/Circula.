@@ -1,131 +1,141 @@
-/* eslint-disable react/prop-types */
-/* eslint-disable no-unused-vars */
-
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import style from "./Avatar.module.css";
 import PayModal from "../payModal/PayModal";
 import api from "../../api/api";
+import style from "./Avatar.module.css";
+
+const DEFAULT_AVATAR =
+  "https://img.icons8.com/fluency-systems-regular/96/user.png";
 
 const Avatar = ({ userData, setAuth, toggleDarkMode }) => {
   const [isPremium, setPremium] = useState(false);
-  const imageUrl = userData.image.split("=")[0];
-  const premium = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const usuario = await api.get("/users/userId", {
-        headers: {
-          token: token,
-        },
-        params: { id: userData.id },
-      });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(
+    localStorage.getItem("darkMode") === "true",
+  );
 
-      if (usuario.data.plan === "premium") {
-        setPremium(true);
-      }
-    } catch (error) {
-      console.error("Error al obtener la información del usuario:", error);
-    }
-  };
+  const imageUrl = userData?.image || DEFAULT_AVATAR;
+  const rating = Math.min(
+    5,
+    Math.max(0, Math.round(Number(userData?.averageRating) || 0)),
+  );
 
   useEffect(() => {
-    if (userData?.id) {
-      premium();
+    if (!userData?.id) {
+      setPremium(false);
+      return;
     }
-  }, [userData]);
+
+    const getPremiumStatus = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const response = await api.get("/users/userId", {
+          headers: { token },
+          params: { id: userData.id },
+        });
+
+        setPremium(response.data.plan === "premium");
+      } catch (error) {
+        console.error("Error al obtener la información del usuario:", error);
+        setPremium(false);
+      }
+    };
+
+    getPremiumStatus();
+  }, [userData?.id]);
 
   const logout = () => {
     localStorage.removeItem("token");
-    setAuth(false);
+    setAuth(false, null);
   };
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const initialDarkMode = localStorage.getItem("darkMode") === "true";
-  const [isDarkMode, setIsDarkMode] = useState(initialDarkMode);
-
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
 
   const handleThemeToggle = () => {
     const updatedDarkMode = !isDarkMode;
+
     setIsDarkMode(updatedDarkMode);
-    toggleDarkMode();
-    localStorage.setItem("darkMode", updatedDarkMode);
+    localStorage.setItem("darkMode", String(updatedDarkMode));
+    toggleDarkMode?.();
   };
 
   return (
-    <>
-      <div className={isPremium ? style.avatarPremium : style.avatar}>
-        {userData.rol === "admin" && (
-          <Link to="/admin">
-            <button className={style.dash}>
-              <img
-                width="30"
-                height="30"
-                src="https://img.icons8.com/color/48/dashboard.png"
-                alt="dashboard"
-              />
-            </button>
-          </Link>
-        )}
+    <div className={isPremium ? style.avatarPremium : style.avatar}>
+      {userData?.rol === "admin" && (
+        <Link
+          to="/admin"
+          className={style.dash}
+          aria-label="Ir al panel de administrador"
+        >
+          <img
+            src="https://img.icons8.com/color/48/dashboard.png"
+            alt=""
+          />
+        </Link>
+      )}
 
+      <div className={style.imageWrapper}>
         <img
           src={imageUrl}
-          alt="Foto de perfil"
+          alt={`Foto de perfil de ${userData?.username || "usuario"}`}
           className={style.photo}
           referrerPolicy="no-referrer"
         />
+
         {isPremium && (
           <img
-            width="36"
-            height="36"
             src="https://img.icons8.com/color/48/guarantee.png"
-            alt="guarantee"
+            alt="Usuario premium"
             className={style.logo}
           />
         )}
-        <h3>{userData.username}</h3>
-        <p>{userData.email}</p>
-        {userData.averageRating ? (
-          <div>
-            {Array.from({ length: userData.averageRating }, (_, index) => (
-              <span key={index}>⭐️</span>
-            ))}
-          </div>
-        ) : (
-          <h4>Todavía nadie te ha calificado.</h4>
-        )}
+      </div>
 
+      <h3>{userData?.username}</h3>
+      <p>{userData?.email}</p>
+
+      {rating > 0 ? (
+        <div
+          className={style.rating}
+          aria-label={`Calificación: ${rating} de 5`}
+        >
+          {Array.from({ length: rating }, (_, index) => (
+            <span key={index}>⭐</span>
+          ))}
+        </div>
+      ) : (
+        <h4>Todavía nadie te ha calificado.</h4>
+      )}
+
+      <div className={style.actions}>
         <button
+          type="button"
           className={isDarkMode ? style.dark : style.light}
           onClick={handleThemeToggle}
         >
-          {isDarkMode ? "Fondo☀️" : "Fondo🌘"}
+          {isDarkMode ? "Fondo ☀️" : "Fondo 🌘"}
         </button>
 
-        <br />
-
         {!isPremium && (
-          <button className={style.premium} onClick={openModal}>
+          <button
+            type="button"
+            className={style.premium}
+            onClick={() => setIsModalOpen(true)}
+          >
             Sé premium
           </button>
         )}
 
-        <div>
-          {!userData && (
-            <button className={style.logout} onClick={logout}>
-              Salir
-            </button>
-          )}
-        </div>
-
-        <PayModal
-          isOpen={isModalOpen}
-          userData={userData}
-          onClose={closeModal}
-        />
+        <button type="button" className={style.logout} onClick={logout}>
+          Salir
+        </button>
       </div>
-    </>
+
+      <PayModal
+        isOpen={isModalOpen}
+        userData={userData}
+        onClose={() => setIsModalOpen(false)}
+      />
+    </div>
   );
 };
 

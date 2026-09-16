@@ -2,68 +2,89 @@ import { useState } from "react";
 import style from "./Footer.module.css";
 
 const Footer = () => {
-  const [isColapsed, setIsColapsed] = useState(true);
-
-  const toggleFooter = () => {
-    setIsColapsed(!isColapsed);
-  };
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
-    <>
-      <button onClick={toggleFooter}>
-        {isColapsed ? (
-          <img width="24" height="24" src="https://img.icons8.com/color/48/collapse-arrow.png" alt="collapse-arrow"/>
-        ) : (
-          <img width="24" height="24" src="https://img.icons8.com/color/48/expand-arrow.png" alt="expand-arrow"/>
-        )}
+    <footer>
+      <button
+        type="button"
+        className={style.toggle}
+        onClick={() => setIsCollapsed((current) => !current)}
+        aria-expanded={!isCollapsed}
+        aria-controls="footer-content"
+        aria-label={isCollapsed ? "Expandir pie de página" : "Ocultar pie de página"}
+      >
+        <img
+          src={
+            isCollapsed
+              ? "https://img.icons8.com/color/48/expand-arrow.png"
+              : "https://img.icons8.com/color/48/collapse-arrow.png"
+          }
+          alt=""
+        />
       </button>
-      <div className={`${style.footer} ${isColapsed ? style.expanded : ""}`}>
-        <div className={style.left}>
-          <h3>Acerca de</h3>
-          <p>Terminos y condiciones</p>
-          <p>Nosotros</p>
-        </div>
 
-        <div className={style.right}>
+      <div
+        id="footer-content"
+        className={`${style.footer} ${isCollapsed ? style.collapsed : ""}`}
+      >
+        <section className={style.left}>
+          <h3>Acerca de</h3>
+          <p>Términos y condiciones</p>
+          <p>Nosotros</p>
+        </section>
+
+        <section className={style.right}>
           <h3>Contacto</h3>
-          <a href="" target="_blank">
+
+          <a
+            href="https://www.instagram.com/"
+            target="_blank"
+            rel="noreferrer"
+          >
             <img
-              width="24"
-              height="24"
               src="https://img.icons8.com/color-glass/48/instagram-new--v1.png"
-              alt="instagram-new--v1"
+              alt=""
             />
             Instagram
           </a>
+
           <a href="mailto:correo@ejemplo.com">
             <img
-              width="24"
-              height="24"
               src="https://img.icons8.com/color/48/apple-mail.png"
-              alt="apple-mail"
+              alt=""
             />
             Centro de ayuda
           </a>
-        </div>
-        <div className={style.center}>
+        </section>
+
+        <section className={style.center}>
           <h3>Desarrollada por</h3>
+
           <div className={style.ab}>
-            <div className={style.a}>
-              <a href="https://github.com/DoutNik" target="_blank">
-                Carlos Emanuel Klema
-              </a>
-              
-            </div>
-            <a href="https://github.com/maxivalli" target="_blank">
-                Maximiliano Valli
-              </a>
-            </div>
-        </div>
+            <a
+              href="https://github.com/DoutNik"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Carlos Emanuel Klema
+            </a>
+
+            <a
+              href="https://github.com/maxivalli"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Maximiliano Valli
+            </a>
+          </div>
+        </section>
       </div>
+
       <div className={style.bottom}>
         <p>Circula© - Todos los derechos registrados - 2026</p>
       </div>
-    </>
+    </footer>
   );
 };
 

@@ -19,9 +19,9 @@ const AllCards = ({ posts,prevHandler,nextHandler,currentPage}) => {
         className={style.allCards}
       >
         {posts &&
-          posts.map((post, index) => (
-            <div key={index} className={style.cards}>
-              <Card key={post.id} post={post} />
+          posts?.map((post) => (
+            <div key={post.id} className={style.cards}>
+              <Card post={post} />
             </div>
           ))}
       </motion.div>

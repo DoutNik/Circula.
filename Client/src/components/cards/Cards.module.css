@@ -1,46 +1,139 @@
 .cards {
-  justify-self: center;
-  width: 1200px;
-  margin: 0;
-  margin-left: -10px;
+  width: min(calc(100% - 2rem), 140rem);
+  margin: clamp(1rem, 3vw, 2.5rem) auto;
+  padding: 0 clamp(0.25rem, 2vw, 1.5rem) 3rem;
+}
+
+.masRec {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-bottom: clamp(0.75rem, 2vw, 1.25rem);
+  text-align: center;
+}
+
+.masRec span {
+  color: grey;
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+}
+
+.fire {
+  width: clamp(1.5rem, 4vw, 2rem);
+  height: auto;
+}
+
+.slide {
+  position: relative;
+  display: grid !important;
+  min-width: 0;
+  padding: 0.5rem;
+  place-items: center;
+}
+
+.slide a {
+  width: min(100%, 19rem);
 }
 
 .logo {
   position: absolute;
-  margin-top: 15px;
-  margin-left: 15px;
+  z-index: 5;
+  top: 1rem;
+  left: max(1rem, calc(50% - 9rem));
+  width: 2rem;
+  height: 2rem;
+  pointer-events: none;
 }
 
-.fire {
-  width: 30px;
-  margin-bottom: -5px;
+/* Corrige alturas y márgenes internos de react-slick */
+.cards :global(.slick-track) {
+  display: flex;
+  align-items: stretch;
 }
 
-.cards span {
-  font-size: 24px;
+.cards :global(.slick-slide) {
+  height: auto;
+}
+
+.cards :global(.slick-slide > div) {
+  height: 100%;
+}
+
+.cards :global(.slick-prev),
+.cards :global(.slick-next) {
+  z-index: 10;
+}
+
+.cards :global(.slick-prev::before),
+.cards :global(.slick-next::before) {
+  color: #4ecdc4;
+  font-size: 1.8rem;
+}
+
+.cards :global(.slick-dots) {
+  bottom: -2.25rem;
+}
+
+.cards :global(.slick-dots li button::before) {
   color: grey;
 }
 
-@media (max-width: 1280px) {
+.cards :global(.slick-dots li.slick-active button::before) {
+  color: #4ecdc4;
+}
+
+/* Televisores 4K */
+@media (min-width: 2560px) {
   .cards {
-    width: 660px;
-    margin: 0;
+    width: min(calc(100% - 5rem), 152rem);
   }
 }
 
-@media (max-width: 768px) {
+/* Televisores Full HD y monitores grandes */
+@media (min-width: 1920px) and (max-width: 2559px) {
   .cards {
-    display: inline;
-    width: 340px;
-    justify-self: center;
+    width: min(calc(100% - 4rem), 120rem);
+  }
+}
+
+/* Notebooks y netbooks */
+@media (max-width: 1100px) {
+  .cards {
+    width: min(calc(100% - 1.5rem), 68rem);
+  }
+}
+
+/* Tablets */
+@media (max-width: 760px) {
+  .cards {
+    width: 100%;
+    padding-inline: 0.5rem;
   }
 
-  .cards span {
-    display: inline;
-    font-size: 18px;
+  .logo {
+    left: max(1rem, calc(50% - 8rem));
+  }
+}
+
+/* Celulares */
+@media (max-width: 500px) {
+  .cards {
+    padding-bottom: 1rem;
   }
 
-  .masRec {
-    margin-bottom: 15px;
+  .masRec span {
+    font-size: 1.1rem;
+  }
+
+  .slide {
+    padding-inline: 0.25rem;
+  }
+
+  .slide a {
+    width: min(100%, 21rem);
+  }
+
+  .logo {
+    left: max(1rem, calc(50% - 9.5rem));
   }
 }

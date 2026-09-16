@@ -59,7 +59,7 @@ const ChatsMessages = ({ chatId, userData }) => {
     socketRef.current?.emit("chat message", messageData);
     await dispatch(createMessage(chatId, userId, newMessage));
     setNewMessage("");
-    messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   };
 
   const handleKeyDown = (e) => {
@@ -116,6 +116,7 @@ const ChatsMessages = ({ chatId, userData }) => {
       window.scrollTo(0, document.body.scrollHeight);
       // Realiza la búsqueda del username del otro usuario en allUsers
       const chat = chats.find((chat) => chat.id == chatId);
+      if (!chat) return;
       let otherUserId;
       if (senderId == chat.user1Id) {
         otherUserId = chat.user2Id;
@@ -137,7 +138,14 @@ const ChatsMessages = ({ chatId, userData }) => {
   return (
     <div className={style.chat}>
       <div className={style.user}>
-        <img src={otherUserImage} className={style.avatar}></img>
+        <img
+          src={
+            otherUserImage ||
+            "https://img.icons8.com/fluency-systems-regular/96/user.png"
+          }
+          className={style.avatar}
+          alt={`Foto de ${otherUsername || "usuario"}`}
+        />
         <h3>{otherUsername}</h3>
       </div>
 

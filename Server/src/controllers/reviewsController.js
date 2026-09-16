@@ -1,45 +1,102 @@
 const { Review, User } = require("../DB_config");
 
-const createReview = async ({ userId, reviewedUserId, rating }) => {
-  const existing = await Review.findAll({
-    where: { userId, reviewedUserId },
+const createReview = async ({
+  userId,
+  reviewedUserId,
+  title,
+  description,
+  rating,
+}) => {
+  return Review.sequelize.transaction(async (transaction) => {
+    const reviewer = await User.findByPk(userId, { transaction });
+    const reviewedUser = await User.findByPk(reviewedUserId, {
+      transaction,
+    });
+
+    if (!reviewer) {
+      throw new Error("Usuario autor no encontrado.");
+    }
+
+    if (!reviewedUser) {
+      throw new Error("Usuario a calificar no encontrado.");
+    }
+
+    if (Number(userId) === Number(reviewedUserId)) {
+      throw new Error("No puedes calificarte a ti mismo.");
+    }
+
+    const existingReview = await Review.findOne({
+      where: { userId, reviewedUserId },
+      transaction,
+    });
+
+    if (existingReview) {
+      throw new Error("Ya has calificado a este usuario.");
+    }
+
+    const review = await Review.create(
+      {
+        userId,
+        reviewedUserId,
+        title: title.trim(),
+        description: description.trim(),
+        rating: Number(rating),
+      },
+      { transaction },
+    );
+
+    const reviews = await Review.findAll({
+      where: { reviewedUserId },
+      attributes: ["rating"],
+      transaction,
+    });
+
+    const averageRating =
+      reviews.reduce((total, current) => total + current.rating, 0) /
+      reviews.length;
+
+    const roundedAverage = Number(averageRating.toFixed(2));
+
+    await reviewedUser.update(
+      { averageRating: roundedAverage },
+      { transaction },
+    );
+
+    return {
+      review,
+      averageRating: roundedAverage,
+    };
   });
-
-  if (existing.length !== 0) {
-    throw new Error("Ya haz calificado a este usuario");
-  }
-
-  const newReview = await Review.create({ userId, reviewedUserId, rating });
-  return newReview;
 };
 
 const allReviews = async () => {
-  const reviews = await Review.findAll();
-  return reviews;
+  return Review.findAll({
+    order: [["createdAt", "DESC"]],
+  });
 };
 
 const getReviewById = async (reviewId) => {
   const review = await Review.findByPk(reviewId);
+
   if (!review) {
-    throw new Error("Review no encontrada.");
+    throw new Error("Reseña no encontrada.");
   }
+
   return review;
 };
 
 const getAverageRatingByUser = async (userId) => {
-  const result = await Review.findAll({ where: { reviewedUserId: userId } });
+  const user = await User.findByPk(userId, {
+    attributes: ["id", "averageRating"],
+  });
 
-  if (!result || result.length === 0) {
-    throw new Error("No se encontraron reseñas para este usuario");
+  if (!user) {
+    throw new Error("Usuario no encontrado.");
   }
 
-  const ratings = result.map((element) => element.rating);
-  const totalRating = ratings.reduce((sum, rating) => sum + rating, 0);
-  const averageRating = totalRating / ratings.length;
-
-  await User.update({ averageRating }, { where: { id: userId } });
-
-  return { averageRating };
+  return {
+    averageRating: Number(user.averageRating) || 0,
+  };
 };
 
 module.exports = {

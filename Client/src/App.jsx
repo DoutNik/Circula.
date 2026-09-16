@@ -23,9 +23,9 @@ import useAutoLogout from "./hooks/useAutoLogout";
 import PaymentSuccess from "./views/payment/paymentSuccess";
 import PaymentFailure from "./views/payment/paymentFailure";
 import PaymentPending from "./views/payment/paymentPending";
+import FormReview from "./components/formReview/FormReview";
 
 import "./App.css";
-import ReviewForm from "./components/formReview/FormReview";
 
 const App = () => {
   const initialDarkMode = localStorage.getItem("darkMode") === "true";
@@ -267,8 +267,8 @@ const App = () => {
         />
 
         <Route
-          path="/review"
-          element={userData ? <ReviewForm userData={userData} /> : <Loading />}
+          path="/review/:reviewedUserId"
+          element={userData ? <FormReview userData={userData} /> : <Loading />}
         />
 
         <Route path="/forgotpassword" element={<ForgotPassword />} />
