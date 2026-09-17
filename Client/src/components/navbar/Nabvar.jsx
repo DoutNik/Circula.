@@ -2,34 +2,42 @@ import { Link, useLocation } from "react-router-dom";
 import Logo from "../../assets/locan.png";
 import style from "./Nabvar.module.css";
 import { logoutUser } from "../logButtons/LogoutButton";
+import { useClerk } from "@clerk/clerk-react";
 
 const NavBar = ({ isAuthenticated, userData }) => {
   const location = useLocation();
-const imageUrl = userData?.image?.split("=")[0];
+  const { signOut } = useClerk();
+
+  const imageUrl = userData?.image?.split("=")[0];
 
   return (
-    <div className={isAuthenticated ? style.navbar : style.navbarOff}>
-      <Link to="/" className={style.linkLogo}>
+    <nav
+      className={isAuthenticated ? style.navbar : style.navbarOff}
+      aria-label="Navegación principal"
+    >
+      {/* LOGO */}
+      <Link to="/" className={style.linkLogo} aria-label="Ir al inicio">
         <img src={Logo} className={style.logo} alt="Locan" />
       </Link>
 
+      {/* PRINCIPAL */}
       <Link
         to="/"
         className={`${style.link} ${
           location.pathname === "/" ? style.active : ""
         }`}
       >
-        <button className={style.iconos}>
+        <span className={style.iconos}>
           <img
-            width="24"
-            height="24"
             src="https://img.icons8.com/fluency-systems-regular/48/home--v1.png"
-            alt="Home"
+            alt=""
+            aria-hidden="true"
           />
-          Principal
-        </button>
+          <span className={style.label}>Principal</span>
+        </span>
       </Link>
 
+      {/* AGREGAR */}
       {isAuthenticated ? (
         <Link
           to="/addProduct"
@@ -37,61 +45,59 @@ const imageUrl = userData?.image?.split("=")[0];
             location.pathname === "/addProduct" ? style.active : ""
           }`}
         >
-          <button className={style.iconos}>
+          <span className={style.iconos}>
             <img
-              width="24"
-              height="24"
               src="https://img.icons8.com/sf-regular/48/add.png"
-              alt="Add"
+              alt=""
+              aria-hidden="true"
             />
-            Agregar
-          </button>
+            <span className={style.label}>Agregar</span>
+          </span>
         </Link>
       ) : (
-        <Link to="/addProduct">
-          <button className={style.iconosFalse}>
+        <Link to="/addProduct" className={style.link}>
+          <span className={style.iconosFalse}>
             <img
-              width="24"
-              height="24"
               src="https://img.icons8.com/sf-regular/48/add.png"
-              alt="Add"
+              alt=""
+              aria-hidden="true"
             />
-            🔐
-          </button>
+            <span className={style.lock}>🔐</span>
+          </span>
         </Link>
       )}
 
+      {/* CANJES */}
       {isAuthenticated ? (
         <Link
-          to="exchanges"
+          to="/exchanges"
           className={`${style.link} ${
             location.pathname === "/exchanges" ? style.active : ""
           }`}
         >
-          <button className={style.iconos}>
+          <span className={style.iconos}>
             <img
-              width="24"
-              height="24"
               src="https://img.icons8.com/material-rounded/48/available-updates.png"
-              alt="Available Updates"
+              alt=""
+              aria-hidden="true"
             />
-            Canjes
-          </button>
+            <span className={style.label}>Canjes</span>
+          </span>
         </Link>
       ) : (
-        <Link to="exchanges">
-          <button className={style.iconosFalse}>
+        <Link to="/exchanges" className={style.link}>
+          <span className={style.iconosFalse}>
             <img
-              width="24"
-              height="24"
               src="https://img.icons8.com/material-rounded/48/available-updates.png"
-              alt="Available Updates"
+              alt=""
+              aria-hidden="true"
             />
-            🔐
-          </button>
+            <span className={style.lock}>🔐</span>
+          </span>
         </Link>
       )}
 
+      {/* MENSAJES */}
       {isAuthenticated ? (
         <Link
           to="/messages"
@@ -99,30 +105,29 @@ const imageUrl = userData?.image?.split("=")[0];
             location.pathname === "/messages" ? style.active : ""
           }`}
         >
-          <button className={style.iconos}>
+          <span className={style.iconos}>
             <img
-              width="24"
-              height="24"
               src="https://img.icons8.com/fluency-systems-regular/48/chat--v1.png"
-              alt="Chat"
+              alt=""
+              aria-hidden="true"
             />
-            Mensajes
-          </button>
+            <span className={style.label}>Mensajes</span>
+          </span>
         </Link>
       ) : (
-        <Link to="/messages">
-          <button className={style.iconosFalse}>
+        <Link to="/messages" className={style.link}>
+          <span className={style.iconosFalse}>
             <img
-              width="24"
-              height="24"
               src="https://img.icons8.com/fluency-systems-regular/48/chat--v1.png"
-              alt="Chat"
+              alt=""
+              aria-hidden="true"
             />
-            🔐
-          </button>
+            <span className={style.lock}>🔐</span>
+          </span>
         </Link>
       )}
 
+      {/* PERFIL / LOGIN */}
       <Link
         to={isAuthenticated ? "/profile" : "/login"}
         className={`${style.link} ${
@@ -132,40 +137,47 @@ const imageUrl = userData?.image?.split("=")[0];
         }`}
       >
         {isAuthenticated ? (
-          <button className={style.iconos}>
+          <span className={style.iconos}>
             <img
-              src={imageUrl}
-              alt="Foto de perfil"
+              src={imageUrl || "/placeholder.png"}
+              alt=""
               className={style.avatar}
               referrerPolicy="no-referrer"
             />
-            {userData && userData.username}
-          </button>
+
+            <span className={style.label}>
+              {userData?.username || "Perfil"}
+            </span>
+          </span>
         ) : (
-          <button className={style.iconos}>
+          <span className={style.iconos}>
             <img
-              width="24"
-              height="24"
               src="https://img.icons8.com/?size=100&id=9ZgJRZwEc5Yj&format=png&color=000000"
-              alt="Usuario"
+              alt=""
+              aria-hidden="true"
             />
-            Iniciar sesión
-          </button>
+            <span className={style.label}>Iniciar sesión</span>
+          </span>
         )}
       </Link>
 
-      {isAuthenticated ? (
-        <button className={style.logout} onClick={logoutUser}>
+      {/* LOGOUT */}
+      {isAuthenticated && (
+        <button
+          type="button"
+          className={style.logout}
+          onClick={() => logoutUser(signOut)}
+          aria-label="Cerrar sesión"
+        >
           <img
-            width="24"
-            height="24"
             src="https://img.icons8.com/fluency-systems-filled/48/exit.png"
-            alt="exit"
+            alt=""
+            aria-hidden="true"
           />
-          Salir
+          <span className={style.label}>Salir</span>
         </button>
-      ) : null}
-    </div>
+      )}
+    </nav>
   );
 };
 

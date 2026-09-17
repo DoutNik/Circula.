@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { getMatches, createChat, getAllChats } from "../../redux/actions";
-
 import style from "./Matchs.module.css";
 
 const Matchs = ({ userData }) => {
@@ -20,7 +19,7 @@ const Matchs = ({ userData }) => {
     dispatch(getAllChats());
   }, [dispatch, userId]);
 
-  // ✅ Crear chat automáticamente si no existe
+  // Crear chat automáticamente si no existe
   const ensureChatExists = async (anotherUserId) => {
     const existingChat = chats.find(
       (chat) =>
@@ -52,55 +51,60 @@ const Matchs = ({ userData }) => {
   };
 
   if (loading) {
-    return <p>Cargando matches...</p>;
+    return <p className={style.statusMessage}>Cargando matches...</p>;
   }
 
   if (!matches.length) {
-    return <p>No tenés matches todavía</p>;
+    return <p className={style.statusMessage}>No tenés matches todavía</p>;
   }
-  
+
   return (
-    <div className={style.container}>
+    <section className={style.container}>
       {matches.map((match) => {
         const myPost = match.myPost;
-
         const anotherPost = match.anotherPost;
 
-        // 🔒 Seguridad: evitar render roto
+        // Evitar render roto si falta información
         if (!myPost || !anotherPost) return null;
 
         return (
-          <div key={match.id} className={style.matchCard}>
-            {/* 🔄 CONTENIDO PRINCIPAL */}
+          <article key={match.id} className={style.matchCard}>
+            {/* PRODUCTOS */}
             <div className={style.exchangeRow}>
-              {/* 🟦 TU PRODUCTO */}
+              {/* TU PRODUCTO */}
               <div className={style.product}>
-                <p className={style.label}>Ofrecés</p>
+                <span className={style.label}>Ofrecés</span>
 
-                <Link to={`/detail/${myPost.id}`}>
+                <Link to={`/detail/${myPost.id}`} className={style.imageLink}>
                   <img
                     className={style.img}
                     src={myPost.image?.[0] || "/placeholder.png"}
-                    alt={myPost.title}
+                    alt={myPost.title || "Producto ofrecido"}
+                    loading="lazy"
                   />
                 </Link>
+
                 <h4 className={style.title}>{myPost.title}</h4>
               </div>
 
-              {/* 🔁 FLECHA */}
-              <div className={style.center}>
+              {/* FLECHA */}
+              <div className={style.center} aria-hidden="true">
                 <span className={style.arrow}>⇄</span>
               </div>
 
-              {/* 🟩 OTRO PRODUCTO */}
+              {/* OTRO PRODUCTO */}
               <div className={style.product}>
-                <p className={style.label}>Recibís</p>
+                <span className={style.label}>Recibís</span>
 
-                <Link to={`/detail/${anotherPost.id}`}>
+                <Link
+                  to={`/detail/${anotherPost.id}`}
+                  className={style.imageLink}
+                >
                   <img
                     className={style.img}
                     src={anotherPost.image?.[0] || "/placeholder.png"}
-                    alt={anotherPost.title}
+                    alt={anotherPost.title || "Producto recibido"}
+                    loading="lazy"
                   />
                 </Link>
 
@@ -108,33 +112,38 @@ const Matchs = ({ userData }) => {
               </div>
             </div>
 
-            {/* 🎯 BOTONES ABAJO */}
+            {/* ACCIONES */}
             <div className={style.actions}>
               <button
+                type="button"
                 className={style.chatBtn}
                 onClick={() => handleGoChat(anotherPost.UserId)}
               >
-                💬 Chat
+                <span className={style.buttonIcon}>💬</span>
+                <span>Chat</span>
               </button>
 
               <button
+                type="button"
                 className={style.profileBtn}
                 onClick={() => handleGoProfile(anotherPost.UserId)}
               >
                 <img
                   className={style.profileImg}
                   src={anotherPost.owner?.image || "/placeholder.png"}
-                  alt="Avatar"
+                  alt=""
+                  loading="lazy"
                 />
+
                 <span className={style.profileBtnName}>
                   {anotherPost.owner?.username || "Usuario"}
                 </span>
               </button>
             </div>
-          </div>
+          </article>
         );
       })}
-    </div>
+    </section>
   );
 };
 

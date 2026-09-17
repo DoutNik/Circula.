@@ -1,21 +1,50 @@
 .header {
-  display: inline-block;
-  justify-self: center;
-  width: 800px;
+  width: min(calc(100% - 2rem), 75rem);
+  margin: clamp(0.75rem, 3vw, 2rem) auto;
 }
 
-.header img {
-  width: 800px;
-  border-radius: 10px;
+.slide {
+  width: 100%;
 }
 
+.image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0.65rem;
+  object-fit: cover;
+}
+
+/* Evita que slick recorte las esquinas del banner */
+.header :global(.slick-list) {
+  overflow: hidden;
+  border-radius: 0.65rem;
+}
+
+/* Tablets */
 @media (max-width: 768px) {
   .header {
-    width: 340px;
-    justify-self: center;
+    width: min(calc(100% - 1.5rem), 42rem);
+    margin-block: 0.75rem;
+  }
+}
+
+/* Celulares */
+@media (max-width: 540px) {
+  .header {
+    width: calc(100% - 1rem);
+    margin-block: 0.5rem;
   }
 
-  .header img {
-    width: 340px;
+  .image,
+  .header :global(.slick-list) {
+    border-radius: 0.45rem;
+  }
+}
+
+/* Televisores y monitores muy grandes */
+@media (min-width: 1920px) {
+  .header {
+    width: min(calc(100% - 4rem), 90rem);
   }
 }

@@ -7,7 +7,7 @@ import {
   validateUsername,
   validateEmail,
   validatePassword,
-  validateImagen,
+  validateImageFile,
   validateProvince,
   validateLocalidad,
   validatePasswordRepeat,
@@ -47,7 +47,7 @@ const Register = ({ setAuth }) => {
       })
       .catch((error) => {
         console.error(
-          `Error: ${error.status}: ${error.statusText || "Ocurrió un error"}`
+          `Error: ${error.status}: ${error.statusText || "Ocurrió un error"}`,
         );
       });
   }, []);
@@ -61,7 +61,7 @@ const Register = ({ setAuth }) => {
     setProvinceError(provinceError);
 
     fetch(
-      `https://apis.datos.gob.ar/georef/api/localidades?provincia=${selectedProvince}&max=500`
+      `https://apis.datos.gob.ar/georef/api/localidades?provincia=${selectedProvince}&max=500`,
     )
       .then((res) => (res.ok ? res.json() : Promise.reject(res)))
       .then((json) => {
@@ -71,7 +71,7 @@ const Register = ({ setAuth }) => {
         console.error(
           `Error al obtener las localidades: ${error.status}: ${
             error.statusText || "Ocurrió un error"
-          }`
+          }`,
         );
       });
   };
@@ -132,16 +132,37 @@ const Register = ({ setAuth }) => {
     setShowPassword(!showPassword);
   };
 
-  const handleFile = (event) => {
-    const file = event.target.files[0];
-    if (file) {
+  const handleFile = async (event) => {
+    const file = event.target.files?.[0];
+    // Limpiar estado anterior
+    setImageError(null);
+    if (!file) {
+      setInput((prev) => ({ ...prev, image: "" }));
+      setImageFile(null);
+      return;
+    }
+    try {
+      // Validar archivo real
+      const validationError = await validateImageFile(file);
+      if (validationError) {
+        setImageError(validationError);
+        setInput((prev) => ({ ...prev, image: "" }));
+        setImageFile(null);
+        // Limpiar input file para poder volver a seleccionar el mismo archivo
+        event.target.value = "";
+        return;
+      }
+      // Archivo válido → generar preview
       const imageUrl = URL.createObjectURL(file);
-      setInput({
-        ...input,
-        image: imageUrl,
-      });
+      setInput((prev) => ({ ...prev, image: imageUrl }));
       setImageFile(file);
       setImageError(null);
+    } catch (error) {
+      console.error("Error validando imagen:", error);
+      setImageError("No se pudo validar la imagen seleccionada");
+      setImageFile(null);
+      setInput((prev) => ({ ...prev, image: "" }));
+      event.target.value = "";
     }
   };
 
@@ -209,7 +230,7 @@ const Register = ({ setAuth }) => {
 
         const responseImage = await api.post(
           `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload/`,
-          formData
+          formData,
         );
 
         secureUrl = responseImage.data.secure_url;
@@ -361,12 +382,13 @@ const Register = ({ setAuth }) => {
               onChange={handleShowPassword}
               checked={showPassword}
             /> */}
-          <div className={style.fileInput} disabled={input.disabled}>
+          <div className={style.fileInput}>
             <input
               type="file"
               accept="image/*"
               name="image"
               onChange={handleFile}
+              disabled={input.disabled}
             />
             {input.image && (
               <div className={style.imagePreview}>
@@ -375,7 +397,10 @@ const Register = ({ setAuth }) => {
                   alt="Preview"
                   className={style.imgUser}
                 />
-                <button onClick={handleImageClear}>✖️</button>
+                <button type="button" onClick={handleImageClear}>
+                  {" "}
+                  ✖️{" "}
+                </button>{" "}
               </div>
             )}
             {/* {errors.image && <span className={style.error}>{errors.image}</span>} */}

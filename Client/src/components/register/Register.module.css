@@ -1,182 +1,461 @@
+/* ================================= CONTENEDOR PRINCIPAL ========================================================= */
 .container {
+  width: min(92vw, 460px);
+  min-height: fit-content;
+  margin: clamp(20px, 5vw, 60px) auto 100px;
+  padding: clamp(20px, 4vw, 42px);
   display: grid;
-  width: 400px;
-  box-shadow: 0px 5px 10px rgba(128, 128, 128, 0.3);
-  border-radius: 10px;
-  padding: 40px;
-  margin-bottom: 100px;
-}
-
+  box-sizing: border-box;
+  background: #ffffff;
+  border-radius: clamp(12px, 1.5vw, 20px);
+  box-shadow: 0 8px 25px rgba(128, 128, 128, 0.25);
+  overflow: hidden;
+} /* ========================================= LOGO ========================================================= */
 .logo {
-  width: 200px;
+  width: clamp(130px, 45vw, 210px);
+  max-width: 100%;
+  height: auto;
+  display: block;
   justify-self: center;
-  margin-top: -30px;
+  margin-top: clamp(-28px, -3vw, -15px);
+  margin-bottom: 8px;
+  object-fit: contain;
+} /* ========================================= TÍTULO ========================================================= */
+.container .title {
+  width: 100%;
+  margin: 0 0 clamp(15px, 2vw, 25px);
+  text-align: center;
 }
-
-.imgUser {
-  width: 60px;
-  height: 60px;
-  margin-top: 10px;
-  justify-self: center;
+.container .title h2 {
+  margin: 0;
+  color: #666;
+  font-size: clamp(22px, 3vw, 32px);
+  line-height: 1.2;
+} /* =============================== FORM ========================================================= */
+.form {
+  width: 100%;
+  min-width: 0;
 }
-
+.container .form form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.2vw, 16px);
+  margin: 0;
+} /* ============================== CAMPOS ========================================================= */
+.container .form form > div {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+} /* ============================== INPUTS ========================================================= */
+.container input {
+  width: 100%;
+  height: clamp(38px, 3vw, 46px);
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0 clamp(10px, 1vw, 14px);
+  border: 1px solid transparent;
+  border-radius: 7px;
+  outline: none;
+  background: #ffffff;
+  color: #222;
+  font-family: "DM Sans", sans-serif;
+  font-size: clamp(12px, 0.9vw, 15px);
+  box-shadow: 0 5px 10px rgba(128, 128, 128, 0.12);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.container input::placeholder {
+  color: #999;
+}
+.container input:focus {
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.14);
+}
+.container input:disabled {
+  background: #f2f2f2;
+  color: #888;
+  cursor: not-allowed;
+} /* ================================ SELECT ========================================================= */
+.container select {
+  width: 100%;
+  height: clamp(38px, 3vw, 46px);
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0 clamp(10px, 1vw, 14px);
+  border: 1px solid transparent;
+  border-radius: 7px;
+  outline: none;
+  background: #ffffff;
+  color: #777;
+  font-size: clamp(12px, 0.9vw, 15px);
+  font-family: "DM Sans", sans-serif;
+  box-shadow: 0 5px 10px rgba(128, 128, 128, 0.12);
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.container select:focus {
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.14);
+}
+.container select:disabled {
+  background: #f2f2f2;
+  cursor: not-allowed;
+} /* =============================== ARCHIVO ========================================================= */
+.fileInput {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.fileInput input[type="file"] {
+  width: 100%;
+  height: auto;
+  min-height: 40px;
+  padding: 8px;
+  box-sizing: border-box;
+  background: #ffffff;
+  color: #666;
+  font-size: clamp(11px, 0.8vw, 14px);
+  cursor: pointer;
+} /* ================================ PREVIEW IMAGEN ========================================================= */
 .imagePreview {
-  display: grid;
-  grid-template-columns: 1fr;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
 }
-.container .buttons {
-  display: grid;
+.imgUser {
+  width: clamp(65px, 14vw, 100px);
+  height: clamp(65px, 14vw, 100px);
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #f0f0f0;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
 }
-
+.imagePreview button {
+  width: clamp(30px, 3vw, 38px);
+  height: clamp(30px, 3vw, 38px);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: #ffffff;
+  color: crimson;
+  font-size: clamp(14px, 1.2vw, 18px);
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(128, 128, 128, 0.18);
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .imagePreview button:hover {
+    transform: scale(1.08);
+    background: #fff1f1;
+  }
+} /* ================================= CHECKBOX ========================================================= */
 .container .check {
   width: 15px;
   height: 15px;
-  margin: 0px;
-  padding: 0px;
+  margin: 10px 0 0;
+  padding: 0;
   align-self: center;
-  margin-top: 10px;
-}
-
+} /* =================================== PASSWORD ========================================================= */
 .container .password {
-  display: grid;
-}
-
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+} /* ======================================== H6 ========================================================= */
 .container h6 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  font-weight: 100;
-  margin: 0px;
-  align-self: center;
-}
-
-.container .form form {
-  display: grid;
-  margin-bottom: 20px;
-}
-
-.container h2 {
-  color: grey;
-}
-
+  width: 100%;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(10px, 0.75vw, 13px);
+  font-weight: 400;
+  color: #777;
+  text-align: center;
+} /* ===================================== PÁRRAFOS ========================================================= */
 .container p {
-  color: grey;
-}
-
-.container input {
-  border: none;
-  height: 30px;
-  width: 200px;
-  border-radius: 5px;
-  margin-top: 20px;
-  box-shadow: 0px 5px 10px rgba(128, 128, 128, 0.1);
-  padding-left: 10px;
-  font-family: "DM Sans";
-}
-
-.fileInput {
-  display: grid;
-}
-
-.fileInput input {
-  display: grid;
-  background-color: white;
-  padding-top: 10px;
-  justify-self: center;
-}
-
-.container select {
-  display: grid;
-  width: 215px;
-  border: none;
-  border-radius: 5px;
-  height: 32px;
-  font-size: 12px;
-  color: gray;
-  box-shadow: 0px 5px 10px rgba(128, 128, 128, 0.1);
-  margin-top: 20px;
-  justify-self: center;
-  background-color: white;
-  padding-left: 10px;
-}
-
+  margin: 0;
+  color: #777;
+  font-size: clamp(11px, 0.8vw, 14px);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+} /* ========================================================= ERRORES ========================================================= */
+.error {
+  width: 100%;
+  margin-top: 4px;
+  display: block;
+  color: #e53935;
+  font-size: clamp(10px, 0.75vw, 13px);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  text-align: left;
+} /* ============================ BOTÓN REGISTRO ========================================================= */
 .register {
-  margin-top: 40px;
+  width: min(100%, 150px);
+  min-height: clamp(38px, 3vw, 48px);
+  margin: clamp(15px, 2vw, 30px) auto 0;
+  padding: 8px 18px;
+  box-sizing: border-box;
+  border: none;
+  border-radius: 7px;
+  background: #4ecdc4;
   color: whitesmoke;
-  background-color: #4ecdc4;
-  width: 100px;
-  border-radius: 5px;
-  font-size: 14px;
-  padding: 5px;
-  justify-self: center;
-  box-shadow: 0px 5px 10px rgba(128, 128, 128, 0.2);
+  font-family: "DM Sans", sans-serif;
+  font-size: clamp(12px, 0.9vw, 15px);
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 5px 10px rgba(128, 128, 128, 0.2);
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease,
+    box-shadow 0.2s ease;
 }
-
-.buttonDisabled {
-  background-color: #ccc;
-  color: #888;
+@media (hover: hover) and (pointer: fine) {
+  .register:hover:not(:disabled) {
+    transform: translateY(-2px);
+    filter: brightness(1.05);
+    box-shadow: 0 8px 15px rgba(128, 128, 128, 0.25);
+  }
+}
+.register:active:not(:disabled) {
+  transform: scale(0.98);
+} /* =================================== BOTÓN DESHABILITADO ========================================================= */
+.buttonDisabled,
+.register:disabled {
+  background: #cccccc;
+  color: #888888;
   cursor: not-allowed;
   pointer-events: none;
-  border: 1px solid #ccc;
-}
-
-.container .title {
-  font-size: 14px;
-  margin-top: -20px;
-  margin-bottom: -20px;
-}
-
-.error {
-  display: grid;
-  font-size: 12px;
-  color: red;
-}
-
-@media (max-width: 768px) {
-  .container {
-    width: 250px;
-  }
-
-  .container option {
-    text-align: left;
-  }
-
-  .container select {
-    padding-left: 10px;
-  }
-}
-
+  border: 1px solid #cccccc;
+  box-shadow: none;
+} /* ================================== LOADER ========================================================= */
 .loaderContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
-  grid-gap: 10px;
-  margin-top: 20px;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 18px;
+  color: #777;
+  font-size: clamp(11px, 0.8vw, 14px);
+  text-align: center;
 }
-
 .loader {
-  width: 50px;
+  width: clamp(30px, 4vw, 50px);
   aspect-ratio: 1;
   border-radius: 50%;
-  border: 8px solid #0000;
-  border-right-color: rgba(255, 230, 109, 0.592);
+  border: clamp(5px, 0.6vw, 8px) solid transparent;
+  border-right-color: rgba(255, 230, 109, 0.7);
   position: relative;
   animation: l24 1s infinite linear;
 }
-.loader:before,
-.loader:after {
+.loader::before,
+.loader::after {
   content: "";
   position: absolute;
-  inset: -8px;
+  inset: clamp(-8px, -0.6vw, -5px);
   border-radius: 50%;
   border: inherit;
   animation: inherit;
   animation-duration: 2s;
 }
-.loader:after {
+.loader::after {
   animation-duration: 4s;
 }
 @keyframes l24 {
   100% {
     transform: rotate(1turn);
+  }
+} /* ================================ TABLETS 481px - 768px ========================================================= */
+@media (min-width: 481px) and (max-width: 768px) {
+  .container {
+    width: min(90vw, 430px);
+    padding: 28px;
+  }
+  .container input,
+  .container select {
+    font-size: 13px;
+  }
+} /* =================================== CELULARES <= 480px ========================================================= */
+@media (max-width: 480px) {
+  .container {
+    width: calc(100% - 24px);
+    margin: 15px auto 90px;
+    padding: 20px 16px;
+    border-radius: 12px;
+  }
+  .logo {
+    width: min(65vw, 180px);
+    margin-top: -15px;
+  }
+  .container .title h2 {
+    font-size: 23px;
+  }
+  .container input,
+  .container select {
+    height: 40px;
+    font-size: 12px;
+  }
+  .fileInput input[type="file"] {
+    font-size: 11px;
+  }
+  .register {
+    width: min(100%, 140px);
+  }
+  .error {
+    font-size: 10px;
+  }
+} /* ================================== CELULARES MUY PEQUEÑOS <= 360px ========================================================= */
+@media (max-width: 360px) {
+  .container {
+    width: calc(100% - 16px);
+    padding: 16px 12px;
+    margin-bottom: 80px;
+  }
+  .logo {
+    width: min(65vw, 150px);
+  }
+  .container .title h2 {
+    font-size: 21px;
+  }
+  .container input,
+  .container select {
+    height: 38px;
+    font-size: 11px;
+  }
+  .container input {
+    padding-left: 9px;
+  }
+  .container select {
+    padding-left: 9px;
+  }
+  .imgUser {
+    width: 70px;
+    height: 70px;
+  }
+  .register {
+    min-height: 38px;
+    width: 125px;
+    font-size: 12px;
+  }
+  .loaderContainer {
+    font-size: 10px;
+  }
+} /* =============================== NOTEBOOKS >= 769px ========================================================= */
+@media (min-width: 769px) {
+  .container {
+    width: min(90vw, 460px);
+  }
+} /* =================================== MONITORES GRANDES >= 1600px ========================================================= */
+@media (min-width: 1600px) {
+  .container {
+    width: 500px;
+    padding: 45px;
+  }
+  .logo {
+    width: 220px;
+  }
+  .container .title h2 {
+    font-size: 32px;
+  }
+  .container input,
+  .container select {
+    height: 48px;
+    font-size: 15px;
+  }
+  .register {
+    min-height: 50px;
+    width: 160px;
+    font-size: 16px;
+  }
+} /* ================================ TV / 2K / 4K >= 2200px ========================================================= */
+@media (min-width: 2200px) {
+  .container {
+    width: 600px;
+    padding: 55px;
+    border-radius: 22px;
+  }
+  .logo {
+    width: 270px;
+  }
+  .container .title h2 {
+    font-size: 40px;
+  }
+  .container input,
+  .container select {
+    height: 58px;
+    font-size: 18px;
+    border-radius: 10px;
+  }
+  .container input {
+    padding-left: 16px;
+  }
+  .container select {
+    padding-left: 16px;
+  }
+  .container p,
+  .error {
+    font-size: 15px;
+  }
+  .register {
+    width: 190px;
+    min-height: 58px;
+    font-size: 18px;
+    border-radius: 10px;
+  }
+  .loaderContainer {
+    font-size: 16px;
+  }
+} /* =================================== PANTALLAS MUY GRANDES >= 3000px ========================================================= */
+@media (min-width: 3000px) {
+  .container {
+    width: 720px;
+    padding: 65px;
+    border-radius: 26px;
+  }
+  .logo {
+    width: 320px;
+  }
+  .container .title h2 {
+    font-size: 48px;
+  }
+  .container input,
+  .container select {
+    height: 68px;
+    font-size: 21px;
+  }
+  .container p,
+  .error {
+    font-size: 18px;
+  }
+  .register {
+    width: 220px;
+    min-height: 68px;
+    font-size: 21px;
+  }
+} /* ================================== REDUCIR ANIMACIONES ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  .register,
+  .imagePreview button {
+    transition: none;
+  }
+  .loader,
+  .loader::before,
+  .loader::after {
+    animation: none;
   }
 }

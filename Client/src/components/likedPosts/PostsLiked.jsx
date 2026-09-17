@@ -1,88 +1,108 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllLikes, getAllPosts, likedPosts } from "../../redux/actions";
+
+import { getAllLikes, getAllPosts } from "../../redux/actions";
 import style from "./PostsLiked.module.css";
 
+const DEFAULT_IMAGE =
+  "https://img.icons8.com/fluency-systems-regular/96/image.png";
+
+const getImageUrl = (post) => {
+  if (Array.isArray(post?.image)) return post.image[0];
+  return post?.image;
+};
+
 const PostsLiked = ({ userData }) => {
-  const userId = userData.id;
   const dispatch = useDispatch();
-  const allPosts = useSelector((state) => state.allPostsCopy);
-  const allLikes = useSelector((state) => state.allLikes);
-  const matchedPairs = useSelector((state) => state.matchedPairs);
-  const likedPostss = useSelector((state) => state.likedPosts);
-  const [userPosts, setUserPosts] = useState([]);
+  const userId = userData?.id;
 
+  // Usamos allPosts, no allPostsCopy, para evitar filtros externos.
+  const allPosts = useSelector((state) => state.allPosts) || [];
+  const allLikes = useSelector((state) => state.allLikes) || [];
+  const matchedPairs = useSelector((state) => state.matchedPairs) || [];
 
-  // Agrega un estado local para controlar si los datos están cargados
   const [dataLoaded, setDataLoaded] = useState(false);
 
   useEffect(() => {
+    if (!userId) return;
+
     const fetchData = async () => {
-      await dispatch(getAllLikes());
-      await dispatch(getAllPosts());
-      await dispatch(likedPosts(userId));
-      // Marca que los datos están cargados una vez que las acciones se completen
-      setDataLoaded(true);
+      try {
+        await Promise.all([
+          dispatch(getAllLikes()),
+          dispatch(getAllPosts()),
+        ]);
+      } catch (error) {
+        console.error("Error al cargar los likes:", error);
+      } finally {
+        setDataLoaded(true);
+      }
     };
 
     fetchData();
   }, [dispatch, userId]);
 
-  useEffect(() => {
-    // Filter user posts when userData or allPosts changes
-    if (userData) {
-      const filteredUserPosts = allPosts.filter(
-        (post) => post.UserId === userData.id,
-      );
-      setUserPosts(filteredUserPosts);
-    }
-  }, [userData, allPosts]);
+  const exchangeAttempts = useMemo(() => {
+    const postsMap = new Map(allPosts.map((post) => [post.id, post]));
 
-  // Si los datos aún no están cargados, muestra un mensaje de carga
-  if (!dataLoaded) {
-    return <div>Cargando...</div>;
+    const matchedPostIds = new Set(
+      matchedPairs
+        .map((pair) => pair.anotherUserPost?.id)
+        .filter(Boolean),
+    );
+
+    return allLikes
+      .filter(
+        (like) =>
+          Number(like.myUserId) === Number(userId) &&
+          !matchedPostIds.has(like.likedPostId),
+      )
+      .map((like) => ({
+        id: `${like.myPostId}-${like.likedPostId}`,
+        myProduct: postsMap.get(like.myPostId),
+        wantedProduct: postsMap.get(like.likedPostId),
+      }))
+      .filter((attempt) => attempt.myProduct && attempt.wantedProduct);
+  }, [allLikes, allPosts, matchedPairs, userId]);
+
+  if (!userId || !dataLoaded) {
+    return <p className={style.loading}>Cargando likes...</p>;
   }
 
-  const matchedPostIds = matchedPairs.map((pair) => pair.anotherUserPost?.id);
-
-  const filteredLikedPosts = likedPostss.filter(
-    (likedPost) => !matchedPostIds.includes(likedPost.id),
-  );
-
-  const postsMap = Object.fromEntries(allPosts.map((post) => [post.id, post]));
-
-  const exchangeAttempts = allLikes
-    .filter((like) => like.myUserId === userId)
-    .map((like) => ({
-      myProduct: postsMap[like.myPostId],
-      wantedProduct: postsMap[like.likedPostId],
-    }));
+  if (exchangeAttempts.length === 0) {
+    return (
+      <p className={style.empty}>
+        Todavía no tienes intercambios pendientes.
+      </p>
+    );
+  }
 
   return (
-    <div className={style.containerP}>
-      {exchangeAttempts.map((attempt, index) => (
-        <div className={style.likes} key={index}>
+    <section className={style.containerP}>
+      {exchangeAttempts.map((attempt) => (
+        <article className={style.likes} key={attempt.id}>
           <div className={style.like}>
             <img
-              src={attempt.myProduct?.image?.[0]}
-              alt={attempt.myProduct?.title}
+              src={getImageUrl(attempt.myProduct) || DEFAULT_IMAGE}
+              alt={attempt.myProduct.title || "Tu publicación"}
               className={style.myProduct}
             />
 
             <div className={style.names}>
-              <h4>{attempt.myProduct?.title}</h4>
-              <h4>{attempt.wantedProduct?.title}</h4>
+              <h4>{attempt.myProduct.title || "Sin título"}</h4>
+              <span>por</span>
+              <h4>{attempt.wantedProduct.title || "Sin título"}</h4>
             </div>
 
             <img
-              src={attempt.wantedProduct?.image?.[0]}
-              alt={attempt.wantedProduct?.title}
+              src={getImageUrl(attempt.wantedProduct) || DEFAULT_IMAGE}
+              alt={attempt.wantedProduct.title || "Publicación deseada"}
               className={style.wantedProduct}
             />
           </div>
-        </div>
+        </article>
       ))}
-    </div>
+    </section>
   );
 };
 

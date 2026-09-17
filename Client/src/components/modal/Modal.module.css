@@ -1,53 +1,175 @@
-body.activeModal {
-    overflow-y: hidden;
-}
-
-.btnModal {
-    padding: 10px 20px;
-    display: block;
-    margin: 100px auto 0;
-    font-size: 18px;
-}
-
-.modal, .overlay {
-    width: 100vw;
-    height: 100vh;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    position: fixed;
-}
-
+:global(body.activeModal) {
+  overflow: hidden;
+} /* ========================================================= MODAL PRINCIPAL ========================================================= */
+.modal {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(12px, 3vw, 40px);
+  box-sizing: border-box;
+} /* ========================================================= OVERLAY ========================================================= */
 .overlay {
-    background: rgba(49,49,49,0.8);
-}
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(20, 20, 20, 0.72);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+} /* ========================================================= CONTENIDO DEL MODAL ========================================================= */
 .modalContent {
-    position: absolute;
-    top: 40%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    line-height: 1.4;
-    background: whitesmoke;
-    padding: 14px 28px;
-    border-radius: 3px;
-    max-width: 600px;
-    min-width: 300px;
+  position: relative;
+  z-index: 1;
+  width: min(100%, clamp(300px, 75vw, 650px));
+  max-height: min(90vh, 700px);
+  overflow-y: auto;
+  background: whitesmoke;
+  color: #222;
+  padding: clamp(24px, 4vw, 42px) clamp(20px, 4vw, 46px) clamp(22px, 3vw, 34px);
+  border-radius: clamp(12px, 1.5vw, 22px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+  text-align: center;
+} /* ========================================================= CONTENIDO ========================================================= */
+.modalBody {
+  width: 100%;
 }
-
+.modalContent h2 {
+  margin: 0 0 clamp(12px, 1.5vw, 20px);
+  color: #222;
+  font-size: clamp(20px, 2.3vw, 34px);
+  line-height: 1.2;
+  font-weight: 700;
+  overflow-wrap: break-word;
+}
 .modal p {
-    color: grey;
-}
-
+  margin: 0;
+  color: #666;
+  font-size: clamp(14px, 1.2vw, 19px);
+  line-height: 1.6;
+  max-width: 560px;
+  margin-inline: auto;
+  overflow-wrap: break-word;
+} /* ========================================================= BOTÓN CERRAR ========================================================= */
 .closeModal {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    padding: 0px 7px;
-    color: crimson;
-    font-size: 20px;
+  position: absolute;
+  top: clamp(8px, 1vw, 16px);
+  right: clamp(8px, 1vw, 16px);
+  width: clamp(30px, 3vw, 42px);
+  height: clamp(30px, 3vw, 42px);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: crimson;
+  font-size: clamp(16px, 1.5vw, 22px);
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
 }
-
-.closeModal:hover {
-    scale: 1.1;
+@media (hover: hover) and (pointer: fine) {
+  .closeModal:hover {
+    transform: scale(1.1);
+    background: rgba(220, 20, 60, 0.08);
+  }
+}
+.closeModal:active {
+  transform: scale(0.95);
+} /* ========================================================= CELULARES PEQUEÑOS <= 480px ========================================================= */
+@media (max-width: 480px) {
+  .modal {
+    padding: 14px;
+  }
+  .modalContent {
+    width: 100%;
+    max-width: 100%;
+    max-height: 88vh;
+    padding: 42px 18px 22px;
+    border-radius: 14px;
+  }
+  .modalContent h2 {
+    font-size: 22px;
+  }
+  .modal p {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .closeModal {
+    top: 9px;
+    right: 9px;
+  }
+} /* ========================================================= CELULARES MUY PEQUEÑOS <= 360px ========================================================= */
+@media (max-width: 360px) {
+  .modal {
+    padding: 10px;
+  }
+  .modalContent {
+    padding: 40px 15px 20px;
+    border-radius: 12px;
+  }
+  .modalContent h2 {
+    font-size: 19px;
+  }
+  .modal p {
+    font-size: 13px;
+  }
+} /* ========================================================= TABLETS 481px - 900px ========================================================= */
+@media (min-width: 481px) and (max-width: 900px) {
+  .modalContent {
+    width: min(90%, 560px);
+  }
+} /* ========================================================= NOTEBOOKS / MONITORES 901px - 2000px ========================================================= */
+@media (min-width: 901px) and (max-width: 2000px) {
+  .modalContent {
+    width: min(70%, 650px);
+  }
+} /* ========================================================= TV / 2K / 4K > 2000px ========================================================= */
+@media (min-width: 2001px) {
+  .modal {
+    padding: 50px;
+  }
+  .modalContent {
+    width: min(60vw, 800px);
+    padding: 50px 60px 45px;
+    border-radius: 24px;
+  }
+  .modalContent h2 {
+    font-size: 38px;
+  }
+  .modal p {
+    font-size: 21px;
+    line-height: 1.7;
+  }
+  .closeModal {
+    width: 46px;
+    height: 46px;
+    font-size: 24px;
+  }
+} /* ========================================================= PANTALLAS MUY GRANDES > 3000px ========================================================= */
+@media (min-width: 3000px) {
+  .modalContent {
+    width: min(55vw, 1000px);
+    padding: 65px 80px 55px;
+  }
+  .modalContent h2 {
+    font-size: 46px;
+  }
+  .modal p {
+    font-size: 24px;
+  }
+} /* ========================================================= ACCESIBILIDAD ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  .closeModal {
+    transition: none;
+  }
 }

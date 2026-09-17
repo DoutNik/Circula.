@@ -1,51 +1,34 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllPosts, deletePost } from "../../redux/actions";
-
 import style from "./Publication.module.css";
 
 const Publication = ({ userData, onPostDeleted }) => {
   const dispatch = useDispatch();
-
   const allPosts = useSelector((state) => state.allPostsCopy);
   const [openMenuId, setOpenMenuId] = useState(null);
-
+  
   useEffect(() => {
     dispatch(getAllPosts());
   }, [dispatch]);
-
+ 
   useEffect(() => {
-    const handleClickOutside = () => setOpenMenuId(null);
+    const handleClickOutside = () => {
+      setOpenMenuId(null);
+    };
     document.addEventListener("click", handleClickOutside);
-
-    return () => document.removeEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
   }, []);
-
-  // 🎯 Posts del usuario
+  
   const userPosts = allPosts.filter((post) => post.UserId === userData?.id);
-
+  
   const handlePostDelete = async (postId) => {
     try {
       await dispatch(deletePost(postId));
       await dispatch(getAllPosts());
-
-      // 🔥 eliminar matches relacionados
-      /*       const matchesToDelete = matches.filter((match) =>
-        match.match.some(
-          (m) => m.myPostId == postId || m.likedPostId == postId,
-        ),
-      );
-
-      matchesToDelete.forEach((match) => {
-        match.match.forEach((m) => {
-          if (m.myPostId === postId || m.likedPostId === postId) {
-            dispatch(deleteMatch(match.id, m.id));
-          }
-        });
-      }); */
-      // Actualiza el contador 1/3 del componente MyProfile.
       await onPostDeleted?.();
-
       setOpenMenuId(null);
     } catch (error) {
       console.error("Error al eliminar la publicación", error);
@@ -53,52 +36,74 @@ const Publication = ({ userData, onPostDeleted }) => {
   };
 
   return (
-    <>
+    <div className={style.publications}>
+      {" "}
       {userPosts.map((post) => (
-        <div key={post.id} className={style.publication}>
-          {/* 🖼️ Imagen */}
-          <img src={post.image?.[0]} className={style.img} alt={post.title} />
-
-          {/* 📄 Info */}
+        <article key={post.id} className={style.publication}>
+          {" "}
+          {/* IMAGEN */}{" "}
+          <div className={style.imageContainer}>
+            {" "}
+            <img
+              src={post.image?.[0] || "/placeholder.png"}
+              className={style.img}
+              alt={post.title || "Publicación"}
+              loading="lazy"
+            />{" "}
+          </div>{" "}
+          {/* INFORMACIÓN */}{" "}
           <div className={style.info}>
-            <h3 className={style.title}>{post.title}</h3>
-
+            {" "}
+            <h3 className={style.title}> {post.title || "Sin título"} </h3>{" "}
             <div className={style.meta}>
-              ❤️ {post.likesCount || 0} interesados
-            </div>
-          </div>
-
-          {/* ⚙️ Opciones */}
-          <div className={style.actions}>
+              {" "}
+              <span aria-hidden="true">❤️</span> {post.likesCount || 0}{" "}
+              interesados{" "}
+            </div>{" "}
+          </div>{" "}
+          {/* ACCIONES */}{" "}
+          <div
+            className={style.actions}
+            onClick={(event) => event.stopPropagation()}
+          >
+            {" "}
             <button
+              type="button"
               className={style.menuBtn}
-              onClick={(e) => {
-                e.stopPropagation();
-                setOpenMenuId(openMenuId === post.id ? null : post.id);
-              }}
+              onClick={() =>
+                setOpenMenuId(openMenuId === post.id ? null : post.id)
+              }
+              aria-label="Opciones de publicación"
+              aria-expanded={openMenuId === post.id}
             >
-              ⋮
-            </button>
-
+              {" "}
+              ⋮{" "}
+            </button>{" "}
             {openMenuId === post.id && (
               <div className={style.menu}>
-                <button className={style.menuItem}>✏️ Editar</button>
-
-                <button className={style.menuItem}>⏸️ Pausar</button>
-
+                {" "}
+                <button type="button" className={style.menuItem}>
+                  {" "}
+                  ✏️ <span>Editar</span>{" "}
+                </button>{" "}
+                <button type="button" className={style.menuItem}>
+                  {" "}
+                  ⏸️ <span>Pausar</span>{" "}
+                </button>{" "}
                 <button
-                  className={style.menuItem}
+                  type="button"
+                  className={`${style.menuItem} ${style.menuItemDanger}`}
                   onClick={() => handlePostDelete(post.id)}
                 >
-                  🗑️ Eliminar
-                </button>
+                  {" "}
+                  🗑️ <span>Eliminar</span>{" "}
+                </button>{" "}
               </div>
-            )}
-          </div>
-        </div>
-      ))}
-    </>
+            )}{" "}
+          </div>{" "}
+        </article>
+      ))}{" "}
+    </div>
   );
 };
-
 export default Publication;

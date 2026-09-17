@@ -1,219 +1,368 @@
-/* 🌐 Variables (modo claro por defecto) */
 :root {
   --bg-card: #ffffff;
-  --text-main: #222;
-  --text-secondary: #666;
+  --text-main: #222222;
+  --text-secondary: #666666;
   --border: #eaeaea;
   --shadow: rgba(0, 0, 0, 0.08);
   --accent: #007bff;
-  --accent2: #4cafef;
-}
-
-/* 🌙 Dark mode automático */
+  --accent2: #4cafef; /* Tamaños fluidos */
+  --card-radius: clamp(14px, 1vw, 22px);
+  --card-padding: clamp(12px, 1.3vw, 24px);
+  --grid-gap: clamp(12px, 1.5vw, 28px);
+} /* ========================================================= DARK MODE AUTOMÁTICO ========================================================= */
 @media (prefers-color-scheme: dark) {
   :root {
     --bg-card: #1e1e1e;
     --text-main: #f5f5f5;
-    --text-secondary: #aaa;
-    --border: #333;
+    --text-secondary: #aaaaaa;
+    --border: #333333;
     --shadow: rgba(0, 0, 0, 0.5);
   }
-}
-
-/* 🌙 Dark mode manual (si usás class="dark") */
+} /* ========================================================= DARK MODE MANUAL ========================================================= */
 .dark {
   --bg-card: #1e1e1e;
   --text-main: #f5f5f5;
-  --text-secondary: #aaa;
-  --border: #333;
+  --text-secondary: #aaaaaa;
+  --border: #333333;
   --shadow: rgba(0, 0, 0, 0.5);
-}
-
+} /* ========================================================= MENSAJES ========================================================= */
+.statusMessage {
+  width: min(100% - 32px, 1400px);
+  margin: clamp(20px, 4vw, 50px) auto;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: clamp(14px, 1vw, 18px);
+} /* ========================================================= CONTENEDOR PRINCIPAL ========================================================= */
 .container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 20px;
-  padding: 20px;
-}
-
-/* 🧾 Card */
+  width: min(100%, 2400px);
+  margin: 0 auto;
+  padding: clamp(12px, 2vw, 40px);
+  display: grid; /* Se adapta automáticamente: celular -> 1 tablet -> 2 notebook -> 2/3 monitor -> 3/4 TV -> 4/5+ */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: var(--grid-gap);
+  box-sizing: border-box;
+} /* ========================================================= CARD ========================================================= */
 .matchCard {
+  width: 100%;
+  min-width: 0;
   background: var(--bg-card);
-  border-radius: 20px;
-  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
   box-shadow: 0 10px 30px var(--shadow);
-  transition: all 0.25s ease;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  border: 1px solid var(--border);
-}
-
-.matchCard:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 40px var(--shadow);
-}
-
+  gap: clamp(10px, 1vw, 18px);
+  box-sizing: border-box;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+} /* Hover solamente para dispositivos que realmente tienen hover */
+@media (hover: hover) and (pointer: fine) {
+  .matchCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px var(--shadow);
+  }
+} /* ========================================================= INTERCAMBIO ========================================================= */
 .exchangeRow {
-  display: flex;
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
+  gap: clamp(8px, 1vw, 18px);
+} /* ========================================================= PRODUCTO ========================================================= */
 .product {
-  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-}
-
+} /* ========================================================= LINK DE IMAGEN ========================================================= */
+.imageLink {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  margin-top: 4px;
+  border-radius: clamp(10px, 1vw, 16px);
+  overflow: hidden;
+} /* ========================================================= IMAGEN ========================================================= */
 .img {
-  width: 95px;
-  height: 95px;
+  /* Se adapta según viewport y nunca crece demasiado. */
+  width: clamp(70px, 8vw, 145px);
+  height: clamp(70px, 8vw, 145px);
+  max-width: 100%;
+  aspect-ratio: 1 / 1;
   object-fit: cover;
-  border-radius: 14px;
+  border-radius: clamp(10px, 1vw, 16px);
   border: 2px solid var(--border);
-  transition: transform 0.2s ease;
+  display: block;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
-
-.img:hover {
-  transform: scale(1.07);
-}
-
+@media (hover: hover) and (pointer: fine) {
+  .img:hover {
+    transform: scale(1.05);
+  }
+} /* ========================================================= LABEL ========================================================= */
+.label {
+  width: 100%;
+  margin: 0 0 6px;
+  color: var(--text-secondary);
+  font-size: clamp(10px, 0.75vw, 13px);
+  font-weight: 500;
+  line-height: 1.2;
+  text-align: center;
+} /* ========================================================= TITULO DEL PRODUCTO ========================================================= */
+.title {
+  width: 100%;
+  max-width: 220px;
+  margin: 8px 0 0;
+  color: var(--text-main);
+  font-size: clamp(12px, 0.9vw, 16px);
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center; /* Evita que una palabra/título muy largo rompa el layout. */
+  overflow-wrap: anywhere; /* Reserva espacio similar para ambos productos. */
+  min-height: clamp(32px, 3vw, 48px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+} /* ========================================================= CENTRO / FLECHA ========================================================= */
 .center {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
-
-/* 🔄 Flecha */
 .arrow {
-  width: 40px;
-  height: 40px;
+  width: clamp(30px, 3vw, 50px);
+  height: clamp(30px, 3vw, 50px);
   border-radius: 50%;
   background: var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
   color: var(--text-main);
-}
-
-.label {
-  flex: 1;
-  font-size: 11px;
-  color: var(--text-secondary);
-  margin-bottom: 2px;
-}
-
-.title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-main);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 36px; /* 🔥 clave real */
-  text-align: center;
-}
-
-/* 🎯 Acciones */
+  font-size: clamp(14px, 1.2vw, 22px);
+  flex-shrink: 0;
+} /* ========================================================= ACCIONES ========================================================= */
 .actions {
+  width: 100%;
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 10px;
-  margin-top: 8px;
-}
-
-/* 💬 Chat (principal) */
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: clamp(6px, 0.8vw, 12px);
+  margin-top: auto;
+  padding-top: 4px;
+} /* ========================================================= BOTÓN CHAT ========================================================= */
 .chatBtn {
-  flex: unset; /* 🔥 importante */
-  padding: 6px 30px;
-  border-radius: 10px;
+  min-height: 38px;
+  padding: 7px clamp(14px, 2vw, 30px);
   border: none;
+  border-radius: 10px;
   background: linear-gradient(135deg, var(--accent2), var(--accent));
-  color: white;
-  font-size: 13px;
-  font-weight: 500;
+  color: #ffffff;
+  font-size: clamp(12px, 0.85vw, 15px);
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  white-space: nowrap;
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
 }
-
-.chatBtn:hover {
-  transform: scale(1.03);
-  filter: brightness(1.1);
+@media (hover: hover) and (pointer: fine) {
+  .chatBtn:hover {
+    transform: scale(1.03);
+    filter: brightness(1.1);
+  }
 }
-
-/* 👤 Perfil */
+.chatBtn:active {
+  transform: scale(0.98);
+}
+.buttonIcon {
+  font-size: 0.95em;
+} /* ========================================================= BOTÓN PERFIL ========================================================= */
 .profileBtn {
-  display: flex;
-  align-items: center;     /* centra vertical */
-  justify-content: center; /* centra horizontal */
-  gap: 6px;                /* espacio entre img y texto */
-
-  padding: 6px;
+  min-height: 38px;
+  max-width: 100%;
+  padding: 5px 9px;
   border-radius: 10px;
   border: 1px solid var(--border);
   background: transparent;
   color: var(--text-main);
-
-  font-size: 13px;
+  font-size: clamp(11px, 0.85vw, 15px);
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
-
-.profileBtn:hover {
-  background: var(--border);
+@media (hover: hover) and (pointer: fine) {
+  .profileBtn:hover {
+    background: var(--border);
+  }
 }
-
+.profileBtn:active {
+  transform: scale(0.98);
+} /* ========================================================= FOTO PERFIL ========================================================= */
 .profileImg {
-  width: 20px;
-  height: 20px;
+  width: clamp(20px, 1.8vw, 30px);
+  height: clamp(20px, 1.8vw, 30px);
+  min-width: 20px;
+  min-height: 20px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--border);
-}
-
+  display: block;
+} /* ========================================================= NOMBRE PERFIL ========================================================= */
 .profileBtnName {
-  display: flex;
-  align-items: center; /* asegura alineación vertical perfecta */
-}
-
-/* 📱 Responsive */
+  max-width: clamp(80px, 10vw, 150px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+} /* ========================================================= CELULARES PEQUEÑOS <= 480px ========================================================= */
 @media (max-width: 480px) {
+  .container {
+    grid-template-columns: 1fr;
+    padding: 10px;
+    gap: 12px;
+  }
+  .matchCard {
+    padding: 13px;
+  }
   .exchangeRow {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .center {
-    order: 2;
-  }
-
-  .product {
-    order: 1;
-  }
-
-  .product:last-child {
-    order: 3;
+    gap: 6px;
   }
   .img {
-    width: 75px;
-    height: 75px;
+    width: clamp(65px, 22vw, 90px);
+    height: clamp(65px, 22vw, 90px);
   }
-
   .title {
-    font-size: 13px;
+    max-width: 110px;
+    font-size: 12px;
+    min-height: 34px;
   }
-
- .arrow {
+  .arrow {
     width: 30px;
     height: 30px;
     font-size: 14px;
+  }
+  .actions {
+    gap: 6px;
+  }
+  .chatBtn {
+    flex: 1;
+    min-width: 90px;
+  }
+  .profileBtn {
+    flex: 1;
+    min-width: 0;
+  }
+  .profileBtnName {
+    max-width: 100px;
+  }
+} /* ========================================================= CELULARES MUY PEQUEÑOS <= 360px ========================================================= */
+@media (max-width: 360px) {
+  .container {
+    padding: 8px;
+  }
+  .matchCard {
+    padding: 10px;
+  }
+  .exchangeRow {
+    /* Separamos verticalmente para que nunca se amontonen los productos. */
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+  }
+  .product:first-child {
+    grid-row: 1;
+  }
+  .center {
+    grid-row: 2;
+  }
+  .product:last-child {
+    grid-row: 3;
+  }
+  .img {
+    width: 82px;
+    height: 82px;
+  }
+  .title {
+    max-width: 150px;
+  }
+  .actions {
+    flex-direction: column;
+  }
+  .chatBtn,
+  .profileBtn {
+    width: 100%;
+  }
+  .profileBtnName {
+    max-width: none;
+  }
+} /* ========================================================= TABLETS 481px - 900px ========================================================= */
+@media (min-width: 481px) and (max-width: 900px) {
+  .container {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .img {
+    width: clamp(80px, 12vw, 115px);
+    height: clamp(80px, 12vw, 115px);
+  }
+} /* ========================================================= NOTEBOOKS / MONITORES MEDIANOS 901px - 1400px ========================================================= */
+@media (min-width: 901px) and (max-width: 1400px) {
+  .container {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+} /* ========================================================= MONITORES GRANDES 1401px - 2000px ========================================================= */
+@media (min-width: 1401px) and (max-width: 2000px) {
+  .container {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+} /* ========================================================= TV / 2K / 4K > 2000px ========================================================= */
+@media (min-width: 2001px) {
+  .container {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    padding: 40px;
+    gap: 28px;
+  }
+  .matchCard {
+    padding: 24px;
+  }
+  .title {
+    font-size: 16px;
+  }
+  .label {
+    font-size: 13px;
+  }
+  .chatBtn,
+  .profileBtn {
+    font-size: 14px;
+  }
+} /* ========================================================= PANTALLAS MUY GRANDES > 3000px ========================================================= */
+@media (min-width: 3000px) {
+  .container {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    max-width: 3200px;
+  }
+} /* ========================================================= ACCESIBILIDAD / REDUCIR ANIMACIONES ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  .matchCard,
+  .img,
+  .chatBtn,
+  .profileBtn {
+    transition: none;
   }
 }

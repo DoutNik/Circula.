@@ -1,143 +1,591 @@
-.navbar {
-  display: grid;
-  position: fixed;
-  top: 0px;
-  left: 0px;
-  right: 0px;
-  grid-template-columns: 10fr 1fr 1fr 1fr 1fr 1fr 1fr;
-  gap: 0px;
-  padding-top: 10px;
-  padding-bottom: 5px;
-  background-color:  #9dbe0a;
-  box-shadow: 0px 5px 10px rgba(128, 128, 128, 0.2);
-  z-index: 998;
+:root {
+  --navbar-bg: #9dbe0a;
+  --navbar-text: #222;
+  --navbar-hover: rgba(255, 255, 255, 0.18);
+  --navbar-active: rgba(255, 255, 255, 0.28);
+  --navbar-border: rgba(0, 0, 0, 0.14);
+  --navbar-shadow: rgba(128, 128, 128, 0.2);
+
+  --navbar-height: clamp(64px, 5vw, 92px);
 }
 
-.avatar {
-  border-radius: 50%;
-  width: 25px;
-  height: 25px;
+/* =========================================================
+   NAVBAR BASE
+========================================================= */
+
+.navbar,
+.navbarOff {
+  position: fixed;
+
+  top: 0;
+  left: 0;
+  right: 0;
+
+  width: 100%;
+
+  min-height: var(--navbar-height);
+
+  display: grid;
+
+  align-items: center;
+
+  gap: clamp(4px, 0.5vw, 14px);
+
+  padding:
+    clamp(6px, 0.7vw, 12px)
+    clamp(10px, 2vw, 40px);
+
+  background-color: var(--navbar-bg);
+
+  box-shadow:
+    0 5px 15px var(--navbar-shadow);
+
+  z-index: 998;
+
+  box-sizing: border-box;
 }
+
+/* =========================================================
+   NAVBAR AUTENTICADO
+========================================================= */
+
+.navbar {
+  grid-template-columns:
+    minmax(180px, 2.3fr)
+    repeat(6, minmax(75px, 1fr));
+}
+
+/* =========================================================
+   NAVBAR SIN AUTENTICAR
+========================================================= */
 
 .navbarOff {
-  display: grid;
-  position: fixed;
-  top: 0px;
-  left: 0px;
-  right: 0px;
-  grid-template-columns: 10fr 1fr 1fr 1fr 1fr 1fr;
-  gap: 0px;
-  padding-top: 10px;
-  padding-bottom: 5px;
-  background-color: #9dbe0a;
-  box-shadow: 0px 5px 10px rgba(128, 128, 128, 0.2);
-  z-index: 998;
-  border: #000209 solid 1px;
+  grid-template-columns:
+    minmax(180px, 2.3fr)
+    repeat(5, minmax(75px, 1fr));
+
+  border-bottom: 1px solid var(--navbar-border);
 }
 
-.navbar button {
-  display: grid;
-  justify-content: center;
+/* =========================================================
+   LINKS
+========================================================= */
+
+.link,
+.linkLogo {
+  min-width: 0;
+
+  height: 100%;
+
+  text-decoration: none;
+
+  color: inherit;
 }
 
-.navbar button img {
-  justify-self: center;
-}
+/* =========================================================
+   LOGO
+========================================================= */
 
-.navbarOff button {
-  display: grid;
-  justify-content: center;
-}
+.linkLogo {
+  display: flex;
 
-.navbarOff button img {
-  justify-self: center;
-}
+  align-items: center;
+  justify-content: flex-start;
 
-.smile {
-  width: 30px;
-  margin-bottom: -8px;
-}
-
-.saludo {
-  position: absolute;
-  left: 250px;
-  top: 6px;
-  font-size: 12px;
-  color: rgb(60, 60, 60);
-}
-
-.logout {
-  display: grid;
-  justify-content: center;
-  font-size: 14px;
+  padding-left: clamp(4px, 1vw, 18px);
 }
 
 .logo {
-  position: absolute;
-  width: 200px;
-  margin-top: -15px;
-  left: 40px;
-  z-index: 999;
+  width: clamp(130px, 13vw, 220px);
+
+  max-width: 100%;
+
+  height: auto;
+
+  display: block;
+
+  object-fit: contain;
 }
 
-.iconos {
+/* =========================================================
+   ITEMS DE NAVEGACIÓN
+========================================================= */
+
+.iconos,
+.iconosFalse,
+.logout {
+  width: 100%;
+  min-width: 0;
+
+  min-height: 48px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: clamp(4px, 0.45vw, 9px);
+
+  padding:
+    5px
+    clamp(5px, 0.8vw, 14px);
+
+  box-sizing: border-box;
+
+  border: none;
+
+  border-radius: 10px;
+
+  color: var(--navbar-text);
+
+  font-family: inherit;
+
+  font-size: clamp(11px, 0.8vw, 16px);
+
+  font-weight: 500;
+
+  line-height: 1.1;
+
   background: transparent;
-  font-size: 14px;
+
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+/* =========================================================
+   ICONOS
+========================================================= */
+
+.iconos img,
+.iconosFalse img,
+.logout img {
+  width: clamp(20px, 1.8vw, 30px);
+  height: clamp(20px, 1.8vw, 30px);
+
+  flex-shrink: 0;
+
+  object-fit: contain;
+}
+
+/* =========================================================
+   PERFIL
+========================================================= */
+
+.avatar {
+  width: clamp(24px, 2vw, 34px) !important;
+  height: clamp(24px, 2vw, 34px) !important;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   TEXTO
+========================================================= */
+
+.label {
+  min-width: 0;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
   white-space: nowrap;
 }
+
+/* =========================================================
+   USUARIO NO AUTENTICADO
+========================================================= */
 
 .iconosFalse {
-  background-color: #9dbe0a;
-  font-size: 13px;
-  white-space: nowrap;
+  background-color: transparent;
 }
 
-@media (max-width: 768px) {
+/* =========================================================
+   LOCK
+========================================================= */
+
+.lock {
+  font-size: clamp(14px, 1vw, 18px);
+}
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+.logout {
+  background: transparent;
+
+  margin: 0;
+}
+
+.logout img {
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   ESTADO ACTIVO
+========================================================= */
+
+.active .iconos {
+  background-color: var(--navbar-active);
+}
+
+/* =========================================================
+   HOVER
+========================================================= */
+
+@media (hover: hover) and (pointer: fine) {
+  .link:hover .iconos,
+  .link:hover .iconosFalse,
+  .logout:hover {
+    background-color: var(--navbar-hover);
+  }
+
+  .link:hover .iconos,
+  .link:hover .iconosFalse {
+    transform: translateY(-1px);
+  }
+
+  .logout:hover {
+    transform: translateY(-1px);
+  }
+}
+
+.iconos:active,
+.iconosFalse:active,
+.logout:active {
+  transform: scale(0.97);
+}
+
+/* =========================================================
+   TABLETS GRANDES / NOTEBOOKS
+   769px - 1100px
+========================================================= */
+
+@media (min-width: 769px) and (max-width: 1100px) {
+  .navbar,
+  .navbarOff {
+    padding-left: 12px;
+    padding-right: 12px;
+
+    gap: 3px;
+  }
+
   .navbar {
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-    bottom: 0;
-    top: auto;
-    padding-bottom: 10px;
+    grid-template-columns:
+      minmax(140px, 1.8fr)
+      repeat(6, minmax(65px, 1fr));
   }
 
   .navbarOff {
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-    bottom: 0;
-    top: auto;
-    justify-self: center;
+    grid-template-columns:
+      minmax(140px, 1.8fr)
+      repeat(5, minmax(65px, 1fr));
   }
 
   .logo {
-    display: none;
+    width: 145px;
   }
 
+  .label {
+    font-size: 11px;
+  }
+}
+
+/* =========================================================
+   CELULARES / TABLETS PEQUEÑAS
+   <= 768px
+========================================================= */
+
+@media (max-width: 768px) {
+  .navbar,
+  .navbarOff {
+    top: auto;
+    bottom: 0;
+
+    left: 0;
+    right: 0;
+
+    min-height: 64px;
+
+    height: auto;
+
+    padding:
+      7px
+      max(8px, env(safe-area-inset-left))
+      calc(7px + env(safe-area-inset-bottom))
+      max(8px, env(safe-area-inset-right));
+
+    gap: 4px;
+
+    border-top: 1px solid var(--navbar-border);
+
+    box-shadow:
+      0 -5px 15px var(--navbar-shadow);
+  }
+
+  .navbar {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .navbarOff {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  /* Logo no participa del layout móvil */
   .linkLogo {
     display: none;
   }
 
-  .div {
-    display: none;
-  }
-
-  .iconos {
-    font-size: 10px;
-  }
-
-  .saludo {
-    display: none;
-  }
-
-  .iconosFalse {
-    font-size: 10px;
-  }
-
+  .iconos,
+  .iconosFalse,
   .logout {
-    font-size: 10px;
+    min-height: 50px;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    gap: 2px;
+
+    padding: 4px 2px;
+
+    border-radius: 8px;
+
+    font-size: clamp(9px, 2.5vw, 12px);
+
+    line-height: 1;
   }
 
+  .iconos img,
+  .iconosFalse img,
+  .logout img {
+    width: clamp(19px, 6vw, 25px);
+    height: clamp(19px, 6vw, 25px);
+  }
+
+  .avatar {
+    width: clamp(23px, 6vw, 29px) !important;
+    height: clamp(23px, 6vw, 29px) !important;
+  }
+
+  .label {
+    max-width: 100%;
+
+    text-align: center;
+  }
+
+  .lock {
+    font-size: 12px;
+  }
+}
+
+/* =========================================================
+   CELULARES PEQUEÑOS
+   <= 480px
+========================================================= */
+
+@media (max-width: 480px) {
+  .navbar,
   .navbarOff {
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-    bottom: 0;
-    top: auto;
+    min-height: 60px;
+
+    padding-top: 5px;
+
+    gap: 2px;
+  }
+
+  .iconos,
+  .iconosFalse,
+  .logout {
+    min-height: 48px;
+
+    font-size: 9px;
+  }
+
+  .iconos img,
+  .iconosFalse img,
+  .logout img {
+    width: 20px;
+    height: 20px;
+  }
+
+  .avatar {
+    width: 22px !important;
+    height: 22px !important;
+  }
+}
+
+/* =========================================================
+   CELULARES MUY PEQUEÑOS
+   <= 360px
+========================================================= */
+
+@media (max-width: 360px) {
+  .navbar,
+  .navbarOff {
+    padding-left: 4px;
+    padding-right: 4px;
+
+    gap: 1px;
+  }
+
+  .iconos,
+  .iconosFalse,
+  .logout {
+    min-height: 46px;
+
+    padding-left: 1px;
+    padding-right: 1px;
+
+    font-size: 8px;
+  }
+
+  .iconos img,
+  .iconosFalse img,
+  .logout img {
+    width: 18px;
+    height: 18px;
+  }
+
+  .avatar {
+    width: 21px !important;
+    height: 21px !important;
+  }
+}
+
+/* =========================================================
+   MONITORES GRANDES
+   >= 1600px
+========================================================= */
+
+@media (min-width: 1600px) {
+  .navbar,
+  .navbarOff {
+    padding-left: 35px;
+    padding-right: 35px;
+
+    min-height: 80px;
+  }
+
+  .logo {
+    width: 210px;
+  }
+
+  .iconos,
+  .iconosFalse,
+  .logout {
+    min-height: 56px;
+
+    font-size: 15px;
+  }
+}
+
+/* =========================================================
+   2K / 4K / TV
+   >= 2200px
+========================================================= */
+
+@media (min-width: 2200px) {
+  .navbar,
+  .navbarOff {
+    min-height: 95px;
+
+    padding:
+      10px
+      50px;
+    gap: 10px;
+  }
+
+  .logo {
+    width: 250px;
+  }
+
+  .iconos,
+  .iconosFalse,
+  .logout {
+    min-height: 68px;
+
+    font-size: 18px;
+
+    border-radius: 14px;
+
+    gap: 8px;
+  }
+
+  .iconos img,
+  .iconosFalse img,
+  .logout img {
+    width: 34px;
+    height: 34px;
+  }
+
+  .avatar {
+    width: 40px !important;
+    height: 40px !important;
+  }
+}
+
+/* =========================================================
+   TV 4K / PANTALLAS MUY GRANDES
+   >= 3000px
+========================================================= */
+
+@media (min-width: 3000px) {
+  .navbar,
+  .navbarOff {
+    min-height: 110px;
+
+    padding-left: 70px;
+    padding-right: 70px;
+
+    gap: 14px;
+  }
+
+  .logo {
+    width: 290px;
+  }
+
+  .iconos,
+  .iconosFalse,
+  .logout {
+    min-height: 78px;
+
+    font-size: 21px;
+
+    border-radius: 16px;
+  }
+
+  .iconos img,
+  .iconosFalse img,
+  .logout img {
+    width: 40px;
+    height: 40px;
+  }
+
+  .avatar {
+    width: 46px !important;
+    height: 46px !important;
+  }
+}
+
+/* =========================================================
+   REDUCIR ANIMACIONES
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .iconos,
+  .iconosFalse,
+  .logout {
+    transition: none;
   }
 }

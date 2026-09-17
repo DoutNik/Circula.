@@ -1,129 +1,322 @@
+/* ========================================================= CONTENEDOR ========================================================= */
 .container {
+  width: min(100%, 1800px);
+  margin: 0 auto;
+  padding: clamp(10px, 2vw, 30px);
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding: 20px;
-}
-
-/* CARD */
+  gap: clamp(12px, 1.5vw, 24px);
+  box-sizing: border-box;
+} /* ========================================================= ESTADOS ========================================================= */
+.state {
+  width: min(100% - 30px, 1000px);
+  margin: clamp(25px, 4vw, 60px) auto;
+  padding: clamp(20px, 3vw, 40px);
+  text-align: center;
+  color: #777;
+  font-size: clamp(13px, 1vw, 18px);
+  box-sizing: border-box;
+} /* ========================================================= CARD ========================================================= */
 .card {
+  width: 100%;
+  min-width: 0;
   background: #ffffff;
-  border-radius: 16px;
-  padding: 16px 20px;
+  border-radius: clamp(12px, 1.2vw, 20px);
+  padding: clamp(12px, 1.5vw, 24px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: all 0.2s ease;
-}
-
-.card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-}
-
-/* CONTENIDO PRINCIPAL */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 1vw, 18px);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+} /* ========================================================= HOVER ========================================================= */
+@media (hover: hover) and (pointer: fine) {
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  }
+} /* ========================================================= PRODUCTOS ========================================================= */
 .like {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(10px, 2vw, 28px);
+} /* ========================================================= PRODUCTO INDIVIDUAL ========================================================= */
+.product {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+} /* ========================================================= IMAGEN ========================================================= */
+.product img {
+  width: clamp(65px, 9vw, 120px);
+  height: clamp(65px, 9vw, 120px);
+  max-width: 100%;
+  object-fit: cover;
+  aspect-ratio: 1 / 1;
+  border-radius: clamp(9px, 1vw, 15px);
+  border: 1px solid #eeeeee;
+  display: block;
+} /* ========================================================= ETIQUETA ========================================================= */
+.productLabel {
+  margin-top: clamp(6px, 0.7vw, 10px);
+  color: #888;
+  font-size: clamp(9px, 0.75vw, 13px);
+  font-weight: 500;
+  line-height: 1.2;
+} /* ========================================================= TÍTULO PRODUCTO ========================================================= */
+.product h4 {
+  width: 100%;
+  max-width: 260px;
+  margin: clamp(4px, 0.5vw, 8px) auto 0;
+  color: #333;
+  font-size: clamp(12px, 1vw, 17px);
+  font-weight: 600;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow-wrap: anywhere;
+} /* ========================================================= INTERCAMBIO ========================================================= */
+.exchange {
+  width: clamp(32px, 4vw, 50px);
+  height: clamp(32px, 4vw, 50px);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-/* IMÁGENES */
-.like img {
-  width: 90px;
-  height: 90px;
-  object-fit: cover;
-  border-radius: 12px;
-  border: 1px solid #eee;
-}
-
-/* INFO CENTRAL */
-.info {
-  flex: 1;
-  text-align: center;
-}
-
-.info h4 {
-  font-size: 14px;
-  margin: 4px 0;
-  font-weight: 600;
-  color: #333;
-}
-
-.info span {
-  display: block;
-  margin: 6px 0;
-  font-size: 18px;
-  color: #888;
-}
-
-/* BOTONES */
-.actions {
-  display: flex;
   justify-content: center;
-  gap: 12px;
-  margin-top: 15px;
-}
-
-.actions button {
-  padding: 10px 16px;
-  border-radius: 10px;
-  border: none;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-/* ACEPTAR */
-.actions button:first-child {
-  background: #22c55e;
-  color: white;
-}
-
-.actions button:first-child:hover {
-  background: #16a34a;
-}
-
-/* RECHAZAR */
-.actions button:last-child {
-  background: #ef4444;
-  color: white;
-}
-
-.actions button:last-child:hover {
-  background: #dc2626;
-}
-
-/* ESTADOS */
-.state {
-  text-align: center;
-  padding: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #f1f1f1;
   color: #777;
-  font-size: 16px;
 }
-
-/* RESPONSIVE */
-@media (max-width: 600px) {
+.exchange span {
+  font-size: clamp(17px, 1.7vw, 26px);
+  line-height: 1;
+} /* ========================================================= ACCIONES ========================================================= */
+.actions {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8px, 1vw, 14px);
+  margin-top: clamp(2px, 0.5vw, 8px);
+  flex-wrap: wrap;
+} /* ========================================================= BOTONES ========================================================= */
+.actions button {
+  min-width: clamp(105px, 12vw, 160px);
+  min-height: clamp(38px, 3vw, 48px);
+  padding: 7px clamp(12px, 1.5vw, 22px);
+  border: none;
+  border-radius: clamp(8px, 0.8vw, 11px);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: clamp(11px, 0.85vw, 15px);
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .actions button:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+  }
+}
+.actions button:active {
+  transform: scale(0.97);
+} /* ========================================================= ACEPTAR ========================================================= */
+.acceptButton {
+  background: #22c55e;
+} /* ========================================================= RECHAZAR ========================================================= */
+.rejectButton {
+  background: #ef4444;
+} /* ========================================================= TABLETS <= 900px ========================================================= */
+@media (max-width: 900px) {
+  .container {
+    padding: 14px;
+  }
   .like {
-    flex-direction: column;
-    text-align: center;
+    gap: 12px;
   }
-
-  .like img {
-    width: 100%;
-    max-width: 200px;
-    height: auto;
+  .product img {
+    width: clamp(70px, 12vw, 105px);
+    height: clamp(70px, 12vw, 105px);
   }
-
-  .info {
-    margin: 10px 0;
+  .product h4 {
+    font-size: 13px;
   }
-
+} /* ========================================================= CELULARES <= 600px ========================================================= */
+@media (max-width: 600px) {
+  .container {
+    padding: 10px 8px;
+  }
+  .card {
+    padding: 12px;
+  } /* Mantenemos los dos productos en paralelo para celulares normales. */
+  .like {
+    gap: 7px;
+  }
+  .product img {
+    width: clamp(58px, 20vw, 85px);
+    height: clamp(58px, 20vw, 85px);
+  }
+  .productLabel {
+    font-size: 9px;
+  }
+  .product h4 {
+    max-width: 110px;
+    font-size: 11px;
+    -webkit-line-clamp: 2;
+  }
+  .exchange {
+    width: 30px;
+    height: 30px;
+  }
+  .exchange span {
+    font-size: 15px;
+  }
   .actions {
-    flex-direction: column;
+    flex-direction: row;
+    gap: 7px;
   }
-
+  .actions button {
+    flex: 1;
+    min-width: 0;
+    min-height: 38px;
+    padding: 7px 8px;
+    font-size: 11px;
+  }
+} /* ========================================================= CELULARES MUY PEQUEÑOS <= 380px ========================================================= */
+@media (max-width: 380px) {
+  .card {
+    padding: 9px;
+  } /* A partir de este ancho usamos una disposición vertical para evitar comprimir demasiado los títulos. */
+  .like {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .product {
+    width: 100%;
+  }
+  .product img {
+    width: 72px;
+    height: 72px;
+  }
+  .product h4 {
+    max-width: 180px;
+  }
+  .exchange {
+    width: 29px;
+    height: 29px;
+    transform: rotate(90deg);
+  }
+  .actions {
+    width: 100%;
+    flex-direction: column;
+    gap: 6px;
+  }
   .actions button {
     width: 100%;
+    flex: none;
+  }
+} /* ========================================================= NOTEBOOK / MONITOR ========================================================= */
+@media (min-width: 1200px) {
+  .container {
+    max-width: 1600px;
+  }
+} /* ========================================================= MONITORES GRANDES ========================================================= */
+@media (min-width: 1800px) {
+  .card {
+    padding: 24px 28px;
+  }
+  .product img {
+    width: 125px;
+    height: 125px;
+  }
+} /* ========================================================= TV / 2K / 4K ========================================================= */
+@media (min-width: 2200px) {
+  .container {
+    max-width: 2200px;
+    gap: 28px;
+  }
+  .card {
+    padding: 30px;
+    border-radius: 22px;
+    gap: 24px;
+  }
+  .like {
+    gap: 40px;
+  }
+  .product img {
+    width: 150px;
+    height: 150px;
+  }
+  .productLabel {
+    font-size: 15px;
+  }
+  .product h4 {
+    max-width: 350px;
+    font-size: 20px;
+  }
+  .exchange {
+    width: 55px;
+    height: 55px;
+  }
+  .exchange span {
+    font-size: 28px;
+  }
+  .actions button {
+    min-height: 52px;
+    font-size: 17px;
+  }
+} /* ========================================================= PANTALLAS MUY GRANDES ========================================================= */
+@media (min-width: 3000px) {
+  .container {
+    max-width: 2800px;
+  }
+  .card {
+    padding: 36px;
+  }
+  .product img {
+    width: 180px;
+    height: 180px;
+  }
+  .productLabel {
+    font-size: 17px;
+  }
+  .product h4 {
+    max-width: 450px;
+    font-size: 23px;
+  }
+  .exchange {
+    width: 65px;
+    height: 65px;
+  }
+  .exchange span {
+    font-size: 34px;
+  }
+  .actions button {
+    min-height: 60px;
+    font-size: 20px;
+  }
+} /* ========================================================= REDUCIR ANIMACIONES ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .actions button {
+    transition: none;
   }
 }

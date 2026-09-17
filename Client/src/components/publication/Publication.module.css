@@ -1,106 +1,554 @@
+/* =========================================================
+   CONTENEDOR
+========================================================= */
+
+.publications {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: clamp(10px, 1vw, 18px);
+}
+
+/* =========================================================
+   PUBLICACIÓN
+========================================================= */
+
 .publication {
+  width: 100%;
+  min-width: 0;
+
   display: grid;
-  grid-template-columns: 90px 1fr auto;
+
+  /*
+    Imagen | información | acciones
+  */
+  grid-template-columns:
+    clamp(65px, 7vw, 110px)
+    minmax(0, 1fr)
+    auto;
+
   align-items: center;
 
-  height: 110px;
+  min-height: clamp(85px, 8vw, 125px);
 
-  padding: 12px 16px;
-  margin-top: 18px;
+  padding: clamp(8px, 1.2vw, 16px);
 
-  border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(0, 1, 10, 0.563);
+  box-sizing: border-box;
+
+  border-radius: clamp(10px, 1vw, 16px);
+
+  background: #ffffff;
+
+  box-shadow: 0 6px 18px rgba(0, 1, 10, 0.18);
+
+  position: relative;
+
+  gap: clamp(10px, 1.5vw, 22px);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+/* =========================================================
+   HOVER
+========================================================= */
+
+@media (hover: hover) and (pointer: fine) {
+  .publication:hover {
+    transform: translateY(-2px);
+
+    box-shadow: 0 9px 24px rgba(0, 1, 10, 0.22);
+  }
+}
+
+/* =========================================================
+   IMAGEN
+========================================================= */
+
+.imageContainer {
+  width: clamp(65px, 7vw, 110px);
+  height: clamp(65px, 7vw, 110px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
 }
 
 .img {
-  width: 90px;
-  height: 90px;
+  width: 100%;
+  height: 100%;
+
   object-fit: cover;
-  border-radius: 10px;
+
+  border-radius: clamp(8px, 0.8vw, 13px);
+
+  display: block;
 }
+
+/* =========================================================
+   INFO
+========================================================= */
 
 .info {
+  min-width: 0;
+
   display: flex;
   flex-direction: column;
+
   justify-content: center;
-  gap: 6px;
+
+  gap: clamp(4px, 0.5vw, 8px);
 }
+
+/* =========================================================
+   TÍTULO
+========================================================= */
 
 .title {
+  min-width: 0;
+
+  margin: 0;
+
+  color: #222;
+
   font-weight: 600;
-  font-size: 1.1rem;
+
+  font-size: clamp(13px, 1.1vw, 18px);
+
+  line-height: 1.3;
 
   overflow: hidden;
-  white-space: nowrap;
+
   text-overflow: ellipsis;
+
+  white-space: nowrap;
 }
+
+/* =========================================================
+   META
+========================================================= */
 
 .meta {
   color: #666;
-  font-size: 0.95rem;
+
+  font-size: clamp(11px, 0.85vw, 15px);
+
+  line-height: 1.3;
+
+  white-space: nowrap;
 }
 
+/* =========================================================
+   TEXTO PREMIUM
+========================================================= */
+
 .premiumHint {
-  font-size: 0.85rem;
+  margin: 0;
+
   color: #ff8800;
+
+  font-size: clamp(10px, 0.75vw, 14px);
+
   font-weight: 600;
 }
 
+/* =========================================================
+   ACCIONES
+========================================================= */
+
 .actions {
   position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
 }
+
+/* =========================================================
+   BOTÓN MENÚ
+========================================================= */
+
+.menuBtn {
+  width: clamp(32px, 3vw, 42px);
+  height: clamp(32px, 3vw, 42px);
+
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: transparent;
+
+  color: #333;
+
+  font-size: clamp(22px, 2vw, 30px);
+
+  font-weight: bold;
+
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .menuBtn:hover {
+    background: #f2f2f2;
+
+    transform: scale(1.05);
+  }
+}
+
+.menuBtn:active {
+  transform: scale(0.95);
+}
+
+/* =========================================================
+   MENÚ DESPLEGABLE
+========================================================= */
 
 .menu {
   position: absolute;
-  right: 0;
-  top: 42px;
 
-  background: white;
+  top: calc(100% + 6px);
+  right: 0;
+
+  min-width: 150px;
+
+  max-width: min(220px, 75vw);
+
+  background: #ffffff;
+
   border-radius: 10px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 
   display: flex;
   flex-direction: column;
+
   overflow: hidden;
 
-  z-index: 10;
+  z-index: 100;
 }
+
+/* =========================================================
+   ITEMS DEL MENÚ
+========================================================= */
 
 .menuItem {
-  padding: 12px 18px;
-  background: none;
+  width: 100%;
+
+  min-height: 42px;
+
+  padding: 9px 14px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  background: transparent;
+
   border: none;
+
+  color: #222;
+
   text-align: left;
-  cursor: pointer;
-  font-size: 0.95rem;
-}
 
-.menuItem:hover {
-  background: #f5f5f5;
-}
+  font-family: inherit;
 
-.menuBtn {
-  font-size: 28px;
-  font-weight: bold;
+  font-size: clamp(12px, 0.85vw, 15px);
 
-  background: none;
-  border: none;
   cursor: pointer;
 
-  padding: 6px 10px;
-  border-radius: 8px;
+  white-space: nowrap;
+
+  transition: background-color 0.2s ease;
 }
 
-.menuBtn:hover {
-  background: #f2f2f2;
+@media (hover: hover) and (pointer: fine) {
+  .menuItem:hover {
+    background: #f5f5f5;
+  }
 }
+
+/* =========================================================
+   ELIMINAR
+========================================================= */
 
 .menuItemDanger {
-  composes: menuItem;
   color: #e53935;
 }
 
-.menuItemDanger:hover {
-  background: #ffeaea;
+@media (hover: hover) and (pointer: fine) {
+  .menuItemDanger:hover {
+    background: #ffeaea;
+  }
 }
 
+/* =========================================================
+   TABLETS
+========================================================= */
+
+@media (max-width: 768px) {
+  .publication {
+    grid-template-columns:
+      70px
+      minmax(0, 1fr)
+      auto;
+
+    min-height: 86px;
+
+    gap: 10px;
+
+    padding: 10px;
+  }
+
+  .imageContainer {
+    width: 70px;
+    height: 70px;
+  }
+
+  .title {
+    font-size: 14px;
+  }
+
+  .meta {
+    font-size: 12px;
+  }
+
+  .menu {
+    min-width: 140px;
+  }
+}
+
+/* =========================================================
+   CELULARES
+========================================================= */
+
+@media (max-width: 480px) {
+  .publication {
+    grid-template-columns:
+      58px
+      minmax(0, 1fr)
+      auto;
+
+    min-height: 72px;
+
+    padding: 8px;
+
+    gap: 8px;
+
+    border-radius: 10px;
+  }
+
+  .imageContainer {
+    width: 58px;
+    height: 58px;
+  }
+
+  .img {
+    border-radius: 8px;
+  }
+
+  .title {
+    font-size: 12px;
+
+    line-height: 1.25;
+  }
+
+  .meta {
+    font-size: 10px;
+  }
+
+  .menuBtn {
+    width: 30px;
+    height: 30px;
+
+    font-size: 22px;
+  }
+
+  .menu {
+    top: calc(100% + 4px);
+
+    min-width: 135px;
+  }
+
+  .menuItem {
+    min-height: 38px;
+
+    padding: 8px 11px;
+
+    font-size: 12px;
+  }
+}
+
+/* =========================================================
+   CELULARES MUY PEQUEÑOS
+========================================================= */
+
+@media (max-width: 360px) {
+  .publication {
+    grid-template-columns:
+      50px
+      minmax(0, 1fr)
+      30px;
+
+    min-height: 64px;
+
+    padding: 7px;
+
+    gap: 7px;
+  }
+
+  .imageContainer {
+    width: 50px;
+    height: 50px;
+  }
+
+  .title {
+    font-size: 11px;
+  }
+
+  .meta {
+    font-size: 9px;
+  }
+
+  .menu {
+    right: -4px;
+
+    min-width: 130px;
+  }
+}
+
+/* =========================================================
+   NOTEBOOKS / MONITORES MEDIANOS
+========================================================= */
+
+@media (min-width: 1200px) {
+  .publication {
+    gap: 20px;
+  }
+}
+
+/* =========================================================
+   MONITORES GRANDES
+========================================================= */
+
+@media (min-width: 1800px) {
+  .publication {
+    min-height: 130px;
+
+    padding: 18px 22px;
+
+    gap: 24px;
+  }
+
+  .imageContainer {
+    width: 110px;
+    height: 110px;
+  }
+}
+
+/* =========================================================
+   TV / 2K / 4K
+========================================================= */
+
+@media (min-width: 2200px) {
+  .publication {
+    min-height: 150px;
+
+    padding: 22px 28px;
+
+    border-radius: 18px;
+
+    gap: 30px;
+  }
+
+  .imageContainer {
+    width: 125px;
+    height: 125px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .meta {
+    font-size: 16px;
+  }
+
+  .menuBtn {
+    width: 46px;
+    height: 46px;
+
+    font-size: 32px;
+  }
+
+  .menuItem {
+    min-height: 48px;
+
+    padding: 12px 18px;
+
+    font-size: 16px;
+  }
+}
+
+/* =========================================================
+   PANTALLAS MUY GRANDES
+========================================================= */
+
+@media (min-width: 3000px) {
+  .publication {
+    min-height: 175px;
+
+    padding: 28px 34px;
+  }
+
+  .imageContainer {
+    width: 145px;
+    height: 145px;
+  }
+
+  .title {
+    font-size: 23px;
+  }
+
+  .meta {
+    font-size: 18px;
+  }
+
+  .menuBtn {
+    width: 52px;
+    height: 52px;
+
+    font-size: 36px;
+  }
+}
+
+/* =========================================================
+   REDUCIR ANIMACIONES
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .publication,
+  .menuBtn,
+  .menuItem {
+    transition: none;
+  }
+}
