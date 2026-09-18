@@ -1,49 +1,157 @@
-.vModal {
-  display: grid;
-  position: absolute;
-  justify-self: center;
-  width: fit-content;
-  height: fit-content;
-  box-shadow: 0px 5px 10px rgba(125, 125, 125, 0.3);
-  background-color: aliceblue;
-  border-radius: 10px;
-  z-index: 999;
-}
-
-.vModal iframe {
-  display: grid;
-  padding: 15px;
-}
-
-.closeButton {
-  display: grid;
-  justify-self: center;
-  height: 30px;
-  width: 30px;
-  border-radius: 50%;
-  display: grid;
-  margin-top: -10px;
-  margin-left: 980px;
-  background-color: tomato;
-  padding: 0;
-  padding-top: 1px;
+/* ========================================================= OVERLAY ========================================================= */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: clamp(10px, 3vw, 40px);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.72);
   z-index: 9999;
+  overflow-y: auto;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+} /* ========================================================= MODAL ========================================================= */
+.modal {
+  position: relative;
+  width: min(
+    100%,
+    1000px
+  ); /* Mantiene una relación apropiada para el video sin depender de una altura fija. */
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border-radius: clamp(8px, 1vw, 16px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  padding: clamp(6px, 1vw, 15px);
+  box-sizing: border-box;
+  z-index: 10000;
+} /* ========================================================= VIDEO ========================================================= */
+.videoContainer {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: clamp(5px, 0.7vw, 12px);
+  background: #000;
 }
-
-@media (max-width: 768px) {
-  .vModal {
-    margin-top: 200px;
-    width: 320px;
-    height: 160px;
+.videoContainer iframe {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: none;
+} /* ========================================================= BOTÓN CERRAR ========================================================= */
+.closeButton {
+  position: absolute;
+  top: clamp(-18px, -1.5vw, -10px);
+  right: clamp(-18px, -1.5vw, -10px);
+  width: clamp(30px, 3vw, 44px);
+  height: clamp(30px, 3vw, 44px);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: tomato;
+  color: #ffffff;
+  font-family: Arial, sans-serif;
+  font-size: clamp(20px, 1.8vw, 28px);
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 10001;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .closeButton:hover {
+    transform: scale(1.1);
+    filter: brightness(1.05);
   }
-
-  .vModal iframe {
-    width: 290px;
-    height: 130px;
+}
+.closeButton:active {
+  transform: scale(0.95);
+} /* ========================================================= CELULARES <= 600px ========================================================= */
+@media (max-width: 600px) {
+  .modalOverlay {
+    padding: 16px;
   }
-
+  .modal {
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: 16 / 9;
+    padding: 5px;
+    border-radius: 10px;
+  }
   .closeButton {
-    margin-top: 185px;
-    margin-left: 320px;
+    top: -12px;
+    right: -8px;
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+  }
+} /* ========================================================= CELULARES MUY PEQUEÑOS <= 360px ========================================================= */
+@media (max-width: 360px) {
+  .modalOverlay {
+    padding: 12px;
+  }
+  .modal {
+    padding: 4px;
+    border-radius: 8px;
+  }
+  .closeButton {
+    top: -10px;
+    right: -6px;
+    width: 29px;
+    height: 29px;
+    font-size: 18px;
+  }
+} /* ========================================================= TABLETS ========================================================= */
+@media (min-width: 601px) and (max-width: 900px) {
+  .modal {
+    width: min(90vw, 850px);
+  }
+} /* ========================================================= NOTEBOOKS / MONITORES ========================================================= */
+@media (min-width: 901px) and (max-width: 1600px) {
+  .modal {
+    width: min(85vw, 960px);
+  }
+} /* ========================================================= MONITORES GRANDES ========================================================= */
+@media (min-width: 1601px) and (max-width: 2200px) {
+  .modal {
+    width: min(80vw, 1200px);
+  }
+} /* ========================================================= TV / 2K / 4K ========================================================= */
+@media (min-width: 2201px) {
+  .modal {
+    width: min(80vw, 1500px);
+    padding: 18px;
+    border-radius: 20px;
+  }
+  .closeButton {
+    width: 50px;
+    height: 50px;
+    font-size: 31px;
+  }
+} /* ========================================================= PANTALLAS MUY GRANDES ========================================================= */
+@media (min-width: 3000px) {
+  .modal {
+    width: min(80vw, 1800px);
+    padding: 22px;
+    border-radius: 24px;
+  }
+  .closeButton {
+    width: 60px;
+    height: 60px;
+    font-size: 38px;
+  }
+} /* ========================================================= REDUCIR ANIMACIONES ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  .closeButton {
+    transition: none;
   }
 }
