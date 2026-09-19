@@ -31,7 +31,6 @@ const Detail = ({ userData }) => {
 
   const allLikes = useSelector((state) => state.allLikes);
   const matches = useSelector((state) => state.matches) || [];
-  const [liked, setLiked] = useState(false);
   const [userPosts, setUserPosts] = useState([]);
   const [showPostSelector, setShowPostSelector] = useState(false);
   const [selectedPostId, setSelectedPostId] = useState(null);
@@ -48,11 +47,11 @@ const Detail = ({ userData }) => {
     }
   }, [userData, allPosts2]);
 
- useEffect(() => {
-  if (myUserId) {
-    dispatch(getMatches(myUserId));
-  }
-}, [dispatch, myUserId]);
+  useEffect(() => {
+    if (myUserId) {
+      dispatch(getMatches(myUserId));
+    }
+  }, [dispatch, myUserId]);
 
   // Comprueba si likedPostId está en la lista de likedPosts
   const isPostLiked = allLikes.some(
@@ -70,18 +69,18 @@ const Detail = ({ userData }) => {
   );
 
   const isMatched = matches.some((match) =>
-  match.posts?.some((p) => p.id === likedPostId)
-);
+    match.posts?.some((p) => p.id === likedPostId),
+  );
 
-useEffect(() => {
-  if (id) {
+  useEffect(() => {
+    if (!id) return;
+
     dispatch(getPostById(id));
-  }
 
-  return () => {
-    dispatch(clearDetail());
-  };
-}, [dispatch, id]);
+    return () => {
+      dispatch(clearDetail());
+    };
+  }, [dispatch, id]);
 
   useEffect(() => {
     dispatch(getAllLikes());
@@ -90,12 +89,12 @@ useEffect(() => {
 
   const handleLikeClick = async () => {
     if (myPostId) {
-      if (!liked && !isMatched && !isPostLiked) {
+      if (!isPostLiked && !isMatched) {
         await dispatch(
           likePost(myUserId, likedPostId, myPostId, anotherUserId),
         );
 
-        setLiked(true);
+        await dispatch(getAllLikes());
 
         Swal.fire({
           title: "Solicitud de canje enviada",
@@ -110,21 +109,17 @@ useEffect(() => {
   };
   const settings = {
     dots: true,
-    infinite: true,
-    speed: 500,
+    infinite: (post?.image?.length ?? 0) > 1,
+    speed: 400,
     slidesToShow: 1,
     slidesToScroll: 1,
+    arrows: true,
     responsive: [
       {
         breakpoint: 768,
         settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-          infinite: true,
-          variableWidth: true,
-          className: "slider variable-width",
-          dots: true,
           arrows: false,
+          dots: true,
         },
       },
     ],
@@ -169,18 +164,23 @@ useEffect(() => {
 
   const isPostAlreadyRequested = (myPostId, likedPostId) => {
     return allLikes.some(
-      (like) => like.myPostId == myPostId && like.likedPostId == likedPostId,
+      (like) =>
+        Number(like.myPostId) === Number(myPostId) &&
+        Number(like.likedPostId) === Number(likedPostId),
     );
   };
 
   let disabledReason = "";
 
-  if (liked) disabledReason = "Ya enviaste una solicitud de canje";
-  else if (myUserId === anotherUserId)
+  if (isPostLiked) {
+    disabledReason = "Ya enviaste una solicitud de canje";
+  } else if (myUserId === anotherUserId) {
     disabledReason = "No puedes canjear tu propia publicación";
-  else if (isMatched) disabledReason = "Este canje ya fue realizado";
-  else if (!hasAvailableProduct)
+  } else if (isMatched) {
+    disabledReason = "Este canje ya fue realizado";
+  } else if (!hasAvailableProduct) {
     disabledReason = "Intentaste este canje con todos tus productos";
+  }
 
   return (
     <>
@@ -274,32 +274,29 @@ useEffect(() => {
       <motion.div
         initial={{
           opacity: 0,
-          scale: 0.9,
+          scale: 0.96,
         }}
         animate={{
           opacity: 1,
-          scale: 1.1,
+          scale: 1,
+        }}
+        transition={{
+          duration: 0.25,
         }}
         className={style.detail}
       >
         <div className={style.carousel}>
           {post && post.title && <h3>{post.title}</h3>}
           <Slider {...settings}>
-            {post && post.image && post.image[0] && (
-              <div>
-                <img src={post.image[0]} alt="Image 1" className={style.img} />
+            {post?.image?.map((image, index) => (
+              <div key={`${post.id}-${index}`}>
+                <img
+                  src={image}
+                  alt={`${post.title} - imagen ${index + 1}`}
+                  className={style.img}
+                />
               </div>
-            )}
-            {post && post.image && post.image[1] && (
-              <div>
-                <img src={post.image[1]} alt="Image 2" className={style.img} />
-              </div>
-            )}
-            {post && post.image && post.image[2] && (
-              <div>
-                <img src={post.image[2]} alt="Image 3" className={style.img} />
-              </div>
-            )}
+            ))}
           </Slider>
         </div>
 

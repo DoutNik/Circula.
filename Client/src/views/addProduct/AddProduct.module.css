@@ -1,163 +1,218 @@
+/* ========================================================= CONTENEDOR ========================================================= */
 .container {
+  width: min(calc(100% - 24px), 1200px);
+  margin: clamp(16px, 4vw, 45px) auto clamp(80px, 8vw, 110px);
+  padding: clamp(16px, 3vw, 40px);
   box-sizing: border-box;
-  width: min(calc(100% - 2rem), 60rem);
-  margin: clamp(1.5rem, 4vw, 3rem) auto 6rem;
-  padding: clamp(1.25rem, 4vw, 2.5rem);
-  border-radius: 0.75rem;
-  background-color: transparent;
+  border-radius: clamp(12px, 1.2vw, 20px);
+  background: transparent;
   box-shadow: 0 0.35rem 1rem rgba(128, 128, 128, 0.22);
   transition: box-shadow 300ms ease;
 }
-
 .container,
 .container * {
   box-sizing: border-box;
-}
-
+} /* ========================================================= TÍTULO ========================================================= */
 .container h3 {
-  margin: 0 0 clamp(1.5rem, 4vw, 3rem);
+  margin: 0 0 clamp(18px, 3vw, 40px);
   color: gray;
   text-align: center;
-  font-size: clamp(1.25rem, 3vw, 1.75rem);
-}
-
+  font-size: clamp(20px, 3vw, 30px);
+  line-height: 1.2;
+} /* ========================================================= FORMULARIO ========================================================= */
 .create {
+  width: 100%;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(1rem, 3vw, 2rem);
+  gap: clamp(18px, 3vw, 36px);
   align-items: start;
   color: #000;
-}
-
+} /* ========================================================= COLUMNAS ========================================================= */
 .part1,
 .part2 {
-  display: grid;
-  gap: 0.8rem;
-  min-width: 0;
-}
-
-.part1 > label,
-.part2 > label {
-  display: grid;
-  gap: 0.4rem;
   width: 100%;
-  margin: 0;
-  color: gray;
-  font-size: 0.8rem;
+  min-width: 0;
+  display: grid;
+  gap: clamp(10px, 1vw, 15px);
 }
-
 .part2 {
   grid-template-columns: 1fr;
-  gap: 0.45rem;
-}
-
-.part2 > label:not(:first-child) {
-  margin-top: 0.6rem;
-}
-
+  gap: clamp(8px, 1vw, 13px);
+} /* ========================================================= LABELS ========================================================= */
+.fieldLabel {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  color: gray;
+  font-size: clamp(12px, 0.8vw, 14px);
+  line-height: 1.3;
+} /* ========================================================= INPUTS ========================================================= */
 .input,
 .create select {
   width: 100%;
   min-width: 0;
-  min-height: 2.6rem;
-  padding: 0.65rem 0.75rem;
-  border: none;
-  border-radius: 0.4rem;
+  min-height: clamp(40px, 3.5vw, 48px);
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 7px;
   outline: none;
-  color: gray;
-  background-color: #fff;
+  color: #555;
+  background: #fff;
   box-shadow: 0 0.3rem 0.7rem rgba(128, 128, 128, 0.16);
   font-family: "DM Sans", sans-serif;
-  font-size: 0.9rem;
-  transition: border-color 200ms ease, box-shadow 200ms ease;
+  font-size: clamp(13px, 0.9vw, 16px);
+  transition:
+    border-color 200ms ease,
+    box-shadow 200ms ease;
 }
-
+.input::placeholder {
+  color: #999;
+}
 .input:focus,
 .create select:focus {
-  border: none;
-  box-shadow: 0 0.3rem 0.7rem rgba(128, 128, 128, 0.2);
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.12);
 }
-
+.input:disabled,
+.create select:disabled {
+  background: #f0f0f0;
+  color: #999;
+  cursor: not-allowed;
+}
 textarea.input {
-  min-height: 7rem;
+  min-height: 140px;
   resize: vertical;
+  line-height: 1.5;
 }
-
 .create select {
   cursor: pointer;
-}
-
+} /* ========================================================= CONTADOR ========================================================= */
+.characterCount {
+  align-self: flex-end;
+  margin-top: -2px;
+  color: #888;
+  font-size: clamp(10px, 0.7vw, 12px);
+} /* ========================================================= ARCHIVOS ========================================================= */
 .files {
-  display: grid;
   width: 100%;
-  min-height: 3rem;
+  min-height: 100px;
   margin: 0;
-  padding: 0.5rem;
-  border-radius: 0.4rem;
-  background-color: #fff;
+  padding: 8px;
+  border-radius: 7px;
+  background: #fff;
   box-shadow: 0 0.3rem 0.7rem rgba(128, 128, 128, 0.16);
-}
-
+} /* ========================================================= DROPZONE ========================================================= */
 .dropzone {
+  width: 100%;
+  min-height: clamp(90px, 10vw, 145px);
   display: grid;
-  min-height: 5rem;
   place-items: center;
-  padding: 0.75rem;
+  padding: clamp(12px, 2vw, 24px);
   border: 2px dashed rgba(128, 128, 128, 0.3);
-  border-radius: 0.4rem;
+  border-radius: 7px;
   color: #5f6b6a;
   text-align: center;
-  font-size: 0.8rem;
+  font-size: clamp(11px, 0.8vw, 14px);
+  line-height: 1.4;
   cursor: pointer;
-  transition: background-color 200ms ease, border-color 200ms ease;
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease;
 }
-
-.dropzone:hover {
-  border-color: #1a535c;
-  background-color: rgba(78, 205, 196, 0.08);
+@media (hover: hover) and (pointer: fine) {
+  .dropzone:hover {
+    border-color: #1a535c;
+    background-color: rgba(78, 205, 196, 0.08);
+  }
+} /* ========================================================= PREVIEWS ========================================================= */
+.previewGrid {
+  width: 100%;
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 10px;
+  justify-items: center;
 }
-
-.files button {
-  margin-top: 0.4rem;
-  padding: 0.2rem 0.45rem;
+.previewItem {
+  width: 100%;
+  max-width: 110px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.previewImage {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+  border-radius: 7px;
+  border: 1px solid #ddd;
+}
+.removeImageButton {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
-  border-radius: 0.3rem;
+  border-radius: 50%;
   background: transparent;
   cursor: pointer;
+  transition:
+    transform 200ms ease,
+    background-color 200ms ease;
 }
-
+@media (hover: hover) and (pointer: fine) {
+  .removeImageButton:hover:not(:disabled) {
+    transform: scale(1.08);
+    background: rgba(255, 0, 0, 0.08);
+  }
+}
+.removeImageButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+} /* ========================================================= ERRORES ========================================================= */
 .errorMessage {
   margin: 0;
   color: crimson;
-  font-size: 0.75rem;
-}
-
+  font-size: clamp(10px, 0.75vw, 13px);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+} /* ========================================================= BOTÓN ========================================================= */
 .button {
   grid-column: 1 / -1;
   justify-self: center;
-  min-width: 8rem;
-  padding: 0.7rem 1.25rem;
+  min-width: clamp(120px, 15vw, 180px);
+  min-height: clamp(40px, 3.5vw, 50px);
+  padding: 8px 20px;
   border: 0;
-  border-radius: 0.4rem;
+  border-radius: 7px;
   background-color: #4ecdc4;
   box-shadow: 0 0.3rem 0.7rem rgba(125, 125, 125, 0.3);
   color: whitesmoke;
-  font-size: 0.95rem;
+  font-family: inherit;
+  font-size: clamp(12px, 0.9vw, 16px);
   font-weight: 700;
   cursor: pointer;
-  transition: background-color 200ms ease, transform 200ms ease;
+  transition:
+    background-color 200ms ease,
+    transform 200ms ease;
 }
-
-.button:hover:not(:disabled) {
-  background-color: #1a535c;
-  transform: translateY(-1px);
+@media (hover: hover) and (pointer: fine) {
+  .button:hover:not(:disabled) {
+    background-color: #1a535c;
+    transform: translateY(-1px);
+  }
 }
-
 .button:disabled {
   background-color: #cccece;
   cursor: not-allowed;
-}
-
+  transform: none;
+} /* ========================================================= LOADER ========================================================= */
 .loaderContainer {
   grid-column: 1 / -1;
   display: flex;
@@ -165,83 +220,154 @@ textarea.input {
   align-items: center;
   gap: 0.65rem;
   color: gray;
-  font-size: 0.85rem;
+  font-size: clamp(11px, 0.8vw, 14px);
+  text-align: center;
 }
-
 .loader {
-  width: 3rem;
+  width: clamp(30px, 4vw, 48px);
   aspect-ratio: 1;
-  border: 0.45rem solid transparent;
+  border: clamp(5px, 0.5vw, 7px) solid transparent;
   border-right-color: rgba(255, 190, 40, 0.9);
   border-radius: 50%;
   animation: spinner 1s linear infinite;
 }
-
 .message {
-  margin: 1.25rem 0 0;
+  margin: 18px 0 0;
   color: grey;
   text-align: center;
-  font-size: 0.75rem;
+  font-size: clamp(10px, 0.7vw, 13px);
   font-weight: 400;
 }
-
 @keyframes spinner {
   to {
     transform: rotate(1turn);
   }
-}
-
-/* Tablets y pantallas medianas */
-@media (max-width: 768px) {
+} /* ========================================================= TABLETS ========================================================= */
+@media (max-width: 900px) {
   .container {
-    width: min(calc(100% - 1.5rem), 38rem);
-    margin-bottom: 3rem;
+    width: min(calc(100% - 24px), 700px);
   }
-
   .create {
     grid-template-columns: 1fr;
   }
-
   .button,
   .loaderContainer {
     grid-column: 1;
   }
-}
-
-/* Móviles pequeños */
-@media (max-width: 420px) {
+} /* ========================================================= CELULARES ========================================================= */
+@media (max-width: 480px) {
   .container {
-    width: calc(100% - 1rem);
-    padding: 1rem;
-    border-radius: 0.5rem;
+    width: calc(100% - 16px);
+    padding: 14px;
+    border-radius: 10px;
   }
-
   .container h3 {
-    margin-bottom: 1.25rem;
+    margin-bottom: 20px;
   }
-
   .input,
   .create select {
-    min-height: 2.8rem;
-    font-size: 1rem;
+    min-height: 42px;
+    font-size: 13px;
   }
-
+  textarea.input {
+    min-height: 120px;
+  }
   .dropzone {
-    min-height: 6rem;
+    min-height: 105px;
   }
-
+  .previewGrid {
+    grid-template-columns: repeat(3, minmax(60px, 1fr));
+  }
+  .previewItem {
+    max-width: 90px;
+  }
   .button {
     width: 100%;
   }
-}
-
-/* Evita animaciones innecesarias si el usuario lo configuró así */
+} /* ========================================================= CELULARES MUY PEQUEÑOS ========================================================= */
+@media (max-width: 360px) {
+  .container {
+    width: calc(100% - 10px);
+    padding: 10px;
+  }
+  .previewGrid {
+    grid-template-columns: repeat(2, minmax(60px, 1fr));
+  }
+  .dropzone {
+    min-height: 95px;
+  }
+} /* ========================================================= MONITORES GRANDES ========================================================= */
+@media (min-width: 1600px) {
+  .container {
+    width: min(calc(100% - 60px), 1300px);
+  }
+  .input,
+  .create select {
+    min-height: 52px;
+    font-size: 16px;
+  }
+  textarea.input {
+    min-height: 170px;
+  }
+} /* ========================================================= 2K / 4K / TV ========================================================= */
+@media (min-width: 2200px) {
+  .container {
+    width: min(calc(100% - 100px), 1500px);
+    padding: 50px;
+  }
+  .container h3 {
+    font-size: 36px;
+  }
+  .input,
+  .create select {
+    min-height: 60px;
+    font-size: 19px;
+    border-radius: 10px;
+  }
+  textarea.input {
+    min-height: 220px;
+  }
+  .dropzone {
+    min-height: 170px;
+    font-size: 17px;
+  }
+  .button {
+    min-height: 60px;
+    font-size: 18px;
+  }
+} /* ========================================================= PANTALLAS MUY GRANDES ========================================================= */
+@media (min-width: 3000px) {
+  .container {
+    width: min(calc(100% - 140px), 1800px);
+  }
+  .container h3 {
+    font-size: 44px;
+  }
+  .input,
+  .create select {
+    min-height: 70px;
+    font-size: 21px;
+  }
+  textarea.input {
+    min-height: 260px;
+  }
+  .dropzone {
+    min-height: 210px;
+    font-size: 20px;
+  }
+  .button {
+    min-height: 70px;
+    font-size: 21px;
+  }
+} /* ========================================================= REDUCIR ANIMACIONES ========================================================= */
 @media (prefers-reduced-motion: reduce) {
   .container,
   .button,
   .dropzone,
-  .loader {
+  .removeImageButton {
     transition: none;
+  }
+  .loader {
     animation: none;
   }
 }

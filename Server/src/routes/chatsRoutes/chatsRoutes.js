@@ -8,23 +8,63 @@ const isAdmin = require("../../middleware/isAdmin");
 router.get("/allChats", authorization, isAdmin, async (req, res) => {
   try {
     const response = await chatsControllers.getAllChats();
+
     return res.status(200).json(response);
   } catch (error) {
-    return res.status(400).json(error.message);
+    console.error("Error al obtener todos los chats:", error);
+
+    return res.status(500).json({
+      error: "Error interno del servidor",
+    });
   }
 });
 
-// Crear chat: el usuario que llama debe ser una de las dos partes
+// Crear chat.
+// El usuario autenticado sale SIEMPRE del token.
+// El cliente solamente indica con quién quiere iniciar el chat.
 router.post("/create", authorization, async (req, res) => {
-  const { anotherUserId } = req.body;
-  const userId = req.body.user;
   try {
-    const response = await chatsControllers.createChat(userId, anotherUserId);
+    const userId = Number(req.user?.id);
+    const anotherUserId = Number(req.body?.anotherUserId);
 
-    return res.status(201).json({ chatId: response.id });
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.status(401).json({
+        error: "Usuario no autenticado",
+      });
+    }
+
+    if (!Number.isInteger(anotherUserId) || anotherUserId <= 0) {
+      return res.status(400).json({
+        error: "anotherUserId inválido",
+      });
+    }
+
+    if (userId === anotherUserId) {
+      return res.status(400).json({
+        error: "No puedes crear un chat contigo mismo",
+      });
+    }
+
+    const response = await chatsControllers.createChat(
+      userId,
+      anotherUserId,
+    );
+
+    return res.status(response.created ? 201 : 200).json({
+      chatId: response.id,
+    });
   } catch (error) {
     console.error("Error al crear el chat:", error);
-    return res.status(400).json({ error: error.message });
+
+    if (error.statusCode) {
+      return res.status(error.statusCode).json({
+        error: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      error: "Error interno del servidor",
+    });
   }
 });
 

@@ -1,5 +1,14 @@
-import { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
+import {
+  useSelector,
+  useDispatch,
+} from "react-redux";
+
 import {
   getAllExistingUsers,
   getAllExistingPosts,
@@ -17,24 +26,62 @@ import {
   resetPostsFilter,
   disablePost,
 } from "../../redux/actions";
+
 import style from "./AdminDash.module.css";
 import Swal from "sweetalert2";
 import notpremium from "../../assets/not-premium.png";
 
 const AdminDash = () => {
   const dispatch = useDispatch();
-  const allUsers = useSelector((state) => state.allExistingUsers);
-  const allUsersCopy = useSelector((state) => state.allExistingUsersCopy);
-  const allPosts = useSelector((state) => state.allExistingPosts);
-  const allPostsCopy = useSelector((state) => state.allExistingPostsCopy);
-  const allMatches = useSelector((state) => state.matches);
 
-  const [selectedUserID, setselectedUserID] = useState("");
-  const [selectedUserPlan, setselectedUserPlan] = useState("");
-  const [selectedUserStatus, setselectedUserStatus] = useState("");
+  const allUsers = useSelector(
+    (state) => state.allExistingUsers
+  );
 
-  const [selectedPostsID, setselectedPostID] = useState("");
-  const [selectedPostStatus, setselectedPostStatus] = useState("");
+  const allUsersCopy = useSelector(
+    (state) => state.allExistingUsersCopy
+  );
+
+  const allPosts = useSelector(
+    (state) => state.allExistingPosts
+  );
+
+  const allPostsCopy = useSelector(
+    (state) => state.allExistingPostsCopy
+  );
+
+  const allMatches = useSelector(
+    (state) => state.matches
+  );
+
+  const [
+    selectedUserID,
+    setSelectedUserID,
+  ] = useState("");
+
+  const [
+    selectedUserPlan,
+    setSelectedUserPlan,
+  ] = useState("");
+
+  const [
+    selectedUserStatus,
+    setSelectedUserStatus,
+  ] = useState("");
+
+  const [
+    selectedPostsID,
+    setSelectedPostID,
+  ] = useState("");
+
+  const [
+    selectedPostStatus,
+    setSelectedPostStatus,
+  ] = useState("");
+
+  /* =====================================================
+     CARGA INICIAL
+  ===================================================== */
 
   useEffect(() => {
     dispatch(getAllExistingUsers());
@@ -42,114 +89,132 @@ const AdminDash = () => {
     dispatch(getAllMatches());
   }, [dispatch]);
 
-  const activeUsersCounter = () => {
-    let activeUsers = 0;
+  /* =====================================================
+     CONTADORES
+  ===================================================== */
 
-    for (const user of allUsersCopy) {
-      if (!user.Deshabilitado) {
-        activeUsers += 1;
-      }
-    }
+  const activeUsers = useMemo(() => {
+    return allUsersCopy.reduce(
+      (total, user) =>
+        total + (!user.Deshabilitado ? 1 : 0),
+      0
+    );
+  }, [allUsersCopy]);
 
-    return activeUsers;
+  const disabledUsers = useMemo(() => {
+    return allUsersCopy.reduce(
+      (total, user) =>
+        total + (user.Deshabilitado ? 1 : 0),
+      0
+    );
+  }, [allUsersCopy]);
+
+  const premiumUsers = useMemo(() => {
+    return allUsersCopy.reduce(
+      (total, user) =>
+        total + (user.plan === "premium" ? 1 : 0),
+      0
+    );
+  }, [allUsersCopy]);
+
+  /* =====================================================
+     TOAST
+  ===================================================== */
+
+  const showToast = async ({
+    icon,
+    title,
+    timer = 1500,
+  }) => {
+    await Swal.fire({
+      toast: true,
+      position: "top-end",
+      showConfirmButton: false,
+      timer,
+      timerProgressBar: true,
+      icon,
+      title,
+    });
   };
 
-  const disabledUsersCounter = () => {
-    let disabledUsers = 0;
-
-    for (const user of allUsersCopy) {
-      if (user.Deshabilitado) {
-        disabledUsers += 1;
-      }
-    }
-
-    return disabledUsers;
-  };
-
-  const premiumUsersCounter = () => {
-    let premiumUsers = 0;
-
-    for (const user of allUsersCopy) {
-      if (user.plan === "premium") {
-        premiumUsers += 1;
-      }
-    }
-
-    return premiumUsers;
-  };
+  /* =====================================================
+     USUARIOS
+  ===================================================== */
 
   const handleDisableUser = async (id) => {
     try {
       await dispatch(deleteUser(id));
-      const Toast = Swal.mixin({
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 1000,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-          toast.addEventListener("mouseleave", Swal.resumeTimer);
-        },
+
+      await showToast({
+        icon: "warning",
+        title: "⛔ Usuario deshabilitado",
       });
 
-      Toast.fire({
-        icon: "warning",
-        iconColor: "red",
-        title: "⛔ Usuario Deshabilitado ⛔",
-      });
       await dispatch(getAllExistingUsers());
     } catch (error) {
-      console.error("Hubo un problema al deshabilitar el usuario: ", error);
+      console.error(
+        "Hubo un problema al deshabilitar el usuario:",
+        error
+      );
+
+      Swal.fire(
+        "Error",
+        "No se pudo deshabilitar el usuario.",
+        "error"
+      );
     }
   };
 
   const handleRestoreUser = async (id) => {
     try {
       await dispatch(restoreUser(id));
-      const Toast = Swal.mixin({
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 1000,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-          toast.addEventListener("mouseleave", Swal.resumeTimer);
-        },
+
+      await showToast({
+        icon: "success",
+        title: "✅ Usuario reactivado",
       });
 
-      Toast.fire({
-        icon: "success",
-        title: "✅ Usuario Reactivado ✅",
-      });
       await dispatch(getAllExistingUsers());
     } catch (error) {
-      console.error("Hubo un problema al reactivar el usuario: ", error);
+      console.error(
+        "Hubo un problema al reactivar el usuario:",
+        error
+      );
+
+      Swal.fire(
+        "Error",
+        "No se pudo reactivar el usuario.",
+        "error"
+      );
     }
   };
+
+  /* =====================================================
+     PUBLICACIONES
+  ===================================================== */
 
   const handleDeletePost = async (id) => {
     try {
       await dispatch(deletePost(id));
 
-      const Toast = Swal.mixin({
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
+      await showToast({
+        icon: "warning",
+        title: "⛔ Publicación eliminada",
         timer: 2000,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-          toast.addEventListener("mouseleave", Swal.resumeTimer);
-        },
       });
 
-      Toast.fire({
-        icon: "warning",
-        iconColor: "red",
-        title: "⛔Publicacion Eliminada⛔",
-      });
       await dispatch(getAllExistingPosts());
     } catch (error) {
-      console.error("Hubo un problema al eliminar la publicacion: ", error);
+      console.error(
+        "Hubo un problema al eliminar la publicación:",
+        error
+      );
+
+      Swal.fire(
+        "Error",
+        "No se pudo eliminar la publicación.",
+        "error"
+      );
     }
   };
 
@@ -157,294 +222,493 @@ const AdminDash = () => {
     try {
       await dispatch(disablePost(id));
 
-      const Toast = Swal.mixin({
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
+      await showToast({
+        icon: "warning",
+        title: "⛔ Publicación deshabilitada",
         timer: 2000,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-          toast.addEventListener("mouseleave", Swal.resumeTimer);
-        },
       });
 
-      Toast.fire({
-        icon: "warning",
-        iconColor: "red",
-        title: "⛔Publicacion deshabilitada⛔",
-      });
       await dispatch(getAllExistingPosts());
     } catch (error) {
-      console.error("Hubo un problema al deshabilitar la publicacion: ", error);
+      console.error(
+        "Hubo un problema al deshabilitar la publicación:",
+        error
+      );
+
+      Swal.fire(
+        "Error",
+        "No se pudo deshabilitar la publicación.",
+        "error"
+      );
     }
   };
 
   const handleRestorePost = async (id) => {
     try {
       await dispatch(restorePost(id));
-      const Toast = Swal.mixin({
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 1000,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-          toast.addEventListener("mouseleave", Swal.resumeTimer);
-        },
+
+      await showToast({
+        icon: "success",
+        title: "✅ Publicación reactivada",
       });
 
-      Toast.fire({
-        icon: "succes",
-        title: "✅ Publicacion Reactivada ✅",
-      });
       await dispatch(getAllExistingPosts());
     } catch (error) {
-      console.error("Hubo un problema al reactivar la publicacion: ", error);
+      console.error(
+        "Hubo un problema al reactivar la publicación:",
+        error
+      );
+
+      Swal.fire(
+        "Error",
+        "No se pudo reactivar la publicación.",
+        "error"
+      );
     }
   };
 
-  function handleSortByID() {
-    setselectedUserID(event.target.value);
-    dispatch(sortUsersByID(event.target.value));
-  }
+  /* =====================================================
+     FILTROS USUARIOS
+  ===================================================== */
 
-  function handleSortByPlan() {
-    setselectedUserPlan(event.target.value);
-    if (event.target.value === "Estándar") {
-      dispatch(sortUsersByPlan("notPremium"));
-    } else {
-      dispatch(sortUsersByPlan("premium"));
-    }
-  }
+  const handleSortByID = (event) => {
+    const value = event.target.value;
 
-  function handleSortByStatus() {
-    setselectedUserStatus(event.target.value);
-    dispatch(sortUsersByStatus(event.target.value));
-  }
+    setSelectedUserID(value);
 
-  function handleResetUsersFilters() {
-    setselectedUserID("");
-    setselectedUserPlan("");
-    setselectedUserStatus("");
+    dispatch(sortUsersByID(value));
+  };
+
+  const handleSortByPlan = (event) => {
+    const value = event.target.value;
+
+    setSelectedUserPlan(value);
+
+    dispatch(
+      sortUsersByPlan(
+        value === "Estándar"
+          ? "notPremium"
+          : "premium"
+      )
+    );
+  };
+
+  const handleSortByStatus = (event) => {
+    const value = event.target.value;
+
+    setSelectedUserStatus(value);
+
+    dispatch(sortUsersByStatus(value));
+  };
+
+  const handleResetUsersFilters = () => {
+    setSelectedUserID("");
+    setSelectedUserPlan("");
+    setSelectedUserStatus("");
+
     dispatch(resetUsersFilter());
-  }
+  };
 
-  function handleSortPostByID() {
-    setselectedPostID(event.target.value);
-    dispatch(sortPostsByID(event.target.value));
-  }
+  /* =====================================================
+     FILTROS PUBLICACIONES
+  ===================================================== */
 
-  function handleSortPostByStatus() {
-    setselectedPostStatus(event.target.value);
-    dispatch(sortPostsByStatus(event.target.value));
-  }
+  const handleSortPostByID = (event) => {
+    const value = event.target.value;
 
-  function handleResetPostsFilters() {
-    setselectedPostID("");
-    setselectedPostStatus("");
+    setSelectedPostID(value);
+
+    dispatch(sortPostsByID(value));
+  };
+
+  const handleSortPostByStatus = (event) => {
+    const value = event.target.value;
+
+    setSelectedPostStatus(value);
+
+    dispatch(sortPostsByStatus(value));
+  };
+
+  const handleResetPostsFilters = () => {
+    setSelectedPostID("");
+    setSelectedPostStatus("");
+
     dispatch(resetPostsFilter());
-  }
+  };
 
   return (
-    <>
-      <h3>Panel de Administrador</h3>
-      <div className={style.topContainer}>
-        <div className={style.tile1}>
+    <main className={style.dashboard}>
+      <header className={style.pageHeader}>
+        <h3>Panel de Administrador</h3>
+      </header>
+
+      {/* =================================================
+          ESTADÍSTICAS
+      ================================================= */}
+
+      <section
+        className={style.topContainer}
+        aria-label="Estadísticas"
+      >
+        <article className={style.tile}>
           <p>Activos</p>
-          <h4 className={style.newUsers}>{activeUsersCounter()}</h4>
-        </div>
-        <div className={style.tile2}>
+          <h4 className={style.newUsers}>
+            {activeUsers}
+          </h4>
+        </article>
+
+        <article className={style.tile}>
           <p>Deshabilitados</p>
-          <h4 className={style.delUsers}>{disabledUsersCounter()}</h4>
-        </div>
-        <div className={style.tile3}>
+          <h4 className={style.delUsers}>
+            {disabledUsers}
+          </h4>
+        </article>
+
+        <article className={style.tile}>
           <p>Publicaciones</p>
-          <h4 className={style.publications}>{allPostsCopy.length}</h4>
-        </div>
-        <div className={style.tile4}>
+          <h4 className={style.publications}>
+            {allPostsCopy.length}
+          </h4>
+        </article>
+
+        <article className={style.tile}>
           <p>Matches</p>
-          <h4 className={style.matchs}>{allMatches.length}</h4>
-        </div>
-        <div className={style.tile5}>
+          <h4 className={style.matchs}>
+            {allMatches.length}
+          </h4>
+        </article>
+
+        <article className={style.tile}>
           <p>Premium</p>
-          <h4 className={style.premium}>{premiumUsersCounter()}</h4>
-        </div>
-      </div>
-      <div className={style.filters}>
-        <div className={style.uFilters}>
+          <h4 className={style.premium}>
+            {premiumUsers}
+          </h4>
+        </article>
+      </section>
+
+      {/* =================================================
+          FILTROS
+      ================================================= */}
+
+      <section className={style.filters}>
+        {/* USUARIOS */}
+        <div className={style.filterPanel}>
           <h3>Filtros de Usuario</h3>
-          <div className={style.uSelect}>
-            <select onChange={handleSortByID} value={selectedUserID}>
-              <option hidden defaultValue>
+
+          <div className={style.selectGroup}>
+            <select
+              onChange={handleSortByID}
+              value={selectedUserID}
+              aria-label="Ordenar usuarios por ID"
+            >
+              <option value="">
                 ID
               </option>
-              {["Ascendente", "Descendente"].map((plan, index) => (
-                <option value={plan} key={index}>
-                  {plan}
-                </option>
-              ))}
+
+              <option value="Ascendente">
+                Ascendente
+              </option>
+
+              <option value="Descendente">
+                Descendente
+              </option>
             </select>
-            <select onChange={handleSortByPlan} value={selectedUserPlan}>
-              <option hidden defaultValue>
+
+            <select
+              onChange={handleSortByPlan}
+              value={selectedUserPlan}
+              aria-label="Filtrar usuarios por plan"
+            >
+              <option value="">
                 Plan
               </option>
-              {["Estándar", "Premium"].map((plan, index) => (
-                <option value={plan} key={index}>
-                  {plan}
-                </option>
-              ))}
+
+              <option value="Estándar">
+                Estándar
+              </option>
+
+              <option value="Premium">
+                Premium
+              </option>
             </select>
-            <select onChange={handleSortByStatus} value={selectedUserStatus}>
-              <option hidden defaultValue>
+
+            <select
+              onChange={handleSortByStatus}
+              value={selectedUserStatus}
+              aria-label="Filtrar usuarios por estado"
+            >
+              <option value="">
                 Estado
               </option>
-              {["Activos", "Deshabilitados"].map((plan, index) => (
-                <option value={plan} key={index}>
-                  {plan}
-                </option>
-              ))}
+
+              <option value="Activos">
+                Activos
+              </option>
+
+              <option value="Deshabilitados">
+                Deshabilitados
+              </option>
             </select>
-            <button onClick={handleResetUsersFilters}>Limpiar</button>
+
+            <button
+              type="button"
+              onClick={handleResetUsersFilters}
+            >
+              Limpiar
+            </button>
           </div>
         </div>
-        <div className={style.pFilters}>
+
+        {/* PUBLICACIONES */}
+        <div className={style.filterPanel}>
           <h3>Filtros de Publicaciones</h3>
-          <div className={style.pSelect}>
-            <select onChange={handleSortPostByID} value={selectedPostsID}>
-              <option hidden defaultValue>
+
+          <div className={style.selectGroup}>
+            <select
+              onChange={handleSortPostByID}
+              value={selectedPostsID}
+              aria-label="Ordenar publicaciones por ID"
+            >
+              <option value="">
                 ID
               </option>
-              {["Ascendente", "Descendente"].map((plan, index) => (
-                <option value={plan} key={index}>
-                  {plan}
-                </option>
-              ))}
+
+              <option value="Ascendente">
+                Ascendente
+              </option>
+
+              <option value="Descendente">
+                Descendente
+              </option>
             </select>
+
             <select
               onChange={handleSortPostByStatus}
               value={selectedPostStatus}
+              aria-label="Filtrar publicaciones por estado"
             >
-              <option hidden defaultValue>
+              <option value="">
                 Estado
               </option>
-              {["Activas", "Deshabilitadas"].map((estado, index) => (
-                <option value={estado} key={index}>
-                  {estado}
-                </option>
-              ))}
+
+              <option value="Activas">
+                Activas
+              </option>
+
+              <option value="Deshabilitadas">
+                Deshabilitadas
+              </option>
             </select>
-            <button onClick={handleResetPostsFilters}>Limpiar</button>
+
+            <button
+              type="button"
+              onClick={handleResetPostsFilters}
+            >
+              Limpiar
+            </button>
           </div>
         </div>
-      </div>
-      <div className={style.bottomContainer}>
-        <div className={style.column1}>
-          <div className={style.uList}>
+      </section>
+
+      {/* =================================================
+          LISTAS
+      ================================================= */}
+
+      <section className={style.bottomContainer}>
+        {/* USUARIOS */}
+        <article className={style.column}>
+          <h3 className={style.columnTitle}>
+            Usuarios
+          </h3>
+
+          <div className={style.list}>
             {allUsers.map((user) => (
-              <div key={user.id} className={style.element}>
-                <h4>ID: {user.id}</h4>
+              <div
+                key={user.id}
+                className={style.element}
+              >
                 <h4>
-                  {user.username} <span>{user.email}</span>
+                  ID: {user.id}
                 </h4>
 
-                {user.Deshabilitado ? (
-                  <span style={{ color: "crimson", fontSize: 16 }}>
-                    Deshabilitado
+                <h4
+                  className={style.userInfo}
+                  title={`${user.username} ${user.email}`}
+                >
+                  <span className={style.username}>
+                    {user.username}
                   </span>
-                ) : (
-                  <span style={{ color: "#3ec762", fontSize: 16 }}>Activo</span>
-                )}
+
+                  <span className={style.email}>
+                    {user.email}
+                  </span>
+                </h4>
+
+                <span
+                  className={
+                    user.Deshabilitado
+                      ? style.statusDisabled
+                      : style.statusActive
+                  }
+                >
+                  {user.Deshabilitado
+                    ? "Deshabilitado"
+                    : "Activo"}
+                </span>
+
                 {user.plan === "premium" ? (
                   <img
                     width="24"
                     height="24"
                     src="https://img.icons8.com/color/48/guarantee.png"
-                    alt="guarantee"
-                    className={style.logo}
+                    alt="Usuario premium"
+                    className={style.planIcon}
+                    loading="lazy"
                   />
                 ) : (
                   <img
                     width="24"
                     height="24"
                     src={notpremium}
-                    alt="experimental-user-puffy-filled"
+                    alt="Usuario estándar"
+                    className={style.planIcon}
+                    loading="lazy"
                   />
                 )}
+
                 <button
-                  onClick={() => handleDisableUser(user.id)}
+                  type="button"
+                  onClick={() =>
+                    handleDisableUser(user.id)
+                  }
                   disabled={user.Deshabilitado}
+                  aria-label={`Deshabilitar usuario ${user.username}`}
                 >
                   <img
                     width="20"
                     height="20"
                     src="https://img.icons8.com/fluency/48/cancel-2.png"
-                    alt="Desactivar"
+                    alt=""
+                    aria-hidden="true"
+                    loading="lazy"
                   />
                 </button>
+
                 <button
-                  onClick={() => handleRestoreUser(user.id)}
+                  type="button"
+                  onClick={() =>
+                    handleRestoreUser(user.id)
+                  }
                   disabled={!user.Deshabilitado}
+                  aria-label={`Reactivar usuario ${user.username}`}
                 >
                   <img
                     width="20"
                     height="20"
                     src="https://img.icons8.com/color/48/ok--v1.png"
-                    alt="Reactivar"
+                    alt=""
+                    aria-hidden="true"
+                    loading="lazy"
                   />
                 </button>
               </div>
             ))}
           </div>
-        </div>
-        <div className={style.column2}>
-          <div className={style.pList}>
+        </article>
+
+        {/* PUBLICACIONES */}
+        <article className={style.column}>
+          <h3 className={style.columnTitle}>
+            Publicaciones
+          </h3>
+
+          <div className={style.list}>
             {allPosts.map((post) => (
-              <div key={post.id} className={style.element}>
-                <h4>ID: {post.id}</h4>
-                <h4>{post.title}</h4>
-                {post.Deshabilitado ? (
-                  <span style={{ color: "crimson", fontSize: 16 }}>
-                    Deshabilitada
-                  </span>
-                ) : (
-                  <span style={{ color: "#3ec762", fontSize: 16 }}>Activa</span>
-                )}
-                <button onClick={() => handleDeletePost(post.id)}>
+              <div
+                key={post.id}
+                className={style.element}
+              >
+                <h4>
+                  ID: {post.id}
+                </h4>
+
+                <h4
+                  className={style.postTitle}
+                  title={post.title}
+                >
+                  {post.title}
+                </h4>
+
+                <span
+                  className={
+                    post.Deshabilitado
+                      ? style.statusDisabled
+                      : style.statusActive
+                  }
+                >
+                  {post.Deshabilitado
+                    ? "Deshabilitada"
+                    : "Activa"}
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleDeletePost(post.id)
+                  }
+                  aria-label={`Eliminar publicación ${post.id}`}
+                >
                   <img
                     width="20"
                     height="20"
                     src="https://img.icons8.com/fluency/48/delete-forever.png"
-                    alt="Eliminar"
+                    alt=""
+                    aria-hidden="true"
+                    loading="lazy"
                   />
                 </button>
+
                 <button
-                  onClick={() => handleDisablePost(post.id)}
+                  type="button"
+                  onClick={() =>
+                    handleDisablePost(post.id)
+                  }
                   disabled={post.Deshabilitado}
+                  aria-label={`Deshabilitar publicación ${post.id}`}
                 >
                   <img
                     width="20"
                     height="20"
                     src="https://img.icons8.com/fluency/48/cancel-2.png"
-                    alt="Desactivar"
+                    alt=""
+                    aria-hidden="true"
+                    loading="lazy"
                   />
                 </button>
+
                 <button
-                  onClick={() => handleRestorePost(post.id)}
+                  type="button"
+                  onClick={() =>
+                    handleRestorePost(post.id)
+                  }
                   disabled={!post.Deshabilitado}
+                  aria-label={`Reactivar publicación ${post.id}`}
                 >
                   <img
                     width="20"
                     height="20"
                     src="https://img.icons8.com/color/48/ok--v1.png"
-                    alt="Reactivar"
+                    alt=""
+                    aria-hidden="true"
+                    loading="lazy"
                   />
                 </button>
               </div>
             ))}
           </div>
-        </div>
-      </div>
-    </>
+        </article>
+      </section>
+    </main>
   );
 };
 

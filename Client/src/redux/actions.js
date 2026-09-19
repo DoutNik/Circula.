@@ -48,7 +48,7 @@ import {
   SELECTED_POST,
   RESET_FILTERS,
   CLEAR_DETAIL,
-  ADD_REVIEW
+  ADD_REVIEW,
 } from "./actionTypes";
 
 export function getAllUsers() {
@@ -113,13 +113,9 @@ export const sortUsersByStatus = (status) => {
 };
 
 export function createGoogleUser(user) {
-
-  console.log("actions entrega",user);
+  console.log("actions entrega", user);
   return async (dispatch) => {
-    const result = await api.post(
-      "/users/registerGoogle",
-      user
-    );
+    const result = await api.post("/users/registerGoogle", user);
     dispatch({
       type: CREATE_USER,
       payload: result.data,
@@ -229,7 +225,7 @@ export const likePost = (myUserId, likedPostId, myPostId, anotherUserId) => {
       });
 
       // Almacenar el estado liked en el almacenamiento local
-      localStorage.setItem(`likedStatus_${likedPostId}`, 'true');
+      localStorage.setItem(`likedStatus_${likedPostId}`, "true");
     } catch (error) {
       console.error("Error al dar like a la publicación", error);
     }
@@ -278,7 +274,7 @@ export const fetchReceivedLikes = (userId) => async (dispatch) => {
           myPost: myPostRes.data,
           anotherPost: anotherPostRes.data,
         };
-      })
+      }),
     );
 
     dispatch(setReceivedLikes(requests));
@@ -294,9 +290,9 @@ export function saveOtherUserData(otherUserName, otherUserImage) {
     type: OTHER_USER_DATA,
     payload: {
       otherUserImage,
-      otherUserName
-    }
-  }
+      otherUserName,
+    },
+  };
 }
 
 export function likedPosts(userId) {
@@ -319,14 +315,13 @@ export function getAllLikes() {
 export function deleteLike(likeId) {
   return async (dispatch) => {
     const result = await api.delete(`/likes/${likeId}`);
-    console.log(result)
+    console.log(result);
     dispatch({
       type: DELETE_LIKE,
       payload: result.data,
     });
   };
 }
-
 
 export const clearDetail = () => {
   return async function (dispatch) {
@@ -336,17 +331,15 @@ export const clearDetail = () => {
   };
 };
 
-export const getMatches = (userId) => {
-  return async (dispatch) => {
-    try {
-      const response = await api.get(`/matches/${userId}`);
-      const matches = response.data;
-      dispatch({ type: GET_MATCHES, payload: matches });
-    } catch (error) {
-      // Manejar errores, por ejemplo, mostrar un mensaje de error en la interfaz de usuario
-      console.error("Error al obtener los matches", error);
-    }
-  };
+export const getMatches = (userId) => async (dispatch) => {
+  try {
+    const response = await api.get(`/matches/${userId}`);
+    dispatch({ type: GET_MATCHES, payload: response.data });
+    return response.data;
+  } catch (error) {
+    console.error("Error al obtener los matches:", error);
+    throw error;
+  }
 };
 
 export const getAllMatches = () => async (dispatch) => {
@@ -366,7 +359,7 @@ export const updateMatchedPairs = (matchedPairs) => {
   return {
     type: UPDATE_FILTERED_MATCHES,
     payload: matchedPairs,
-  }
+  };
 };
 
 export const selectedPost = (postId, postImage) => {
@@ -500,51 +493,56 @@ export function messagesHistory(chatId) {
   return async (dispatch) => {
     try {
       const response = await api.get(`/messages/${chatId}`);
-      dispatch({
-        type: CARGAR_HISTORIAL_MENSAJES,
-        payload: response.data
-      });
+      dispatch({ type: CARGAR_HISTORIAL_MENSAJES, payload: response.data });
+      return response.data;
     } catch (error) {
       console.error("Error al cargar el historial de mensajes:", error);
+      throw error;
     }
   };
 }
 
-export function createMessage(chatId, userId, content) {
+export function createMessage(chatId, content) {
   return async () => {
     try {
-      await api.post(`/messages/${chatId}`, {
-        chatId,
-        userId,
-        content, 
+      if (!chatId) {
+        throw new Error("chatId es requerido");
+      }
+      if (typeof content !== "string" || !content.trim()) {
+        throw new Error("El mensaje no puede estar vacío");
+      }
+      const response = await api.post(`/messages/${chatId}`, {
+        content: content.trim(),
       });
+      return response.data;
     } catch (error) {
       console.error("Error al crear el mensaje:", error);
+      throw error;
     }
   };
 }
 
 //CREAR CHAT
-export function createChat(userId, anotherUserId) {
-  return async (dispatch) => {
-    try {
-    const chatId = await api.post("/chats/create", {
-      userId,
-      anotherUserId,
-    })
+export const createChat = (anotherUserId) => async (dispatch) => {
+  try {
+    if (!anotherUserId) {
+      throw new Error("anotherUserId es requerido");
+    }
+    const response = await api.post("/chats/create", { anotherUserId });
+    const chatId = response.data?.chatId;
+    if (!chatId) {
+      throw new Error("El backend no devolvió chatId");
+    }
     dispatch({
       type: CHAT_CREATED,
-      payload: { chatId: chatId.data, user1Id: userId, user2Id: anotherUserId },
+      payload: { chatId, user2Id: anotherUserId },
     });
-
-    return chatId.data
-
-  }catch (error) {
-      console.error("Error al crear el chat:", error);
-      throw error
-    }
-  };
-}
+    return { chatId };
+  } catch (error) {
+    console.error("Error al crear el chat:", error);
+    throw error;
+  }
+};
 
 export function getAllChats() {
   return async function (dispatch) {

@@ -1,113 +1,369 @@
+/* ========================================================= CONTENEDOR PRINCIPAL ========================================================= */
 .chats {
-  display: grid;
-}
-
+  width: 100%;
+  min-height: calc(100vh - 80px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: clamp(10px, 2vw, 30px);
+  padding-bottom: clamp(80px, 8vw, 110px);
+  box-sizing: border-box;
+} /* ========================================================= CONTENEDOR DEL CHAT ========================================================= */
 .chatsMsg {
-  display: grid;
-}
-
+  width: min(100%, 1100px);
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+} /* ========================================================= PERFIL ========================================================= */
 .imgProf {
-  width: 60px;
+  width: clamp(42px, 5vw, 70px);
+  height: clamp(42px, 5vw, 70px);
+  object-fit: cover;
   border-radius: 50%;
-  border: 3px solid #4ecdc4;
-}
-
+  border: clamp(2px, 0.3vw, 4px) solid #4ecdc4;
+  flex-shrink: 0;
+} /* ========================================================= NOMBRE ========================================================= */
 .name {
   align-self: center;
+  min-width: 0;
+  margin: 0;
   text-align: left;
-}
-
+  color: #333;
+  font-size: clamp(13px, 1vw, 17px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+} /* ========================================================= HEADER / IDENTIFICACIÓN DEL CHAT ========================================================= */
 .chat {
+  width: min(100%, 900px);
+  min-height: clamp(60px, 6vw, 80px);
+  margin: 0 auto;
+  padding: clamp(8px, 1.2vw, 14px);
+  box-sizing: border-box;
   display: grid;
-  justify-self: center;
-  grid-template-columns: 1fr 1fr;
-  width: 250px;
-  height: 65px;
-  box-shadow: 0px 5px 10px rgba(124, 124, 124, 0.3);
-  border-radius: 10px;
-  padding: 10px;
-}
-
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(10px, 1.5vw, 18px);
+  background: #ffffff;
+  box-shadow: 0 5px 15px rgba(128, 128, 128, 0.2);
+  border-radius: clamp(10px, 1vw, 16px);
+} /* ========================================================= CONVERSACIÓN ========================================================= */
 .conversations {
-  display: grid;
-  width: 250px;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0px 5px 10px rgba(124, 124, 124, 0.3);
-}
-
+  width: min(100%, 900px);
+  min-width: 0;
+  min-height: clamp(300px, 55vh, 700px);
+  margin: clamp(10px, 1.5vw, 18px) auto 0;
+  padding: clamp(12px, 2vw, 24px);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1vw, 14px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #ffffff;
+  border-radius: clamp(10px, 1vw, 16px);
+  box-shadow: 0 5px 15px rgba(128, 128, 128, 0.2); /* Mejora el scroll en móviles. */
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+} /* ========================================================= MENSAJE DEL OTRO USUARIO ========================================================= */
 .conversation1 {
+  width: 100%;
   display: grid;
-  grid-template-columns: 1fr 5fr;
-}
-
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: end;
+  gap: clamp(7px, 1vw, 12px);
+} /* ========================================================= AVATAR OTRO USUARIO ========================================================= */
 .imgOther {
-  width: 40px;
-  align-self: center;
+  width: clamp(30px, 3.5vw, 46px);
+  height: clamp(30px, 3.5vw, 46px);
+  object-fit: cover;
+  align-self: end;
   border-radius: 50%;
-  border: 3px solid grey;
-  box-shadow: 0px 5px 10px rgba(122, 122, 122, 0.3);
-}
-
+  border: clamp(2px, 0.25vw, 3px) solid #999;
+  box-shadow: 0 5px 10px rgba(122, 122, 122, 0.25);
+  flex-shrink: 0;
+} /* ========================================================= BURBUJA OTRO USUARIO ========================================================= */
 .convOther {
-  align-self: center;
-  font-size: 12px;
-  text-align: left;
-  background-color: gray;
-  padding-left: 10px;
-  margin-left: 10px;
+  min-width: 0;
+  max-width: min(75%, 650px);
+  justify-self: start;
+  align-self: end;
+  margin: 0;
+  padding: clamp(8px, 1vw, 12px);
+  border-radius: 5px 12px 12px 12px;
+  background-color: #808080;
   color: whitesmoke;
-  border-radius: 5px;
-  box-shadow: 0px 5px 10px rgba(122, 122, 122, 0.3);
-}
-
+  font-size: clamp(11px, 0.85vw, 15px);
+  line-height: 1.4;
+  text-align: left;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  box-shadow: 0 5px 10px rgba(122, 122, 122, 0.2);
+} /* ========================================================= MENSAJE PROPIO ========================================================= */
 .conversation2 {
+  width: 100%;
   display: grid;
-  grid-template-columns: 5fr 1fr;
-}
-
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: clamp(7px, 1vw, 12px);
+} /* ========================================================= AVATAR PROPIO ========================================================= */
 .imgMe {
-  width: 40px;
-  align-self: center;
+  width: clamp(30px, 3.5vw, 46px);
+  height: clamp(30px, 3.5vw, 46px);
+  object-fit: cover;
+  align-self: end;
   border-radius: 50%;
-  border: 3px solid #4ecdc4;
-  box-shadow: 0px 5px 10px rgba(122, 122, 122, 0.3);
-}
-
+  border: clamp(2px, 0.25vw, 3px) solid #4ecdc4;
+  box-shadow: 0 5px 10px rgba(122, 122, 122, 0.25);
+  flex-shrink: 0;
+} /* ========================================================= BURBUJA PROPIA ========================================================= */
 .convMe {
-  align-self: center;
-  font-size: 12px;
-  text-align: left;
+  min-width: 0;
+  max-width: min(75%, 650px);
+  justify-self: end;
+  align-self: end;
+  margin: 0;
+  padding: clamp(8px, 1vw, 12px);
+  border-radius: 12px 5px 12px 12px;
   background-color: #4ecdc4;
-  margin-right: 10px;
-  padding-left: 10px;
   color: whitesmoke;
-  border-radius: 5px;
-  box-shadow: 0px 5px 10px rgba(122, 122, 122, 0.3);
-}
-
+  font-size: clamp(11px, 0.85vw, 15px);
+  line-height: 1.4;
+  text-align: left;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  box-shadow: 0 5px 10px rgba(122, 122, 122, 0.2);
+} /* ========================================================= ÁREA DE ENVÍO ========================================================= */
 .message {
+  width: min(100%, 900px);
+  margin: clamp(10px, 1.5vw, 18px) auto 0;
   display: grid;
-  grid-template-columns: 5fr 1fr;
-  margin-top: 20px;
-}
-
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(7px, 1vw, 12px);
+  box-sizing: border-box;
+} /* ========================================================= INPUT MENSAJE ========================================================= */
 .message input {
-  border-radius: 10px;
-  border: none;
-  box-shadow: 0px 5px 10px rgba(122, 122, 122, 0.2);
-  padding-left: 10px;
+  width: 100%;
+  min-width: 0;
+  min-height: clamp(40px, 4vw, 52px);
+  padding: 0 clamp(10px, 1.2vw, 16px);
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: clamp(8px, 1vw, 12px);
+  outline: none;
+  background: #ffffff;
+  color: #222;
+  font-family: inherit;
+  font-size: clamp(12px, 0.9vw, 15px);
+  box-shadow: 0 5px 10px rgba(122, 122, 122, 0.15);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
-
+.message input:focus {
+  border-color: #4ecdc4;
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.12);
+}
+.message input::placeholder {
+  color: #999;
+}
+.message input:disabled {
+  background: #eeeeee;
+  cursor: not-allowed;
+} /* ========================================================= BOTÓN / ICONO DE ENVÍO ========================================================= */
 .message img {
+  width: clamp(38px, 4vw, 52px);
+  height: clamp(38px, 4vw, 52px);
+  padding: clamp(7px, 0.8vw, 10px);
+  box-sizing: border-box;
   background-color: #4ecdc4;
-  padding: 5px;
   border-radius: 50%;
-  box-shadow: 0px 5px 10px rgba(122, 122, 122, 0.3);
+  box-shadow: 0 5px 10px rgba(122, 122, 122, 0.3);
+  cursor: pointer;
+  object-fit: contain;
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
 }
-
+@media (hover: hover) and (pointer: fine) {
+  .message img:hover {
+    transform: scale(1.05);
+    filter: brightness(1.05);
+  }
+}
+.message img:active {
+  transform: scale(0.95);
+} /* ========================================================= TABLETS ========================================================= */
 @media (max-width: 768px) {
   .chats {
-    grid-template-columns: 1fr;
+    min-height: calc(100vh - 65px);
+    padding: 10px;
+    padding-bottom: 75px;
+  }
+  .chatsMsg {
+    width: 100%;
+  }
+  .chat,
+  .conversations,
+  .message {
+    width: 100%;
+  }
+  .conversations {
+    min-height: calc(100vh - 200px);
+  }
+  .convOther,
+  .convMe {
+    max-width: 80%;
+  }
+} /* ========================================================= CELULARES ========================================================= */
+@media (max-width: 480px) {
+  .chats {
+    padding: 6px;
+    padding-bottom: 72px;
+  }
+  .chat {
+    min-height: 58px;
+    border-radius: 9px;
+  }
+  .name {
+    font-size: 13px;
+  }
+  .conversations {
+    min-height: calc(100vh - 180px);
+    padding: 10px;
+    gap: 8px;
+    border-radius: 9px;
+  }
+  .convOther,
+  .convMe {
+    max-width: 82%;
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+  .message {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px;
+  }
+  .message input {
+    min-height: 42px;
+    font-size: 12px;
+  }
+  .message img {
+    width: 42px;
+    height: 42px;
+  }
+} /* ========================================================= CELULARES MUY PEQUEÑOS ========================================================= */
+@media (max-width: 360px) {
+  .chats {
+    padding: 4px;
+    padding-bottom: 68px;
+  }
+  .conversations {
+    padding: 8px;
+  }
+  .convOther,
+  .convMe {
+    max-width: 88%;
+    font-size: 10px;
+  }
+  .message input {
+    min-height: 40px;
+    font-size: 11px;
+  }
+  .message img {
+    width: 40px;
+    height: 40px;
+  }
+} /* ========================================================= MONITORES GRANDES ========================================================= */
+@media (min-width: 1600px) {
+  .chatsMsg {
+    width: min(100%, 1200px);
+  }
+  .chat,
+  .conversations,
+  .message {
+    width: min(100%, 1050px);
+  }
+  .conversations {
+    min-height: 650px;
+  }
+  .convOther,
+  .convMe {
+    max-width: 65%;
+    font-size: 15px;
+  }
+} /* ========================================================= 2K / 4K / TV ========================================================= */
+@media (min-width: 2200px) {
+  .chats {
+    padding: 35px;
+  }
+  .chatsMsg {
+    width: min(100%, 1500px);
+  }
+  .chat,
+  .conversations,
+  .message {
+    width: min(100%, 1300px);
+  }
+  .chat {
+    min-height: 90px;
+  }
+  .conversations {
+    min-height: 800px;
+    padding: 30px;
+  }
+  .name {
+    font-size: 20px;
+  }
+  .convOther,
+  .convMe {
+    max-width: 60%;
+    font-size: 18px;
+  }
+  .message input {
+    min-height: 60px;
+    font-size: 18px;
+  }
+  .message img {
+    width: 58px;
+    height: 58px;
+  }
+} /* ========================================================= PANTALLAS MUY GRANDES ========================================================= */
+@media (min-width: 3000px) {
+  .chatsMsg {
+    width: min(100%, 1800px);
+  }
+  .chat,
+  .conversations,
+  .message {
+    width: min(100%, 1550px);
+  }
+  .conversations {
+    min-height: 950px;
+    padding: 40px;
+  }
+  .convOther,
+  .convMe {
+    font-size: 21px;
+  }
+  .message input {
+    min-height: 70px;
+    font-size: 21px;
+  }
+  .message img {
+    width: 68px;
+    height: 68px;
+  }
+} /* ========================================================= REDUCIR ANIMACIONES ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  .message img,
+  .message input {
+    transition: none;
+  }
+  .conversations {
+    scroll-behavior: auto;
   }
 }

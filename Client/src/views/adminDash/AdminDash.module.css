@@ -1,148 +1,735 @@
-.topContainer {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-  gap: 20px;
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+.dashboard {
+  width: min(
+    calc(100% - 24px),
+    1800px
+  );
+
+  margin:
+    clamp(20px, 4vw, 50px)
+    auto
+    100px;
+
+  box-sizing: border-box;
 }
 
-.tile1 {
+/* =========================================================
+   HEADER
+========================================================= */
+
+.pageHeader {
+  margin-bottom:
+    clamp(20px, 3vw, 35px);
+
+  text-align: center;
+}
+
+.pageHeader h3 {
+  margin: 0;
+
+  color: #666;
+
+  font-size:
+    clamp(20px, 2.5vw, 32px);
+}
+
+/* =========================================================
+   TOP CARDS
+========================================================= */
+
+.topContainer {
+  width: 100%;
+
   display: grid;
-  width: 200px;
-  height: 150px;
-  box-shadow: 0px 5px 10px rgba(128, 128, 128, 0.3);
-  border-radius: 10px;
+
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(170px, 1fr)
+    );
+
+  gap:
+    clamp(10px, 1.5vw, 20px);
+
+  margin-bottom:
+    clamp(20px, 3vw, 35px);
+}
+
+.tile {
+  min-width: 0;
+
+  min-height:
+    clamp(120px, 12vw, 160px);
+
+  padding:
+    clamp(14px, 2vw, 24px);
+
+  box-sizing: border-box;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 5px 15px
+      rgba(128, 128, 128, 0.2);
+
+  border-radius:
+    clamp(10px, 1vw, 15px);
+}
+
+.tile p {
+  margin: 0;
+
+  color: #666;
+
+  font-size:
+    clamp(11px, 0.9vw, 15px);
+
+  font-weight: 500;
+
+  text-align: center;
+}
+
+.newUsers,
+.delUsers,
+.publications,
+.matchs,
+.premium {
+  margin: 0;
+
+  font-size:
+    clamp(28px, 3vw, 42px);
+
+  line-height: 1;
 }
 
 .newUsers {
-  font-size: 36px;
   color: rgb(150, 222, 42);
-  margin: 0;
-}
-
-.tile2 {
-  display: grid;
-  width: 200px;
-  height: 150px;
-  box-shadow: 0px 5px 10px rgba(128, 128, 128, 0.3);
-  border-radius: 10px;
 }
 
 .delUsers {
-  font-size: 36px;
-  color: red;
-  margin: 0;
-}
-
-.tile3 {
-  display: grid;
-  width: 200px;
-  height: 150px;
-  box-shadow: 0px 5px 10px rgba(128, 128, 128, 0.3);
-  border-radius: 10px;
+  color: #e53935;
 }
 
 .publications {
-  font-size: 36px;
-  color: aqua;
-  margin: 0;
-}
-
-.tile4 {
-  display: grid;
-  width: 200px;
-  height: 150px;
-  box-shadow: 0px 5px 10px rgba(128, 128, 128, 0.3);
-  border-radius: 10px;
+  color: #00bcd4;
 }
 
 .matchs {
-  font-size: 36px;
   color: orange;
-  margin: 0;
-}
-
-.tile5 {
-  display: grid;
-  width: 200px;
-  height: 150px;
-  box-shadow: 0px 5px 10px rgba(128, 128, 128, 0.3);
-  border-radius: 10px;
 }
 
 .premium {
-  font-size: 36px;
   color: blueviolet;
-  margin: 0;
 }
+
+/* =========================================================
+   FILTROS
+========================================================= */
 
 .filters {
+  width: 100%;
+
   display: grid;
-  grid-template-columns: 1fr 1fr;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+
+  gap:
+    clamp(14px, 2vw, 30px);
+
+  margin-bottom:
+    clamp(20px, 3vw, 35px);
 }
 
-.filters select {
-  border: none;
-  outline: none;
-  margin: 10px;
-  border-radius: 5px;
+.filterPanel {
+  min-width: 0;
+
+  padding:
+    clamp(12px, 1.5vw, 20px);
+
+  background: #ffffff;
+
+  border-radius: 12px;
+
+  box-shadow:
+    0 5px 15px
+      rgba(128, 128, 128, 0.18);
 }
+
+.filterPanel h3 {
+  margin:
+    0
+    0
+    12px;
+
+  color: #666;
+
+  font-size:
+    clamp(14px, 1vw, 18px);
+
+  text-align: center;
+}
+
+.selectGroup {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      4,
+      minmax(0, 1fr)
+    );
+
+  gap: 8px;
+}
+
+.filterPanel:nth-child(2)
+  .selectGroup {
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
+}
+
+.selectGroup select,
+.selectGroup button {
+  width: 100%;
+
+  min-width: 0;
+
+  min-height: 38px;
+
+  padding:
+    7px 9px;
+
+  border: none;
+
+  border-radius: 7px;
+
+  font-family: inherit;
+
+  font-size:
+    clamp(10px, 0.8vw, 13px);
+
+  outline: none;
+}
+
+.selectGroup select {
+  background: #f5f5f5;
+
+  color: #555;
+
+  cursor: pointer;
+}
+
+.selectGroup select:focus {
+  box-shadow:
+    0 0 0 3px
+      rgba(78, 205, 196, 0.15);
+}
+
+.selectGroup button {
+  background: #4ecdc4;
+
+  color: white;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .selectGroup button:hover {
+    background: #1a535c;
+
+    transform: translateY(-1px);
+  }
+}
+
+/* =========================================================
+   LISTAS
+========================================================= */
 
 .bottomContainer {
+  width: 100%;
+
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 80px;
-  margin-top: 30px;
-  justify-self: center;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+
+  gap:
+    clamp(15px, 3vw, 60px);
+
   margin-bottom: 100px;
 }
 
-.column1 {
-  display: grid;
-  width: 500px;
-  height: fit-content;
-  box-shadow: 0px 5px 10px rgba(128, 128, 128, 0.3);
-  border-radius: 10px;
+.column {
+  min-width: 0;
+
+  overflow: hidden;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 5px 15px
+      rgba(128, 128, 128, 0.2);
+
+  border-radius:
+    clamp(10px, 1vw, 15px);
 }
 
-.column1 img {
+.columnTitle {
+  margin: 0;
+
+  padding:
+    14px 16px;
+
+  color: #555;
+
+  text-align: center;
+
+  font-size:
+    clamp(14px, 1vw, 18px);
+
+  border-bottom:
+    1px solid #eeeeee;
+}
+
+/* =========================================================
+   LISTADO
+========================================================= */
+
+.list {
+  width: 100%;
+}
+
+/* =========================================================
+   ELEMENTO
+========================================================= */
+
+.element {
+  width: 100%;
+
+  min-width: 0;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(42px, 0.8fr)
+    minmax(110px, 3fr)
+    minmax(70px, 1.2fr)
+    40px
+    40px
+    40px;
+
+  align-items: center;
+
+  gap: 7px;
+
+  padding:
+    10px 12px;
+
+  border-bottom:
+    1px solid #eeeeee;
+}
+
+.element:last-child {
+  border-bottom: none;
+}
+
+.element h4 {
+  min-width: 0;
+
+  margin: 0;
+
+  color: #333;
+
+  font-size:
+    clamp(10px, 0.75vw, 14px);
+
+  font-weight: 500;
+}
+
+.userInfo,
+.postTitle {
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+.userInfo {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.username,
+.email {
+  min-width: 0;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+.email {
+  color: #888;
+
+  font-size:
+    0.9em;
+}
+
+.statusActive,
+.statusDisabled {
+  font-size:
+    clamp(9px, 0.7vw, 12px);
+
+  font-weight: 600;
+
+  text-align: center;
+}
+
+.statusActive {
+  color: #3ec762;
+}
+
+.statusDisabled {
+  color: crimson;
+}
+
+/* =========================================================
+   ICONO PLAN
+========================================================= */
+
+.planIcon {
+  width: 24px;
+
+  height: 24px;
+
+  object-fit: contain;
+
   justify-self: center;
 }
 
-.column1 h4 {
-  text-align: left;
-  margin: 15px;
-  background-color: rgba(128, 128, 128, 0.3);
-  padding-left: 10px;
-  border-radius: 5px;
-}
+/* =========================================================
+   BOTONES DE ACCIÓN
+========================================================= */
 
-.column2 {
-  display: grid;
-  width: 500px;
-  height: auto;
-  box-shadow: 0px 5px 10px rgba(128, 128, 128, 0.3);
-  border-radius: 10px;
-}
+.element button {
+  width: 32px;
 
-.column2 h4 {
-  text-align: left;
-  margin: 15px;
-  background-color: rgba(0, 149, 255, 0.3);
-  padding-left: 10px;
-  border-radius: 5px;
-}
+  height: 32px;
 
-/* Los estilos de 'element' los agregó Agus, borrar o modificar cuando sea necesario. */
+  padding: 5px;
 
-.element {
-  display: grid;
-  grid-template-columns: 2fr 5fr 1fr 1fr 1fr 1fr;
+  display: flex;
+
   align-items: center;
+  justify-content: center;
+
+  border: none;
+
+  border-radius: 7px;
+
+  background: transparent;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
 }
 
-.element span {
-  width: fit-content;
+.element button img {
+  width: 20px;
+  height: 20px;
+
+  display: block;
 }
 
-button:disabled img {
-  filter: grayscale(100%);
+@media (hover: hover) and (pointer: fine) {
+  .element button:hover:not(:disabled) {
+    background:
+      rgba(0, 0, 0, 0.06);
+
+    transform: scale(1.05);
+  }
+}
+
+.element button:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.45;
+}
+
+/* =========================================================
+   TABLETS
+========================================================= */
+
+@media (max-width: 1000px) {
+  .dashboard {
+    width: min(
+      calc(100% - 20px),
+      900px
+    );
+  }
+
+  .filters {
+    grid-template-columns: 1fr;
+  }
+
+  .bottomContainer {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   CELULARES
+========================================================= */
+
+@media (max-width: 600px) {
+  .dashboard {
+    width: calc(100% - 12px);
+
+    margin-bottom: 80px;
+  }
+
+  .topContainer {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+
+  .tile {
+    min-height: 105px;
+  }
+
+  .newUsers,
+  .delUsers,
+  .publications,
+  .matchs,
+  .premium {
+    font-size: 28px;
+  }
+
+  .selectGroup,
+  .filterPanel:nth-child(2)
+    .selectGroup {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+
+  .selectGroup button {
+    grid-column: 1 / -1;
+  }
+
+  .element {
+    grid-template-columns:
+      minmax(42px, 0.8fr)
+      minmax(90px, 2fr)
+      minmax(62px, 1fr)
+      34px
+      34px
+      34px;
+
+    padding:
+      8px 6px;
+
+    gap: 4px;
+  }
+
+  .element button {
+    width: 30px;
+    height: 30px;
+
+    padding: 4px;
+  }
+
+  .element button img {
+    width: 18px;
+    height: 18px;
+  }
+
+  .planIcon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .column {
+    overflow-x: auto;
+  }
+}
+
+/* =========================================================
+   CELULARES PEQUEÑOS
+========================================================= */
+
+@media (max-width: 380px) {
+  .dashboard {
+    width: calc(100% - 8px);
+  }
+
+  .topContainer {
+    grid-template-columns: 1fr;
+  }
+
+  .filterPanel {
+    padding: 10px;
+  }
+
+  .selectGroup,
+  .filterPanel:nth-child(2)
+    .selectGroup {
+    grid-template-columns: 1fr;
+  }
+
+  .selectGroup button {
+    grid-column: auto;
+  }
+
+  .element {
+    /*
+      Mantiene la información completa pero
+      permite scroll horizontal controlado.
+    */
+    min-width: 440px;
+  }
+}
+
+/* =========================================================
+   MONITORES GRANDES
+========================================================= */
+
+@media (min-width: 1600px) {
+  .dashboard {
+    width: min(
+      calc(100% - 60px),
+      1900px
+    );
+  }
+
+  .element {
+    min-height: 58px;
+  }
+}
+
+/* =========================================================
+   2K / 4K / TV
+========================================================= */
+
+@media (min-width: 2200px) {
+  .dashboard {
+    width: min(
+      calc(100% - 100px),
+      2200px
+    );
+  }
+
+  .tile {
+    min-height: 180px;
+  }
+
+  .newUsers,
+  .delUsers,
+  .publications,
+  .matchs,
+  .premium {
+    font-size: 50px;
+  }
+
+  .pageHeader h3 {
+    font-size: 38px;
+  }
+
+  .filterPanel h3,
+  .columnTitle {
+    font-size: 21px;
+  }
+
+  .element {
+    min-height: 70px;
+
+    padding:
+      12px 16px;
+  }
+
+  .element h4 {
+    font-size: 16px;
+  }
+}
+
+/* =========================================================
+   PANTALLAS MUY GRANDES
+========================================================= */
+
+@media (min-width: 3000px) {
+  .dashboard {
+    width: min(
+      calc(100% - 140px),
+      2800px
+    );
+  }
+
+  .tile {
+    min-height: 210px;
+  }
+
+  .newUsers,
+  .delUsers,
+  .publications,
+  .matchs,
+  .premium {
+    font-size: 60px;
+  }
+
+  .element {
+    min-height: 80px;
+  }
+
+  .element h4 {
+    font-size: 18px;
+  }
+}
+
+/* =========================================================
+   ACCESIBILIDAD
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .selectGroup button,
+  .element button {
+    transition: none;
+  }
 }
