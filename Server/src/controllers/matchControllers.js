@@ -4,9 +4,14 @@ const { Op } = require("sequelize");
 // Función para encontrar matches
 const findMatches = async (userId) => {
   try {
+    console.log("🔎 findMatches userId:", userId);
+
     const matches = await Matches.findAll({
       where: {
-        [Op.or]: [{ UserId1: userId }, { UserId2: userId }],
+        [Op.or]: [
+          { UserId1: userId },
+          { UserId2: userId },
+        ],
       },
       order: [["createdAt", "DESC"]],
       include: [
@@ -17,7 +22,7 @@ const findMatches = async (userId) => {
           include: [
             {
               model: User,
-              as: "owner", // 🔥 CLAVE
+              as: "owner",
               attributes: ["id", "username", "image"],
             },
           ],
@@ -29,13 +34,15 @@ const findMatches = async (userId) => {
           include: [
             {
               model: User,
-              as: "owner", // 🔥 CLAVE
+              as: "owner",
               attributes: ["id", "username", "image"],
             },
           ],
         },
       ],
     });
+
+    console.log("✅ DB matches:", matches.length);
 
     return matches.map((m) => {
       const isMine = Number(m.UserId1) === Number(userId);
@@ -50,7 +57,14 @@ const findMatches = async (userId) => {
       };
     });
   } catch (error) {
-    throw new Error("Error al obtener matches: " + error.message);
+    console.error("❌ ERROR REAL findMatches:");
+    console.error(error);
+    console.error("❌ message:", error.message);
+    console.error("❌ name:", error.name);
+    console.error("❌ parent:", error.parent);
+    console.error("❌ original:", error.original);
+
+    throw error;
   }
 };
 

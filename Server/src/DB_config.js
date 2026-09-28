@@ -56,10 +56,17 @@ sequelize.models = Object.fromEntries(capsEntries);
 const { Post, User, Like, Matches, Message, Chat, Review } = sequelize.models;
 
 // User - Post
-User.hasMany(Post);
-Post.belongsTo(User);
+User.hasMany(Post, {
+  foreignKey: "UserId",
+  as: "posts",
+});
 
-//Like - Post
+Post.belongsTo(User, {
+  foreignKey: "UserId",
+  as: "owner",
+});
+
+// Like - Post
 Like.belongsTo(Post, {
   foreignKey: "likedPostId",
   as: "TargetPost",
@@ -76,22 +83,31 @@ Post.hasMany(Like, {
 });
 
 // User - Chat
-User.belongsToMany(Chat, {
-  through: "UserChat",
+Chat.belongsTo(User, {
+  foreignKey: "user1Id",
+  as: "user1",
 });
-Chat.belongsToMany(User, {
-  through: "UserChat",
-  foreignKey: "chatId",
+
+Chat.belongsTo(User, {
+  foreignKey: "user2Id",
+  as: "user2",
 });
-Post.belongsTo(User, {
-  as: "owner",
-  foreignKey: "UserId",
+
+User.hasMany(Chat, {
+  foreignKey: "user1Id",
+  as: "chatsAsUser1",
+});
+
+User.hasMany(Chat, {
+  foreignKey: "user2Id",
+  as: "chatsAsUser2",
 });
 
 // Chat - Message
 Chat.hasMany(Message, {
   foreignKey: "chatId",
 });
+
 Message.belongsTo(Chat, {
   foreignKey: "chatId",
 });
@@ -101,10 +117,12 @@ User.hasMany(Message, {
   foreignKey: "senderId",
   as: "sender",
 });
+
 Message.belongsTo(User, {
   foreignKey: "senderId",
 });
 
+// User - Review
 User.hasMany(Review, {
   foreignKey: "userId",
 });
@@ -114,7 +132,7 @@ Review.belongsTo(User, {
   foreignKey: "reviewedUserId",
 });
 
-//Matches - Post
+// Matches - Post
 Matches.belongsTo(Post, {
   as: "post1",
   foreignKey: "PostId1",

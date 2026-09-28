@@ -41,11 +41,20 @@ router.get(
         });
       }
 
+      console.log("🔎 Buscando matches para userId:", userId);
+
       const matches = await matchController.findMatches(userId);
+
+      console.log("✅ Matches encontrados:", matches.length);
 
       return res.status(200).json(matches);
     } catch (error) {
-      console.error("Error al obtener los matches:", error);
+      console.error("❌ ERROR REAL AL OBTENER MATCHES:");
+      console.error(error);
+      console.error("❌ message:", error.message);
+      console.error("❌ name:", error.name);
+      console.error("❌ parent:", error.parent);
+      console.error("❌ original:", error.original);
 
       return res.status(500).json({
         error: "Error interno del servidor",
