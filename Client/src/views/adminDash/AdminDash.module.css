@@ -3,15 +3,9 @@
 ========================================================= */
 
 .dashboard {
-  width: min(
-    calc(100% - 24px),
-    1800px
-  );
+  width: min(calc(100% - 24px), 1800px);
 
-  margin:
-    clamp(20px, 4vw, 50px)
-    auto
-    100px;
+  margin: clamp(20px, 4vw, 50px) auto 100px;
 
   box-sizing: border-box;
 }
@@ -21,8 +15,7 @@
 ========================================================= */
 
 .pageHeader {
-  margin-bottom:
-    clamp(20px, 3vw, 35px);
+  margin-bottom: clamp(20px, 3vw, 35px);
 
   text-align: center;
 }
@@ -32,8 +25,7 @@
 
   color: #666;
 
-  font-size:
-    clamp(20px, 2.5vw, 32px);
+  font-size: clamp(20px, 2.5vw, 32px);
 }
 
 /* =========================================================
@@ -45,27 +37,19 @@
 
   display: grid;
 
-  grid-template-columns:
-    repeat(
-      auto-fit,
-      minmax(170px, 1fr)
-    );
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
 
-  gap:
-    clamp(10px, 1.5vw, 20px);
+  gap: clamp(10px, 1.5vw, 20px);
 
-  margin-bottom:
-    clamp(20px, 3vw, 35px);
+  margin-bottom: clamp(20px, 3vw, 35px);
 }
 
 .tile {
   min-width: 0;
 
-  min-height:
-    clamp(120px, 12vw, 160px);
+  min-height: clamp(120px, 12vw, 160px);
 
-  padding:
-    clamp(14px, 2vw, 24px);
+  padding: clamp(14px, 2vw, 24px);
 
   box-sizing: border-box;
 
@@ -78,14 +62,11 @@
 
   gap: 6px;
 
-  background: #ffffff;
+  background: var(--surface-secondary);
 
-  box-shadow:
-    0 5px 15px
-      rgba(128, 128, 128, 0.2);
+  box-shadow: 0 5px 15px rgba(128, 128, 128, 0.2);
 
-  border-radius:
-    clamp(10px, 1vw, 15px);
+  border-radius: clamp(10px, 1vw, 15px);
 }
 
 .tile p {
@@ -93,8 +74,7 @@
 
   color: #666;
 
-  font-size:
-    clamp(11px, 0.9vw, 15px);
+  font-size: clamp(11px, 0.9vw, 15px);
 
   font-weight: 500;
 
@@ -108,8 +88,7 @@
 .premium {
   margin: 0;
 
-  font-size:
-    clamp(28px, 3vw, 42px);
+  font-size: clamp(28px, 3vw, 42px);
 
   line-height: 1;
 }
@@ -143,44 +122,31 @@
 
   display: grid;
 
-  grid-template-columns:
-    repeat(
-      2,
-      minmax(0, 1fr)
-    );
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 
-  gap:
-    clamp(14px, 2vw, 30px);
+  gap: clamp(14px, 2vw, 30px);
 
-  margin-bottom:
-    clamp(20px, 3vw, 35px);
+  margin-bottom: clamp(20px, 3vw, 35px);
 }
 
 .filterPanel {
   min-width: 0;
 
-  padding:
-    clamp(12px, 1.5vw, 20px);
+  padding: clamp(12px, 1.5vw, 20px);
 
-  background: #ffffff;
+  background: var(--surface-secondary);
 
   border-radius: 12px;
 
-  box-shadow:
-    0 5px 15px
-      rgba(128, 128, 128, 0.18);
+  box-shadow: 0 5px 15px rgba(128, 128, 128, 0.18);
 }
 
 .filterPanel h3 {
-  margin:
-    0
-    0
-    12px;
+  margin: 0 0 12px;
 
   color: #666;
 
-  font-size:
-    clamp(14px, 1vw, 18px);
+  font-size: clamp(14px, 1vw, 18px);
 
   text-align: center;
 }
@@ -188,22 +154,13 @@
 .selectGroup {
   display: grid;
 
-  grid-template-columns:
-    repeat(
-      4,
-      minmax(0, 1fr)
-    );
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 
   gap: 8px;
 }
 
-.filterPanel:nth-child(2)
-  .selectGroup {
-  grid-template-columns:
-    repeat(
-      3,
-      minmax(0, 1fr)
-    );
+.filterPanel:nth-child(2) .selectGroup {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .selectGroup select,
@@ -214,8 +171,7 @@
 
   min-height: 38px;
 
-  padding:
-    7px 9px;
+  padding: 7px 9px;
 
   border: none;
 
@@ -223,24 +179,20 @@
 
   font-family: inherit;
 
-  font-size:
-    clamp(10px, 0.8vw, 13px);
+  font-size: clamp(10px, 0.8vw, 13px);
 
   outline: none;
 }
 
-.selectGroup select {
-  background: #f5f5f5;
-
-  color: #555;
+.selectGroup select option {
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
 
   cursor: pointer;
 }
 
 .selectGroup select:focus {
-  box-shadow:
-    0 0 0 3px
-      rgba(78, 205, 196, 0.15);
+  box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.15);
 }
 
 .selectGroup button {
@@ -274,14 +226,9 @@
 
   display: grid;
 
-  grid-template-columns:
-    repeat(
-      2,
-      minmax(0, 1fr)
-    );
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 
-  gap:
-    clamp(15px, 3vw, 60px);
+  gap: clamp(15px, 3vw, 60px);
 
   margin-bottom: 100px;
 }
@@ -291,31 +238,25 @@
 
   overflow: hidden;
 
-  background: #ffffff;
+  background: var(--surface);
 
-  box-shadow:
-    0 5px 15px
-      rgba(128, 128, 128, 0.2);
+  box-shadow: 0 5px 15px var(--shadow);
 
-  border-radius:
-    clamp(10px, 1vw, 15px);
+  border-radius: clamp(10px, 1vw, 15px);
 }
 
 .columnTitle {
   margin: 0;
 
-  padding:
-    14px 16px;
+  padding: 14px 16px;
 
   color: #555;
 
   text-align: center;
 
-  font-size:
-    clamp(14px, 1vw, 18px);
+  font-size: clamp(14px, 1vw, 18px);
 
-  border-bottom:
-    1px solid #eeeeee;
+  border-bottom: 1px solid #eeeeee;
 }
 
 /* =========================================================
@@ -349,11 +290,9 @@
 
   gap: 7px;
 
-  padding:
-    10px 12px;
+  padding: 10px 12px;
 
-  border-bottom:
-    1px solid #eeeeee;
+  border-bottom: 1px solid #eeeeee;
 }
 
 .element:last-child {
@@ -367,8 +306,7 @@
 
   color: #333;
 
-  font-size:
-    clamp(10px, 0.75vw, 14px);
+  font-size: clamp(10px, 0.75vw, 14px);
 
   font-weight: 500;
 }
@@ -390,6 +328,8 @@
 
 .username,
 .email {
+  color: var(--text-muted);
+
   min-width: 0;
 
   overflow: hidden;
@@ -402,14 +342,12 @@
 .email {
   color: #888;
 
-  font-size:
-    0.9em;
+  font-size: 0.9em;
 }
 
 .statusActive,
 .statusDisabled {
-  font-size:
-    clamp(9px, 0.7vw, 12px);
+  font-size: clamp(9px, 0.7vw, 12px);
 
   font-weight: 600;
 
@@ -476,9 +414,7 @@
 
 @media (hover: hover) and (pointer: fine) {
   .element button:hover:not(:disabled) {
-    background:
-      rgba(0, 0, 0, 0.06);
-
+    background: var(--surface-hover);
     transform: scale(1.05);
   }
 }
@@ -495,10 +431,7 @@
 
 @media (max-width: 1000px) {
   .dashboard {
-    width: min(
-      calc(100% - 20px),
-      900px
-    );
+    width: min(calc(100% - 20px), 900px);
   }
 
   .filters {
@@ -522,11 +455,7 @@
   }
 
   .topContainer {
-    grid-template-columns:
-      repeat(
-        2,
-        minmax(0, 1fr)
-      );
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .tile {
@@ -542,13 +471,8 @@
   }
 
   .selectGroup,
-  .filterPanel:nth-child(2)
-    .selectGroup {
-    grid-template-columns:
-      repeat(
-        2,
-        minmax(0, 1fr)
-      );
+  .filterPanel:nth-child(2) .selectGroup {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .selectGroup button {
@@ -564,8 +488,7 @@
       34px
       34px;
 
-    padding:
-      8px 6px;
+    padding: 8px 6px;
 
     gap: 4px;
   }
@@ -610,8 +533,7 @@
   }
 
   .selectGroup,
-  .filterPanel:nth-child(2)
-    .selectGroup {
+  .filterPanel:nth-child(2) .selectGroup {
     grid-template-columns: 1fr;
   }
 
@@ -634,10 +556,7 @@
 
 @media (min-width: 1600px) {
   .dashboard {
-    width: min(
-      calc(100% - 60px),
-      1900px
-    );
+    width: min(calc(100% - 60px), 1900px);
   }
 
   .element {
@@ -651,10 +570,7 @@
 
 @media (min-width: 2200px) {
   .dashboard {
-    width: min(
-      calc(100% - 100px),
-      2200px
-    );
+    width: min(calc(100% - 100px), 2200px);
   }
 
   .tile {
@@ -670,23 +586,43 @@
   }
 
   .pageHeader h3 {
-    font-size: 38px;
+    margin: 0;
+
+    color: var(--text-secondary);
+
+    font-size: clamp(20px, 2.5vw, 32px);
   }
 
-  .filterPanel h3,
+  .filterPanel h3 {
+    margin: 0 0 12px;
+
+    color: var(--text-secondary);
+
+    font-size: clamp(14px, 1vw, 18px);
+
+    text-align: center;
+  }
+
   .columnTitle {
-    font-size: 21px;
+    margin: 0;
+
+    padding: 14px 16px;
+
+    color: var(--text-secondary);
+
+    text-align: center;
+
+    font-size: clamp(14px, 1vw, 18px);
+
+    border-bottom: 1px solid var(--border);
   }
 
   .element {
-    min-height: 70px;
-
-    padding:
-      12px 16px;
+    border-bottom: 1px solid var(--border);
   }
 
   .element h4 {
-    font-size: 16px;
+    color: var(--text-primary);
   }
 }
 
@@ -696,10 +632,7 @@
 
 @media (min-width: 3000px) {
   .dashboard {
-    width: min(
-      calc(100% - 140px),
-      2800px
-    );
+    width: min(calc(100% - 140px), 2800px);
   }
 
   .tile {

@@ -1,76 +1,235 @@
+/* =========================
+   CONTENEDOR PRINCIPAL
+========================= */
+
 .loading {
-    display: grid;
-    grid-template-rows: 1fr 1fr;
-    width: 300px;
-    height: 150px;
-    background-color: whitesmoke;
-    box-shadow: 0px 5px 10px rgba(128, 128, 128, 0.3);
-    border-radius: 10px;
-    align-content: center;
-    justify-content: center;
-    margin-top: 150px;
-    padding: 20px;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  width: min(100% - 2rem, 24rem);
+
+  min-height: 11rem;
+
+  margin: 6rem auto 0;
+  padding: 1.5rem;
+
+  background-color: whitesmoke;
+
+  border-radius: 0.75rem;
+
+  box-shadow: 0 0.3rem 0.8rem rgba(128, 128, 128, 0.3);
+
+  text-align: center;
 }
 
-.loading h3 {
-    font-size: 14px;
-}
+/* =========================
+   ICONO
+========================= */
 
 .loading img {
-    display: grid;
-    justify-self: center;
-    align-self: center;
+  display: block;
+
+  width: 3rem;
+  height: 3rem;
+
+  margin-bottom: 0.75rem;
 }
 
-.loading button {
-    color: whitesmoke;
-    background-color: #4ECDC4;
-    width: 120px;
-    border-radius: 5px;
-    font-size: 16px;
-    padding: 5px;
-    justify-self: center;
-    box-shadow: 0px 5px 10px rgba(128, 128, 128, 0.2);
+/* =========================
+   MENSAJE
+========================= */
+
+.loading h3 {
+  max-width: 20rem;
+
+  margin: 0 0 1.25rem;
+
+  font-size: 0.95rem;
+  line-height: 1.5;
+  font-weight: 600;
+
+  color: #333;
+}
+
+/* =========================
+   BOTÓN LOGIN
+========================= */
+
+.loginButton {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-width: 8rem;
+  min-height: 2.5rem;
+
+  padding: 0.4rem 1rem;
+
+  border-radius: 0.4rem;
+
+  background-color: #4ecdc4;
+  color: whitesmoke;
+
+  font-size: 1rem;
+  font-weight: 600;
+
+  text-decoration: none;
+
+  box-shadow: 0 0.3rem 0.6rem rgba(128, 128, 128, 0.2);
+
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease;
+}
+
+.loginButton:hover {
+  background-color: #3dbbb2;
+
+  transform: translateY(-1px);
+
+  box-shadow: 0 0.4rem 0.8rem rgba(128, 128, 128, 0.3);
+}
+
+.loginButton:active {
+  transform: translateY(0);
+}
+
+.loginButton:focus-visible {
+  outline: 3px solid #ffe66d;
+  outline-offset: 3px;
+}
+
+/* =========================
+   SPINNER
+========================= */
+
+.spinnerContainer {
+  display: grid;
+
+  width: 100%;
+  min-height: 60vh;
+
+  place-items: center;
 }
 
 .spinner {
-    margin: 200px auto 0;
-    width: 70px;
-    text-align: center;
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 0.35rem;
+
+  width: 5rem;
+}
+
+/* =========================
+   BOLITAS
+========================= */
+
+.spinner > span {
+  display: block;
+
+  width: 1.1rem;
+  height: 1.1rem;
+
+  border-radius: 50%;
+
+  background-color: #ffe66d;
+
+  animation: bounceDelay 1.4s infinite ease-in-out both;
+}
+
+.bounce1 {
+  animation-delay: -0.32s !important;
+}
+
+.bounce2 {
+  animation-delay: -0.16s !important;
+}
+
+.bounce3 {
+  animation-delay: 0s !important;
+}
+
+/* =========================
+   ANIMACIÓN
+========================= */
+
+@keyframes bounceDelay {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
   }
-  
-  .spinner > div {
-    width: 18px;
-    height: 18px;
-    background-color: #ffe66d;
-  
-    border-radius: 100%;
-    display: inline-block;
-    -webkit-animation: sk-bouncedelay 1.4s infinite ease-in-out both;
-    animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+
+  40% {
+    transform: scale(1);
   }
-  
-  .spinner .bounce1 {
-    -webkit-animation-delay: -0.32s;
-    animation-delay: -0.32s;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 480px) {
+  .loading {
+    width: calc(100% - 2rem);
+
+    margin-top: 3rem;
+    padding: 1.25rem;
   }
-  
-  .spinner .bounce2 {
-    -webkit-animation-delay: -0.16s;
-    animation-delay: -0.16s;
+
+  .loading h3 {
+    font-size: 0.9rem;
   }
-  
-  @-webkit-keyframes sk-bouncedelay {
-    0%, 80%, 100% { -webkit-transform: scale(0) }
-    40% { -webkit-transform: scale(1.0) }
+
+  .spinnerContainer {
+    min-height: 50vh;
   }
-  
-  @keyframes sk-bouncedelay {
-    0%, 80%, 100% { 
-      -webkit-transform: scale(0);
-      transform: scale(0);
-    } 40% { 
-      -webkit-transform: scale(1.0);
-      transform: scale(1.0);
-    }
+}
+
+/* =========================
+   MOBILE PEQUEÑO
+========================= */
+
+@media (max-width: 360px) {
+  .loading {
+    width: calc(100% - 1.5rem);
+    padding: 1rem;
   }
+
+  .loading h3 {
+    font-size: 0.85rem;
+  }
+
+  .loginButton {
+    width: 100%;
+  }
+}
+
+/* =========================
+   ACCESIBILIDAD
+========================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner > span {
+    animation: none;
+    transform: scale(1);
+  }
+
+  .loginButton {
+    transition: none;
+  }
+
+  .loginButton:hover,
+  .loginButton:active {
+    transform: none;
+  }
+}

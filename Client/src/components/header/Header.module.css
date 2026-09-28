@@ -1,6 +1,7 @@
 .header {
-  width: min(calc(100% - 2rem), 75rem);
-  margin: clamp(0.75rem, 3vw, 2rem) auto;
+  box-sizing: border-box;
+  width: min(70%, 50rem);
+  margin: 0.1rem auto;
 }
 
 .slide {
@@ -11,40 +12,51 @@
   display: block;
   width: 100%;
   height: auto;
-  border-radius: 0.65rem;
-  object-fit: cover;
+  border-radius: 0.5rem;
 }
 
-/* Evita que slick recorte las esquinas del banner */
+/* Slick */
 .header :global(.slick-list) {
   overflow: hidden;
-  border-radius: 0.65rem;
+  border-radius: 0.5rem;
 }
 
-/* Tablets */
+.header :global(.slick-track) {
+  display: flex;
+  align-items: flex-start;
+}
+
+/* Tablet */
 @media (max-width: 768px) {
   .header {
-    width: min(calc(100% - 1.5rem), 42rem);
-    margin-block: 0.75rem;
+    width: min(74%, 34rem);
+    margin-block: 0.5rem;
   }
 }
 
-/* Celulares */
+/* Celular */
 @media (max-width: 540px) {
   .header {
-    width: calc(100% - 1rem);
-    margin-block: 0.5rem;
+    width: 82%;
+    margin-block: 0.35rem;
   }
 
   .image,
   .header :global(.slick-list) {
-    border-radius: 0.45rem;
+    border-radius: 0.4rem;
   }
 }
 
-/* Televisores y monitores muy grandes */
+/* Celular pequeño */
+@media (max-width: 380px) {
+  .header {
+    width: 86%;
+  }
+}
+
+/* Pantallas grandes */
 @media (min-width: 1920px) {
   .header {
-    width: min(calc(100% - 4rem), 90rem);
+    width: min(72%, 55rem);
   }
 }

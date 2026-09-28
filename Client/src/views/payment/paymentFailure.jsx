@@ -1,8 +1,10 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import style from "./PaymentFailure.module.css";
 
-export default function PaymentFailure() {
+const PaymentFailure = () => {
   const { search } = useLocation();
   const navigate = useNavigate();
+
   const params = new URLSearchParams(search);
 
   const paymentId = params.get("payment_id");
@@ -10,108 +12,62 @@ export default function PaymentFailure() {
   const statusDetail = params.get("status_detail");
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <div style={styles.icon}>❌</div>
-
-        <h1 style={styles.title}>Pago no completado</h1>
-
-        <p style={styles.text}>
-          Tu pago no pudo procesarse o fue cancelado.
-          No se realizó ningún cargo.
-        </p>
-
-        <div style={styles.infoBox}>
-          <p><strong>Estado:</strong> {status || "Desconocido"}</p>
-          <p><strong>Detalle:</strong> {statusDetail || "—"}</p>
-          <p><strong>ID de pago:</strong> {paymentId || "—"}</p>
+    <main className={style.container}>
+      <section className={style.card}>
+        <div className={style.icon} aria-hidden="true">
+          ❌
         </div>
 
-        <div style={styles.actions}>
+        <h1 className={style.title}>Pago no completado</h1>
+
+        <p className={style.text}>
+          El pago no pudo procesarse o fue cancelado.
+          Revisá los datos de la operación y, si es necesario,
+          intentá nuevamente.
+        </p>
+
+        <div className={style.infoBox}>
+          <p>
+            <strong>Estado:</strong>{" "}
+            {status || "Desconocido"}
+          </p>
+
+          <p>
+            <strong>Detalle:</strong>{" "}
+            {statusDetail || "—"}
+          </p>
+
+          <p>
+            <strong>ID de pago:</strong>{" "}
+            {paymentId || "—"}
+          </p>
+        </div>
+
+        <div className={style.actions}>
           <button
-            style={styles.primaryButton}
+            type="button"
+            className={style.primaryButton}
             onClick={() => navigate("/premium")}
           >
             Intentar nuevamente
           </button>
 
           <button
-            style={styles.secondaryButton}
+            type="button"
+            className={style.secondaryButton}
             onClick={() => navigate("/")}
           >
             Volver al inicio
           </button>
         </div>
 
-        <p style={styles.help}>
-          Si el problema persiste, intenta con otro medio de pago
-          o contacta soporte.
+        <p className={style.help}>
+          Si el problema persiste, intentá con otro medio
+          de pago o contactá soporte.
         </p>
-      </div>
-    </div>
+      </section>
+    </main>
   );
-}
-
-const styles = {
-  container: {
-    minHeight: "100vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "#f5f7fa",
-    padding: 20,
-  },
-  card: {
-    background: "#fff",
-    padding: 40,
-    borderRadius: 16,
-    boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
-    maxWidth: 480,
-    width: "100%",
-    textAlign: "center",
-  },
-  icon: {
-    fontSize: 64,
-    marginBottom: 10,
-  },
-  title: {
-    marginBottom: 10,
-  },
-  text: {
-    color: "#555",
-    marginBottom: 20,
-  },
-  infoBox: {
-    background: "#f1f3f5",
-    padding: 16,
-    borderRadius: 10,
-    textAlign: "left",
-    marginBottom: 24,
-  },
-  actions: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 12,
-  },
-  primaryButton: {
-    padding: "12px 16px",
-    borderRadius: 8,
-    border: "none",
-    background: "#ff4d4f",
-    color: "#fff",
-    fontWeight: "bold",
-    cursor: "pointer",
-  },
-  secondaryButton: {
-    padding: "12px 16px",
-    borderRadius: 8,
-    border: "1px solid #ccc",
-    background: "#fff",
-    cursor: "pointer",
-  },
-  help: {
-    marginTop: 20,
-    fontSize: 14,
-    color: "#888",
-  },
 };
+
+export default PaymentFailure;

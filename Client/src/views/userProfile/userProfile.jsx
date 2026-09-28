@@ -1,130 +1,223 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import style from "./UserProfile.module.css";
-import { useParams } from "react-router-dom";
 import api from "../../api/api";
 
 const UserProfile = ({ id }) => {
   const { userId } = useParams();
+  const navigate = useNavigate();
+
   const [userData, setUserData] = useState(null);
-  const [rating, setRating] = useState(true);
+  const [showRating, setShowRating] = useState(false);
+  const [isRating, setIsRating] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const response = await api.get("/users/anotherUserId", {
-          params: { id: userId },
+          params: {
+            id: userId,
+          },
         });
-        // Verifica si hay datos en la respuesta antes de actualizar el estado
+
         if (response.data) {
           setUserData(response.data);
         } else {
           console.error("No se recibieron datos del usuario");
         }
       } catch (error) {
-        console.error("Error al obtener la información del usuario:", error);
+        console.error(
+          "Error al obtener la información del usuario:",
+          error
+        );
       }
     };
 
     fetchUserData();
-  }, [userId, rating]);
+  }, [userId]);
 
   const handleRating = async (value) => {
+    if (isRating || !id?.id || !userId) return;
+
+    setIsRating(true);
+
     try {
-      let newReview = {
+      const newReview = {
         userId: id.id,
         reviewedUserId: userId,
         rating: value,
       };
 
-      const newRating = await api.post("/reviews/", newReview);
-      if (newRating) {
-        const response = await api.get(`/reviews/averageRating/${userId}`);
-        if (response) {
-          userData.averageRating = response.data.averageRating;
-        }
-      }
+      await api.post("/reviews/", newReview);
+
+      const response = await api.get(
+        `/reviews/averageRating/${userId}`
+      );
+
+      setUserData((prev) => {
+        if (!prev) return prev;
+
+        return {
+          ...prev,
+          averageRating: response.data.averageRating,
+        };
+      });
+
+      setShowRating(false);
     } catch (error) {
-      console.log(error);
+      console.error("Error al calificar al usuario:", error);
     } finally {
-      handleResetRatingClick();
+      setIsRating(false);
     }
   };
 
-  const handleRatingClick = () => {
-    setRating(false);
-  };
-
-  const handleResetRatingClick = async () => {
-    setRating(true);
-  };
-
   const handleGoBack = () => {
-    window.history.back();
+    navigate(-1);
   };
 
-  return (
-    <>
-      {userData && rating ? (
-        <div
-          className={
-            userData.premium === "premium" ? style.avatarPremium : style.avatar
-          }
-        >
-          <img src={userData.image} className={style.photo} alt="User Avatar" />
-          {userData.premium === "premium" && (
-            <img
-              width="36"
-              height="36"
-              src="https://img.icons8.com/color/48/guarantee.png"
-              alt="Premium Guarantee"
-              className={style.logo}
-            />
-          )}
-          <h3>{userData.username}</h3>
-          <p>{userData.email}</p>
-          {userData.averageRating ? (
-            <div>
-              {Array.from({ length: userData.averageRating }, (_, index) => (
-                <span key={index}>⭐️</span>
-              ))}
-            </div>
-          ) : (
-            <h4 className={style.calif}>
-              ¡Todavía no hay calificaciones, sé el primero!
-            </h4>
-          )}
-          <div>
-            <button className={style.back} onClick={handleGoBack}>
-              Atrás
-            </button>
-            <button onClick={handleRatingClick} className={style.bRating}>
-              Calificar
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className={style.modal}>
-          <h3>Califica al usuario con estrellas</h3>
-          <div className={style.ratingContainer}>
+  if (!userData) {
+    return (
+      <main className={style.loading}>
+        <p>Cargando perfil...</p>
+      </main>
+    );
+  }
+
+  if (showRating) {
+    return (
+      <main className={style.ratingView}>
+        <section className={style.modal}>
+          <h2>Calificá a {userData.username}</h2>
+
+          <p className={style.ratingText}>
+            Seleccioná una cantidad de estrellas.
+          </p>
+
+          <div
+            className={style.ratingContainer}
+            aria-label="Seleccionar calificación"
+          >
             {[1, 2, 3, 4, 5].map((value) => (
-              <label key={value} className={style.starLabel}>
+              <label
+                key={value}
+                className={style.starLabel}
+              >
                 <input
                   type="radio"
                   name="rating"
                   value={value}
-                  onClick={() => handleRating(value)}
+                  onChange={() => handleRating(value)}
+                  disabled={isRating}
                   className={style.starInput}
                 />
-                {value}
+
+                <span
+                  className={style.star}
+                  aria-hidden="true"
+                >
+                  ⭐
+                </span>
+
+                <span className={style.starNumber}>
+                  {value}
+                </span>
               </label>
             ))}
           </div>
-          <button onClick={handleResetRatingClick} className={style.back}>
+
+          <button
+            type="button"
+            onClick={() => setShowRating(false)}
+            className={style.back}
+            disabled={isRating}
+          >
             Atrás
           </button>
+        </section>
+      </main>
+    );
+  }
+
+  const averageRating = Number(userData.averageRating) || 0;
+  const roundedRating = Math.round(averageRating);
+  const isPremium = userData.premium === "premium";
+
+  return (
+    <main className={style.container}>
+      <section
+        className={
+          isPremium
+            ? style.avatarPremium
+            : style.avatar
+        }
+      >
+        <div className={style.profileTop}>
+          <div className={style.photoWrapper}>
+            <img
+              src={userData.image}
+              className={style.photo}
+              alt={`Avatar de ${userData.username}`}
+            />
+
+            {isPremium && (
+              <img
+                src="https://img.icons8.com/color/48/guarantee.png"
+                alt="Usuario Premium"
+                className={style.logo}
+              />
+            )}
+          </div>
+
+          <h2>{userData.username}</h2>
+
+          <p className={style.email}>
+            {userData.email}
+          </p>
         </div>
-      )}
-    </>
+
+        {averageRating > 0 ? (
+          <div className={style.rating}>
+            <div
+              className={style.stars}
+              aria-label={`Calificación ${averageRating} de 5`}
+            >
+              {Array.from(
+                { length: roundedRating },
+                (_, index) => (
+                  <span key={index}>⭐</span>
+                )
+              )}
+            </div>
+
+            <span className={style.ratingValue}>
+              {averageRating.toFixed(1)}
+            </span>
+          </div>
+        ) : (
+          <p className={style.calif}>
+            ¡Todavía no hay calificaciones, sé el primero!
+          </p>
+        )}
+
+        <div className={style.actions}>
+          <button
+            type="button"
+            className={style.back}
+            onClick={handleGoBack}
+          >
+            Atrás
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowRating(true)}
+            className={style.bRating}
+          >
+            Calificar
+          </button>
+        </div>
+      </section>
+    </main>
   );
 };
 

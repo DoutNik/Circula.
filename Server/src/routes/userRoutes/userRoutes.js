@@ -17,33 +17,23 @@ router.get("/allUsers", authorization, isAdmin, async (req, res) => {
   }
 });
 
-router.get(
-  "/allDisabledUsers",
-  authorization,
-  isAdmin,
-  async (req, res) => {
-    try {
-      const response = await userController.getAllDisabled();
-      return res.status(200).json(response);
-    } catch (error) {
-      return res.status(400).json(error.message);
-    }
-  },
-);
+router.get("/allDisabledUsers", authorization, isAdmin, async (req, res) => {
+  try {
+    const response = await userController.getAllDisabled();
+    return res.status(200).json(response);
+  } catch (error) {
+    return res.status(400).json(error.message);
+  }
+});
 
-router.get(
-  "/allExistingUsers",
-  authorization,
-  isAdmin,
-  async (req, res) => {
-    try {
-      const response = await userController.getAllExisting();
-      return res.status(200).json(response);
-    } catch (error) {
-      return res.status(400).json(error.message);
-    }
-  },
-);
+router.get("/allExistingUsers", authorization, isAdmin, async (req, res) => {
+  try {
+    const response = await userController.getAllExisting();
+    return res.status(200).json(response);
+  } catch (error) {
+    return res.status(400).json(error.message);
+  }
+});
 
 router.post("/register", authLimiter, validInfo, async (req, res) => {
   const user = req.body;
@@ -85,7 +75,7 @@ router.post("/social-login", authLimiter, async (req, res) => {
 
 router.get("/userId", authorization, async (req, res) => {
   try {
-    const response = await userController.getUserId(req.body.user);
+    const response = await userController.getUserId(req.authUserId);
     return res.status(200).json(response);
   } catch (error) {
     return res.status(400).json(error.message);
@@ -114,22 +104,17 @@ router.get("/userById/:id", authorization, async (req, res) => {
 });
 
 // Solo el dueño del perfil (o un admin) puede editarlo
-router.put(
-  "/:id",
-  authorization,
-  isSelfOrAdmin("id"),
-  async (req, res) => {
-    const { id } = req.params;
-    const updatedData = req.body;
-    try {
-      const requester = await userController.getUserId(req.body.user);
-      await userController.updateUser(id, updatedData, requester);
-      return res.status(200).json({ message: "Resource updated successfully" });
-    } catch (error) {
-      return res.status(404).json({ error: error.message });
-    }
-  },
-);
+router.put("/:id", authorization, isSelfOrAdmin("id"), async (req, res) => {
+  const { id } = req.params;
+  const updatedData = req.body;
+  try {
+    const requester = await userController.getUserId(req.body.user);
+    await userController.updateUser(id, updatedData, requester);
+    return res.status(200).json({ message: "Resource updated successfully" });
+  } catch (error) {
+    return res.status(404).json({ error: error.message });
+  }
+});
 
 router.get("/logueado", async (req, res) => {
   const { email } = req.query;
@@ -142,20 +127,15 @@ router.get("/logueado", async (req, res) => {
 });
 
 // Solo el dueño de la cuenta (o un admin) puede borrarla
-router.delete(
-  "/:id",
-  authorization,
-  isSelfOrAdmin("id"),
-  async (req, res) => {
-    const { id } = req.params;
-    try {
-      const response = await userController.deleteUser(id);
-      return res.status(200).json({ message: "User successfully deleted" });
-    } catch (error) {
-      return res.status(404).json({ error: error.message });
-    }
-  },
-);
+router.delete("/:id", authorization, isSelfOrAdmin("id"), async (req, res) => {
+  const { id } = req.params;
+  try {
+    const response = await userController.deleteUser(id);
+    return res.status(200).json({ message: "User successfully deleted" });
+  } catch (error) {
+    return res.status(404).json({ error: error.message });
+  }
+});
 
 router.post("/forgot-password", authLimiter, async (req, res) => {
   const { email } = req.body;
@@ -179,19 +159,14 @@ router.post("/reset-password/:id", authLimiter, async (req, res) => {
 });
 
 // Solo administradores pueden restaurar cuentas deshabilitadas
-router.put(
-  "/restoreUser/:id",
-  authorization,
-  isAdmin,
-  async (req, res) => {
-    const { id } = req.params;
-    try {
-      const restoredUser = await userController.restoreUser(id);
-      return res.status(200).json({ restoredUser });
-    } catch (error) {
-      return res.status(400).json({ error: error.message });
-    }
-  },
-);
+router.put("/restoreUser/:id", authorization, isAdmin, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const restoredUser = await userController.restoreUser(id);
+    return res.status(200).json({ restoredUser });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
 
 module.exports = router;

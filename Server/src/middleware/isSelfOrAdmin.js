@@ -6,7 +6,7 @@ const { User } = require("../DB_config");
 module.exports = (paramName = "id") => {
   return async (req, res, next) => {
     try {
-      const requesterId = String(req.body.user);
+      const requesterId = String(req.authUserId);
       const targetId = String(req.params[paramName]);
 
       if (requesterId === targetId) {
@@ -19,7 +19,9 @@ module.exports = (paramName = "id") => {
         return next();
       }
 
-      return res.status(403).json("Not Authorize - Not the owner of this resource");
+      return res
+        .status(403)
+        .json("Not Authorize - Not the owner of this resource");
     } catch (error) {
       console.error("Error isSelfOrAdmin:", error.message);
       return res.status(500).json("Error checking permissions");

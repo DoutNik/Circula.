@@ -2,29 +2,49 @@ import { Link, useLocation } from "react-router-dom";
 import Logo from "../../assets/locan.png";
 import style from "./Nabvar.module.css";
 import { logoutUser } from "../logButtons/LogoutButton";
-import { useClerk } from "@clerk/clerk-react";
 
 const NavBar = ({ isAuthenticated, userData }) => {
   const location = useLocation();
-  const { signOut } = useClerk();
 
   const imageUrl = userData?.image?.split("=")[0];
 
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
+  };
+
   return (
     <nav
-      className={isAuthenticated ? style.navbar : style.navbarOff}
+      className={
+        isAuthenticated
+          ? style.navbar
+          : style.navbarOff
+      }
       aria-label="Navegación principal"
     >
       {/* LOGO */}
-      <Link to="/" className={style.linkLogo} aria-label="Ir al inicio">
-        <img src={Logo} className={style.logo} alt="Locan" />
+      <Link
+        to="/"
+        className={style.linkLogo}
+        aria-label="Ir al inicio"
+      >
+        <img
+          src={Logo}
+          className={style.logo}
+          alt="Locan"
+        />
       </Link>
 
       {/* PRINCIPAL */}
       <Link
         to="/"
         className={`${style.link} ${
-          location.pathname === "/" ? style.active : ""
+          location.pathname === "/"
+            ? style.active
+            : ""
         }`}
       >
         <span className={style.iconos}>
@@ -33,7 +53,9 @@ const NavBar = ({ isAuthenticated, userData }) => {
             alt=""
             aria-hidden="true"
           />
-          <span className={style.label}>Principal</span>
+          <span className={style.label}>
+            Principal
+          </span>
         </span>
       </Link>
 
@@ -42,7 +64,9 @@ const NavBar = ({ isAuthenticated, userData }) => {
         <Link
           to="/addProduct"
           className={`${style.link} ${
-            location.pathname === "/addProduct" ? style.active : ""
+            location.pathname === "/addProduct"
+              ? style.active
+              : ""
           }`}
         >
           <span className={style.iconos}>
@@ -51,18 +75,25 @@ const NavBar = ({ isAuthenticated, userData }) => {
               alt=""
               aria-hidden="true"
             />
-            <span className={style.label}>Agregar</span>
+            <span className={style.label}>
+              Agregar
+            </span>
           </span>
         </Link>
       ) : (
-        <Link to="/addProduct" className={style.link}>
+        <Link
+          to="/addProduct"
+          className={style.link}
+        >
           <span className={style.iconosFalse}>
             <img
               src="https://img.icons8.com/sf-regular/48/add.png"
               alt=""
               aria-hidden="true"
             />
-            <span className={style.lock}>🔐</span>
+            <span className={style.lock}>
+              🔐
+            </span>
           </span>
         </Link>
       )}
@@ -72,7 +103,9 @@ const NavBar = ({ isAuthenticated, userData }) => {
         <Link
           to="/exchanges"
           className={`${style.link} ${
-            location.pathname === "/exchanges" ? style.active : ""
+            location.pathname === "/exchanges"
+              ? style.active
+              : ""
           }`}
         >
           <span className={style.iconos}>
@@ -81,18 +114,25 @@ const NavBar = ({ isAuthenticated, userData }) => {
               alt=""
               aria-hidden="true"
             />
-            <span className={style.label}>Canjes</span>
+            <span className={style.label}>
+              Canjes
+            </span>
           </span>
         </Link>
       ) : (
-        <Link to="/exchanges" className={style.link}>
+        <Link
+          to="/exchanges"
+          className={style.link}
+        >
           <span className={style.iconosFalse}>
             <img
               src="https://img.icons8.com/material-rounded/48/available-updates.png"
               alt=""
               aria-hidden="true"
             />
-            <span className={style.lock}>🔐</span>
+            <span className={style.lock}>
+              🔐
+            </span>
           </span>
         </Link>
       )}
@@ -102,7 +142,9 @@ const NavBar = ({ isAuthenticated, userData }) => {
         <Link
           to="/messages"
           className={`${style.link} ${
-            location.pathname === "/messages" ? style.active : ""
+            location.pathname === "/messages"
+              ? style.active
+              : ""
           }`}
         >
           <span className={style.iconos}>
@@ -111,27 +153,41 @@ const NavBar = ({ isAuthenticated, userData }) => {
               alt=""
               aria-hidden="true"
             />
-            <span className={style.label}>Mensajes</span>
+            <span className={style.label}>
+              Mensajes
+            </span>
           </span>
         </Link>
       ) : (
-        <Link to="/messages" className={style.link}>
+        <Link
+          to="/messages"
+          className={style.link}
+        >
           <span className={style.iconosFalse}>
             <img
               src="https://img.icons8.com/fluency-systems-regular/48/chat--v1.png"
               alt=""
               aria-hidden="true"
             />
-            <span className={style.lock}>🔐</span>
+            <span className={style.lock}>
+              🔐
+            </span>
           </span>
         </Link>
       )}
 
       {/* PERFIL / LOGIN */}
       <Link
-        to={isAuthenticated ? "/profile" : "/login"}
+        to={
+          isAuthenticated
+            ? "/profile"
+            : "/login"
+        }
         className={`${style.link} ${
-          location.pathname === (isAuthenticated ? "/profile" : "/login")
+          location.pathname ===
+          (isAuthenticated
+            ? "/profile"
+            : "/login")
             ? style.active
             : ""
         }`}
@@ -139,7 +195,10 @@ const NavBar = ({ isAuthenticated, userData }) => {
         {isAuthenticated ? (
           <span className={style.iconos}>
             <img
-              src={imageUrl || "/placeholder.png"}
+              src={
+                imageUrl ||
+                "/placeholder.png"
+              }
               alt=""
               className={style.avatar}
               referrerPolicy="no-referrer"
@@ -156,7 +215,9 @@ const NavBar = ({ isAuthenticated, userData }) => {
               alt=""
               aria-hidden="true"
             />
-            <span className={style.label}>Iniciar sesión</span>
+            <span className={style.label}>
+              Iniciar sesión
+            </span>
           </span>
         )}
       </Link>
@@ -166,7 +227,7 @@ const NavBar = ({ isAuthenticated, userData }) => {
         <button
           type="button"
           className={style.logout}
-          onClick={() => logoutUser(signOut)}
+          onClick={handleLogout}
           aria-label="Cerrar sesión"
         >
           <img
@@ -174,7 +235,9 @@ const NavBar = ({ isAuthenticated, userData }) => {
             alt=""
             aria-hidden="true"
           />
-          <span className={style.label}>Salir</span>
+          <span className={style.label}>
+            Salir
+          </span>
         </button>
       )}
     </nav>

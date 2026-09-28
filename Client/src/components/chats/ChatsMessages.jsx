@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   createMessage,
-  getAllChats,
+  getMyChats,
   getAllUsers,
   saveOtherUserData,
 } from "../../redux/actions";
@@ -108,7 +108,7 @@ const ChatsMessages = ({ chatId, userData }) => {
   //Rellenar lista de usuarios
   useEffect(() => {
     dispatch(getAllUsers());
-    dispatch(getAllChats());
+    dispatch(getMyChats());
   }, [dispatch]);
 
   useEffect(() => {

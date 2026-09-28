@@ -34,6 +34,7 @@ import {
   OTHER_USER_DATA,
   GET_ALL_MESSAGES,
   GET_ALL_CHATS,
+  GET_MY_CHATS,
   DELETE_LIKE,
   CHAT_CREATED,
   GET_MATCHES,
@@ -43,6 +44,7 @@ import {
   LIKES_LOADING,
   LIKES_LOADING_DONE,
   SET_RECEIVED_LIKES,
+  GET_MY_LIKES,
   LIKED_POSTS,
   GET_ALL_LIKES,
   SELECTED_POST,
@@ -449,6 +451,12 @@ function rootReducer(state = initialState, action) {
         receivedLikes: action.payload,
       };
 
+    case GET_MY_LIKES:
+      return {
+        ...state,
+        myLikes: action.payload,
+      };
+
     case LIKES_LOADING:
       return {
         ...state,
@@ -465,7 +473,7 @@ function rootReducer(state = initialState, action) {
       return {
         ...state,
         receivedLikes: state.receivedLikes.filter(
-          (like) => like.id !== action.payload.likeId
+          (like) => like.id !== action.payload.likeId,
         ),
       };
 
@@ -514,6 +522,12 @@ function rootReducer(state = initialState, action) {
       };
 
     case GET_ALL_CHATS:
+      return {
+        ...state,
+        chats: action.payload,
+      };
+
+    case "GET_MY_CHATS":
       return {
         ...state,
         chats: action.payload,

@@ -33,6 +33,7 @@ import {
   LIKE_POST,
   RESPOND_LIKE,
   SET_RECEIVED_LIKES,
+  GET_MY_LIKES,
   LIKES_LOADING,
   LIKES_LOADING_DONE,
   LIKED_POSTS,
@@ -312,6 +313,30 @@ export function getAllLikes() {
   };
 }
 
+export function getMyLikes() {
+  return async function (dispatch) {
+    try {
+      const response = await api.get(
+        "/likes/getLikesEnviados"
+      );
+
+      dispatch({
+        type: GET_MY_LIKES,
+        payload: response.data,
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Error al obtener los likes enviados:",
+        error
+      );
+
+      throw error;
+    }
+  };
+}
+
 export function deleteLike(likeId) {
   return async (dispatch) => {
     const result = await api.delete(`/likes/${likeId}`);
@@ -553,6 +578,30 @@ export function getAllChats() {
     });
   };
 }
+
+export const getMyChats = () => {
+  return async (dispatch) => {
+    try {
+      const response = await api.get("/chats/myChats");
+
+      dispatch({
+        type: "GET_MY_CHATS",
+        payload: response.data,
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener mis chats:", error);
+
+      dispatch({
+        type: "GET_MY_CHATS_ERROR",
+        payload: error.response?.data?.error || "Error al obtener los chats",
+      });
+
+      throw error;
+    }
+  };
+};
 
 export function getAllMessages() {
   return async function (dispatch) {

@@ -1,84 +1,175 @@
 .myProfile {
+  box-sizing: border-box;
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 30px;
-  margin-top: 30px;
-  margin-bottom: 100px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  width: min(100%, 75rem);
+  margin: 2rem auto 6rem;
+  padding: 0 1rem;
 }
 
 .avatar {
   display: grid;
-  height: 300px;
+  width: 100%;
+  min-height: 18rem;
+  place-items: start center;
 }
 
 .publications {
+  box-sizing: border-box;
   display: grid;
-  grid-template-columns: 1fr;
-  box-shadow: 0px 5px 10px rgba(127, 126, 126, 0.3);
-  border-radius: 10px;
-  margin-top: 50px;
-  padding: 20px;
-  margin-bottom: 100px;
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  border-radius: 0.75rem;
+  background: var(--surface-secondary);
+  box-shadow: 0 0.3rem 0.8rem rgba(127, 126, 126, 0.3);
 }
 
-.publicationsPremium {
-  display: grid;
-  grid-template-columns: 1fr;
-  box-shadow: 0px 5px 10px rgba(127, 126, 126, 0.3);
-  border: 2px solid goldenrod;
-  border-radius: 10px;
-  margin-top: 50px;
-  padding: 30px;
-  margin-bottom: 100px;
+.publicationHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+}
+
+.publications h2 {
+  margin: 0;
+  color: rgb(95, 95, 95);
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 
 .agregar {
-  display: grid;
-  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 5.5rem;
+  min-height: 2.5rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
   background-color: #4ecdc4;
-  color: whitesmoke;
-  width: 90px;
-  font-size: 14px;
-  padding-bottom: 5px;
-  margin-top: 20px;
-  box-shadow: 0px 5px 10px rgba(128, 128, 128, 0.3);
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: 0 0.3rem 0.6rem rgba(128, 128, 128, 0.3);
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
 }
 
-.publications h3 {
-  color: rgb(95, 95, 95);
-  margin: 0;
+.agregar:hover {
+  transform: translateY(-1px);
+  background-color: #3dbbb2;
+  box-shadow: 0 0.4rem 0.8rem rgba(128, 128, 128, 0.35);
 }
 
-@media (max-width: 768px) {
+.agregar:active {
+  transform: scale(0.97);
+}
+
+.agregar:focus-visible {
+  outline: 3px solid #ffe66d;
+  outline-offset: 3px;
+}
+
+.postLimit {
+  margin: 0.75rem 0 0;
+  color: #777;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+/* Tablet */
+@media (min-width: 769px) {
   .myProfile {
-    grid-template-columns: 1fr;
-    margin-top: 30px;
+    grid-template-columns: minmax(15rem, 22rem) minmax(0, 1fr);
+    align-items: start;
+    gap: 2.5rem;
   }
 
   .avatar {
-    width: 300px;
-    justify-self: center;
+    min-height: 18rem;
   }
 
   .publications {
-    display: grid;
-    justify-self: center;
-    padding: 0px;
-    padding-top: 30px;
-    padding-bottom: 30px;
-    margin-top: 90px;
-    width: 300px;
-    margin-bottom: 100px;
+    min-width: 0;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .myProfile {
+    width: 100%;
+    margin-top: 1.5rem;
+    padding: 0 0.75rem;
+    gap: 1.5rem;
   }
 
-  .publicationsPremium {
-    display: grid;
-    justify-self: center;
-    padding: 0px;
-    padding-top: 30px;
-    padding-bottom: 30px;
-    margin-top: 90px;
-    width: 300px;
-    margin-bottom: 100px;
+  .avatar {
+    min-height: auto;
+  }
+
+  .publications {
+    width: 100%;
+    margin: 0;
+    padding: 1rem;
+    box-shadow: 0 0.25rem 0.6rem rgba(127, 126, 126, 0.2);
+  }
+}
+
+/* Mobile pequeño */
+@media (max-width: 480px) {
+  .myProfile {
+    margin-bottom: 4rem;
+    padding: 0 0.5rem;
+  }
+
+  .publicationHeader {
+    align-items: flex-start;
+  }
+
+  .publications h2 {
+    font-size: 1.1rem;
+  }
+
+  .agregar {
+    min-width: 5rem;
+    min-height: 2.25rem;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* Pantallas muy pequeñas */
+@media (max-width: 360px) {
+  .publicationHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .publications h2 {
+    text-align: center;
+  }
+
+  .agregar {
+    width: 100%;
+  }
+}
+
+/* Usuarios que prefieren menos movimiento */
+@media (prefers-reduced-motion: reduce) {
+  .agregar {
+    transition: none;
+  }
+
+  .agregar:hover,
+  .agregar:active {
+    transform: none;
   }
 }

@@ -1,8 +1,8 @@
-/* eslint-disable no-unused-vars */
-import api from "./api/api";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
-import { messaging, getToken, onMessage } from "./firebase";
+import { getToken, onMessage, messaging } from "./firebase";
+
+import api from "./api/api";
 
 import AddProduct from "./views/addProduct/addProduct";
 import Chats from "./views/chats/chats";
@@ -27,150 +27,305 @@ import FormReview from "./components/formReview/FormReview";
 
 import "./App.css";
 
+api.defaults.baseURL = import.meta.env.VITE_API_URL;
+
+const ProtectedRoute = ({ userData, children }) => {
+  return userData ? children : <Loading />;
+};
+
 const App = () => {
-  const initialDarkMode = localStorage.getItem("darkMode") === "true";
   useAutoLogout();
-  const [darkMode, setDarkMode] = useState(initialDarkMode);
 
-  useEffect(() => {
-    setDarkModeStyles(darkMode);
-    localStorage.setItem("darkMode", darkMode);
-  }, [darkMode]);
-
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-  };
-
-  const setDarkModeStyles = (isDark) => {
-    if (isDark) {
-      document.body.style.backgroundColor = "rgb(25, 25, 30)";
-      document.body.style.color = "grey";
-    } else {
-      document.body.style.backgroundColor = "whitesmoke";
-      document.body.style.color = "grey";
-    }
-  };
-
-  api.defaults.baseURL = import.meta.env.VITE_API_URL;
-
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker
-        .register("/sw.js")
-        .then((registration) => {
-          console.log("✅ Service Worker registrado con éxito:", registration);
-        })
-        .catch((error) => {
-          console.log("❌ Falló el registro del Service Worker:", error);
-        });
-    });
-  }
+  const [darkMode, setDarkMode] = useState(
+    () => localStorage.getItem("darkMode") === "true"
+  );
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
-  const setAuth = (status, user) => {
-    setIsAuthenticated(status);
-    setUserData(user);
+useEffect(() => {
+  const root = document.documentElement;
+
+  if (darkMode) {
+    root.style.setProperty(
+      "--page-background",
+      "#19191e"
+    );
+
+    root.style.setProperty(
+      "--surface",
+      "#24242b"
+    );
+
+    root.style.setProperty(
+      "--surface-secondary",
+      "#2d2d35"
+    );
+
+    root.style.setProperty(
+      "--surface-hover",
+      "#34343d"
+    );
+
+    root.style.setProperty(
+      "--text-primary",
+      "#f1f1f1"
+    );
+
+    root.style.setProperty(
+      "--text-secondary",
+      "#cccccc"
+    );
+
+    root.style.setProperty(
+      "--text-muted",
+      "#a5a5a5"
+    );
+
+    root.style.setProperty(
+      "--border",
+      "#41414a"
+    );
+
+    root.style.setProperty(
+      "--border-strong",
+      "#50505a"
+    );
+
+    root.style.setProperty(
+      "--shadow",
+      "rgba(0, 0, 0, 0.35)"
+    );
+
+    root.style.setProperty(
+      "color-scheme",
+      "dark"
+    );
+  } else {
+    root.style.setProperty(
+      "--page-background",
+      "whitesmoke"
+    );
+
+    root.style.setProperty(
+      "--surface",
+      "#ffffff"
+    );
+
+    root.style.setProperty(
+      "--surface-secondary",
+      "#f5f5f5"
+    );
+
+    root.style.setProperty(
+      "--surface-hover",
+      "#fafafa"
+    );
+
+    root.style.setProperty(
+      "--text-primary",
+      "#333333"
+    );
+
+    root.style.setProperty(
+      "--text-secondary",
+      "#666666"
+    );
+
+    root.style.setProperty(
+      "--text-muted",
+      "#888888"
+    );
+
+    root.style.setProperty(
+      "--border",
+      "#eeeeee"
+    );
+
+    root.style.setProperty(
+      "--border-strong",
+      "#dddddd"
+    );
+
+    root.style.setProperty(
+      "--shadow",
+      "rgba(128, 128, 128, 0.2)"
+    );
+
+    root.style.setProperty(
+      "color-scheme",
+      "light"
+    );
+  }
+
+  localStorage.setItem(
+    "darkMode",
+    String(darkMode)
+  );
+}, [darkMode]);
+
+  const toggleDarkMode = () => {
+    setDarkMode((prev) => !prev);
   };
 
   useEffect(() => {
+    if (!("serviceWorker" in navigator)) {
+      return;
+    }
+
+    const registerServiceWorker = async () => {
+      try {
+        const registration =
+          await navigator.serviceWorker.register("/sw.js");
+
+        console.log(
+          "✅ Service Worker registrado con éxito:",
+          registration
+        );
+      } catch (error) {
+        console.error(
+          "❌ Falló el registro del Service Worker:",
+          error
+        );
+      }
+    };
+
+    registerServiceWorker();
+  }, []);
+
+  useEffect(() => {
+    let unsubscribeMessage;
+
+    const initializeFirebaseMessaging = async () => {
+      try {
+        const currentToken = await getToken(messaging, {
+          vapidKey:
+            "BIgcX_H0G3MswOLcfly2-S_b8SY-LI9zu4ihlf5jK2GOgJUhsTMrKZ0nLJUUwwMNqkSQSt76cT_qOpZ9o7QNBzA",
+        });
+
+        if (currentToken) {
+          // Enviar el token al backend si corresponde.
+        } else {
+          console.warn("No se recibió token FCM.");
+        }
+      } catch (error) {
+        console.error(
+          "Error al obtener token FCM:",
+          error
+        );
+      }
+    };
+
+    initializeFirebaseMessaging();
+
+    unsubscribeMessage = onMessage(
+      messaging,
+      (payload) => {
+        console.log(
+          "Mensaje en primer plano:",
+          payload
+        );
+      }
+    );
+
+    return () => {
+      if (unsubscribeMessage) {
+        unsubscribeMessage();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+
     const checkAuth = async () => {
       const token = localStorage.getItem("token");
 
-      // 🧠 1️⃣ Si no hay token o está vacío, no hacemos request
-      if (!token || token === "undefined" || token.trim() === "") {
-        setIsAuthenticated(false);
-        localStorage.removeItem("token"); // Limpieza por las dudas
+      if (
+        !token ||
+        token === "undefined" ||
+        token.trim() === ""
+      ) {
+        if (mounted) {
+          setIsAuthenticated(false);
+          setUserData(null);
+          setIsCheckingAuth(false);
+        }
+
+        localStorage.removeItem("token");
         return;
       }
 
       try {
-        // 🧠 2️⃣ Intentamos verificar el token
-        const verifyResponse = await api.get("/users/verify", {
-          headers: { token },
+        const verifyResponse = await api.get(
+          "/users/verify",
+          {
+            headers: {
+              token,
+            },
+          }
+        );
+
+        if (verifyResponse.data !== true) {
+          throw new Error("Token no autorizado");
+        }
+
+        const userResponse = await api.get(
+          "/users/userId",
+          {
+            headers: {
+              token,
+            },
+          }
+        );
+
+        if (!mounted) return;
+
+        setUserData({
+          email: userResponse.data.email,
+          id: userResponse.data.id,
+          username: userResponse.data.username,
+          image: userResponse.data.image,
+          rol: userResponse.data.rol,
+          averageRating: userResponse.data.averageRating,
+          plan: userResponse.data.plan,
         });
 
-        if (verifyResponse.data === true) {
-          // 🧠 3️⃣ Si es válido, obtenemos los datos del usuario
-          const userResponse = await api.get("/users/userId", {
-            headers: { token },
-          });
-
-          setIsAuthenticated(true);
-          setUserData({
-            email: userResponse.data.email,
-            id: userResponse.data.id,
-            username: userResponse.data.username,
-            image: userResponse.data.image,
-            rol: userResponse.data.rol,
-            averageRating: userResponse.data.averageRating,
-            plan: userResponse.data.plan,
-          });
-        } else {
-          // 🧠 4️⃣ Si el backend dice que no es válido
-          console.warn("❌ Token no autorizado (verificación fallida)");
-          setIsAuthenticated(false);
-          localStorage.removeItem("token");
-        }
+        setIsAuthenticated(true);
       } catch (error) {
-        // 🧠 5️⃣ Si el token está vencido o da error en el servidor
         console.error(
           "⚠️ Token inválido o expirado:",
-          error.response?.data || error.message,
+          error.response?.data || error.message
         );
-        setIsAuthenticated(false);
+
+        if (mounted) {
+          setIsAuthenticated(false);
+          setUserData(null);
+        }
+
         localStorage.removeItem("token");
+      } finally {
+        if (mounted) {
+          setIsCheckingAuth(false);
+        }
       }
     };
 
     checkAuth();
-  }, [isAuthenticated]);
 
-  //onesignal push notifications
-  const [isPremium, setPremium] = useState(false);
-
-  useEffect(() => {
-    // Pide permiso
-    getToken(messaging, {
-      vapidKey:
-        "BIgcX_H0G3MswOLcfly2-S_b8SY-LI9zu4ihlf5jK2GOgJUhsTMrKZ0nLJUUwwMNqkSQSt76cT_qOpZ9o7QNBzA",
-    })
-      .then((currentToken) => {
-        if (currentToken) {
-          // Podrías enviarlo a tu backend
-        } else {
-          console.warn("No se recibió token.");
-        }
-      })
-      .catch((err) => {
-        console.error("Error al obtener token FCM:", err);
-      });
-
-    onMessage(messaging, (payload) => {
-      console.log("Mensaje en primer plano: ", payload);
-    });
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  if (userData && userData) {
-    const premium = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const usuario = await api.get("/users/userId", {
-          headers: {
-            token: token,
-          },
-          params: { id: userData.id },
-        });
+  const setAuth = (status, user = null) => {
+    setIsAuthenticated(status);
+    setUserData(status ? user : null);
+  };
 
-        if (usuario.data.plan === "premium") {
-          setPremium(true);
-        }
-      } catch (error) {
-        console.error("Error al obtener la información del usuario:", error);
-      }
-    };
-    premium();
+  if (isCheckingAuth) {
+    return <Loading />;
   }
 
   return (
@@ -180,120 +335,157 @@ const App = () => {
         setAuth={setAuth}
         userData={userData}
       />
-      <Routes>
-        <Route path="/" element={<Home />} />
 
-        <Route
-          path="/login"
-          element={
-            isAuthenticated ? (
-              userData ? (
+      <div className="appContent">
+        <Routes>
+          {/* Público */}
+          <Route
+            path="/"
+            element={<Home />}
+          />
+
+          <Route
+            path="/login"
+            element={
+              isAuthenticated ? (
                 <MyProfile
                   userData={userData}
                   setAuth={setAuth}
                   toggleDarkMode={toggleDarkMode}
                 />
               ) : (
-                <div className="spinner">
-                  <div className="bounce1"></div>
-                  <div className="bounce2"></div>
-                  <div className="bounce3"></div>
-                </div>
+                <Login setAuth={setAuth} />
               )
-            ) : isAuthenticated ? (
-              user ? (
+            }
+          />
+
+          <Route
+            path="/register"
+            element={
+              isAuthenticated ? (
                 <MyProfile
-                  userData={user.name}
+                  userData={userData}
                   setAuth={setAuth}
                   toggleDarkMode={toggleDarkMode}
                 />
               ) : (
-                <div className="spinner">
-                  <div className="bounce1"></div>
-                  <div className="bounce2"></div>
-                  <div className="bounce3"></div>
-                </div>
+                <Register setAuth={setAuth} />
               )
-            ) : (
-              <Login setAuth={setAuth} />
-            )
-          }
-        />
+            }
+          />
 
-        <Route
-          path="/profile"
-          element={
-            isAuthenticated && userData ? (
-              <MyProfile
-                userData={userData}
-                setAuth={setAuth}
-                toggleDarkMode={toggleDarkMode}
-              />
-            ) : (
-              <Loading />
-            )
-          }
-        />
+          <Route
+            path="/forgotpassword"
+            element={<ForgotPassword />}
+          />
 
-        <Route
-          path="/addProduct"
-          element={userData ? <AddProduct userData={userData} /> : <Loading />}
-        />
+          <Route
+            path="/resetpassword/:id"
+            element={<ResetPassword />}
+          />
 
-        <Route
-          path="/detail/:id"
-          element={userData ? <Detail userData={userData} /> : <Loading />}
-        />
+          {/* Protegidas */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute userData={userData}>
+                <MyProfile
+                  userData={userData}
+                  setAuth={setAuth}
+                  toggleDarkMode={toggleDarkMode}
+                />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/exchanges"
-          element={userData ? <Exchanges userData={userData} /> : <Loading />}
-        />
+          <Route
+            path="/addProduct"
+            element={
+              <ProtectedRoute userData={userData}>
+                <AddProduct userData={userData} />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/chats/:chatId"
-          element={userData ? <Chats userData={userData} /> : <Loading />}
-        />
+          <Route
+            path="/detail/:id"
+            element={
+              <ProtectedRoute userData={userData}>
+                <Detail userData={userData} />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/register"
-          element={
-            isAuthenticated ? (
-              userData && <MyProfile userData={userData} setAuth={setAuth} />
-            ) : (
-              <Register setAuth={setAuth} />
-            )
-          }
-        />
+          <Route
+            path="/exchanges"
+            element={
+              <ProtectedRoute userData={userData}>
+                <Exchanges userData={userData} />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/review/:reviewedUserId"
-          element={userData ? <FormReview userData={userData} /> : <Loading />}
-        />
+          <Route
+            path="/chats/:chatId"
+            element={
+              <ProtectedRoute userData={userData}>
+                <Chats userData={userData} />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route path="/forgotpassword" element={<ForgotPassword />} />
+          <Route
+            path="/messages"
+            element={
+              <ProtectedRoute userData={userData}>
+                <Messages userData={userData} />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route path="/resetpassword/:id" element={<ResetPassword />} />
+          <Route
+            path="/review/:reviewedUserId"
+            element={
+              <ProtectedRoute userData={userData}>
+                <FormReview userData={userData} />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/messages"
-          element={userData ? <Messages userData={userData} /> : <Loading />}
-        />
+          <Route
+            path="/UserProfile/:userId"
+            element={
+              <ProtectedRoute userData={userData}>
+                <UserProfile id={userData} />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route path="/admin" element={<AdminDash></AdminDash>} />
-        <Route
-          path="/UserProfile/:userId"
-          element={<UserProfile id={userData}></UserProfile>}
-        />
+          {/* Pagos */}
+          <Route
+            path="/success"
+            element={<PaymentSuccess />}
+          />
 
-        <Route path="/success" element={<PaymentSuccess />} />
-        <Route path="/failure" element={<PaymentFailure />} />
-        <Route path="/pending" element={<PaymentPending />} />
-      </Routes>
+          <Route
+            path="/failure"
+            element={<PaymentFailure />}
+          />
+
+          <Route
+            path="/pending"
+            element={<PaymentPending />}
+          />
+
+          {/* Admin */}
+          <Route
+            path="/admin"
+            element={<AdminDash />}
+          />
+        </Routes>
+      </div>
     </>
   );
 };
 
 export default App;
-
-//

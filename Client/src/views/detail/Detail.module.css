@@ -7,7 +7,7 @@
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   width: min(800px, calc(100% - 32px));
   min-width: 0;
-  margin: 40px auto 70px;
+  margin: 40px auto 0px;
   box-shadow: 0 5px 10px rgba(128, 128, 128, 0.3);
   border-radius: 10px;
   overflow: hidden;

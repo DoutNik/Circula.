@@ -39,7 +39,7 @@
 
   border-radius: clamp(10px, 1vw, 16px);
 
-  background: #ffffff;
+  background: var(--surface-secondary);
 
   box-shadow: 0 6px 18px rgba(0, 1, 10, 0.18);
 

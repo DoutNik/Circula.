@@ -1,129 +1,75 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import style from "./PaymentPending.module.css";
 
-export default function PaymentPending() {
+const PaymentPending = () => {
   const { search } = useLocation();
   const navigate = useNavigate();
+
   const params = new URLSearchParams(search);
 
   const paymentId = params.get("payment_id");
   const status = params.get("status");
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <div style={styles.icon}>⏳</div>
+    <main className={style.container}>
+      <section className={style.card}>
+        <div className={style.icon} aria-hidden="true">
+          ⏳
+        </div>
 
-        <h1 style={styles.title}>Pago pendiente</h1>
+        <h1 className={style.title}>Pago pendiente</h1>
 
-        <p style={styles.text}>
+        <p className={style.text}>
           Tu pago está en proceso de confirmación.
-          Esto puede demorar algunos minutos o hasta 48 horas,
-          dependiendo del medio de pago.
+          El tiempo de acreditación puede variar según
+          el medio de pago utilizado.
         </p>
 
-        <div style={styles.infoBox}>
-          <p><strong>Estado:</strong> {status || "Pendiente"}</p>
-          <p><strong>ID de pago:</strong> {paymentId || "—"}</p>
+        <div className={style.infoBox}>
+          <p>
+            <strong>Estado:</strong>{" "}
+            {status || "Pendiente"}
+          </p>
+
+          <p>
+            <strong>ID de pago:</strong>{" "}
+            {paymentId || "—"}
+          </p>
         </div>
 
-        <div style={styles.notice}>
-          💡 Te avisaremos cuando el pago sea acreditado.
-          Puedes cerrar esta página sin problemas.
+        <div className={style.notice}>
+          <span aria-hidden="true">💡</span>
+          <span>
+            Te avisaremos cuando el pago sea acreditado.
+            Podés cerrar esta página sin problemas.
+          </span>
         </div>
 
-        <div style={styles.actions}>
+        <div className={style.actions}>
           <button
-            style={styles.primaryButton}
+            type="button"
+            className={style.primaryButton}
             onClick={() => navigate("/")}
           >
             Ir al inicio
           </button>
 
           <button
-            style={styles.secondaryButton}
+            type="button"
+            className={style.secondaryButton}
             onClick={() => navigate("/premium")}
           >
             Ver estado del plan
           </button>
         </div>
 
-        <p style={styles.help}>
-          Si pagaste en efectivo, revisa tu comprobante
-          y completa el pago antes de la fecha de vencimiento.
+        <p className={style.help}>
+          Conservá el comprobante de pago hasta que
+          la operación quede confirmada.
         </p>
-      </div>
-    </div>
+      </section>
+    </main>
   );
-}
-
-const styles = {
-  container: {
-    minHeight: "100vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "#f5f7fa",
-    padding: 20,
-  },
-  card: {
-    background: "#fff",
-    padding: 40,
-    borderRadius: 16,
-    boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
-    maxWidth: 480,
-    width: "100%",
-    textAlign: "center",
-  },
-  icon: {
-    fontSize: 64,
-    marginBottom: 10,
-  },
-  title: {
-    marginBottom: 10,
-  },
-  text: {
-    color: "#555",
-    marginBottom: 20,
-  },
-  infoBox: {
-    background: "#f1f3f5",
-    padding: 16,
-    borderRadius: 10,
-    textAlign: "left",
-    marginBottom: 20,
-  },
-  notice: {
-    background: "#fff7e6",
-    padding: 14,
-    borderRadius: 10,
-    marginBottom: 24,
-    fontSize: 14,
-    color: "#8a6d3b",
-  },
-  actions: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 12,
-  },
-  primaryButton: {
-    padding: "12px 16px",
-    borderRadius: 8,
-    border: "none",
-    background: "#faad14",
-    color: "#fff",
-    fontWeight: "bold",
-    cursor: "pointer",
-  },
-  secondaryButton: {
-    padding: "12px 16px",
-    borderRadius: 8,
-    border: "1px solid #ccc",
-    background: "#fff",
-    cursor: "pointer",
-  },
-  help: {
-    marginTop: 20,
-    fontSize: 14,
-    color: "#888",
-  },
 };
+
+export default PaymentPending;

@@ -1,37 +1,42 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { getAllLikes, getAllPosts } from "../../redux/actions";
+import { getMyLikes, getAllPosts } from "../../redux/actions";
 import style from "./PostsLiked.module.css";
 
 const DEFAULT_IMAGE =
   "https://img.icons8.com/fluency-systems-regular/96/image.png";
 
 const getImageUrl = (post) => {
-  if (Array.isArray(post?.image)) return post.image[0];
+  if (Array.isArray(post?.image)) {
+    return post.image[0];
+  }
+
   return post?.image;
 };
 
 const PostsLiked = ({ userData }) => {
   const dispatch = useDispatch();
+
   const userId = userData?.id;
 
-  // Usamos allPosts, no allPostsCopy, para evitar filtros externos.
   const allPosts = useSelector((state) => state.allPosts) || [];
-  const allLikes = useSelector((state) => state.allLikes) || [];
+
+  const myLikes = useSelector((state) => state.myLikes) || [];
+
   const matchedPairs = useSelector((state) => state.matchedPairs) || [];
 
   const [dataLoaded, setDataLoaded] = useState(false);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {
+      setDataLoaded(false);
+      return;
+    }
 
     const fetchData = async () => {
       try {
-        await Promise.all([
-          dispatch(getAllLikes()),
-          dispatch(getAllPosts()),
-        ]);
+        await Promise.all([dispatch(getMyLikes()), dispatch(getAllPosts())]);
       } catch (error) {
         console.error("Error al cargar los likes:", error);
       } finally {
@@ -46,16 +51,14 @@ const PostsLiked = ({ userData }) => {
     const postsMap = new Map(allPosts.map((post) => [post.id, post]));
 
     const matchedPostIds = new Set(
-      matchedPairs
-        .map((pair) => pair.anotherUserPost?.id)
-        .filter(Boolean),
+      matchedPairs.map((pair) => pair.anotherUserPost?.id).filter(Boolean),
     );
 
-    return allLikes
+    return myLikes
       .filter(
         (like) =>
           Number(like.myUserId) === Number(userId) &&
-          !matchedPostIds.has(like.likedPostId),
+          !matchedPostIds.has(Number(like.likedPostId)),
       )
       .map((like) => ({
         id: `${like.myPostId}-${like.likedPostId}`,
@@ -63,7 +66,7 @@ const PostsLiked = ({ userData }) => {
         wantedProduct: postsMap.get(like.likedPostId),
       }))
       .filter((attempt) => attempt.myProduct && attempt.wantedProduct);
-  }, [allLikes, allPosts, matchedPairs, userId]);
+  }, [myLikes, allPosts, matchedPairs, userId]);
 
   if (!userId || !dataLoaded) {
     return <p className={style.loading}>Cargando likes...</p>;
@@ -71,9 +74,7 @@ const PostsLiked = ({ userData }) => {
 
   if (exchangeAttempts.length === 0) {
     return (
-      <p className={style.empty}>
-        Todavía no tienes intercambios pendientes.
-      </p>
+      <p className={style.empty}>Todavía no tienes intercambios pendientes.</p>
     );
   }
 
@@ -90,7 +91,9 @@ const PostsLiked = ({ userData }) => {
 
             <div className={style.names}>
               <h4>{attempt.myProduct.title || "Sin título"}</h4>
+
               <span>por</span>
+
               <h4>{attempt.wantedProduct.title || "Sin título"}</h4>
             </div>
 

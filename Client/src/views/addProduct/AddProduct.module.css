@@ -1,12 +1,20 @@
 /* ========================================================= CONTENEDOR ========================================================= */
 .container {
   width: min(calc(100% - 24px), 1200px);
-  margin: clamp(16px, 4vw, 45px) auto clamp(80px, 8vw, 110px);
+
+  margin: clamp(16px, 4vw, 45px) auto 0.1rem;
+
   padding: clamp(16px, 3vw, 40px);
+
   box-sizing: border-box;
+
   border-radius: clamp(12px, 1.2vw, 20px);
+
   background: transparent;
-  box-shadow: 0 0.35rem 1rem rgba(128, 128, 128, 0.22);
+
+  box-shadow:
+    0 0.35rem 1rem rgba(128, 128, 128, 0.22);
+
   transition: box-shadow 300ms ease;
 }
 .container,
@@ -258,6 +266,7 @@ textarea.input {
 @media (max-width: 480px) {
   .container {
     width: calc(100% - 16px);
+    margin-bottom: 0.75rem;
     padding: 14px;
     border-radius: 10px;
   }
@@ -288,6 +297,7 @@ textarea.input {
 @media (max-width: 360px) {
   .container {
     width: calc(100% - 10px);
+    margin-bottom: 0.5rem;
     padding: 10px;
   }
   .previewGrid {

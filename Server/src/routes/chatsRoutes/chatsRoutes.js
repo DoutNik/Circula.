@@ -5,6 +5,8 @@ const chatsControllers = require("../../controllers/chatsControllers");
 const authorization = require("../../middleware/authorization");
 const isAdmin = require("../../middleware/isAdmin");
 
+// Obtener todos los chats.
+// Solo administradores.
 router.get("/allChats", authorization, isAdmin, async (req, res) => {
   try {
     const response = await chatsControllers.getAllChats();
@@ -19,9 +21,31 @@ router.get("/allChats", authorization, isAdmin, async (req, res) => {
   }
 });
 
+// Obtener los chats del usuario autenticado.
+router.get("/myChats", authorization, async (req, res) => {
+  try {
+    const userId = Number(req.authUserId);
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.status(401).json({
+        error: "Usuario no autenticado",
+      });
+    }
+
+    const response = await chatsControllers.getChatsByUserId(userId);
+
+    return res.status(200).json(response);
+  } catch (error) {
+    console.error("Error al obtener los chats del usuario:", error);
+
+    return res.status(500).json({
+      error: "Error interno del servidor",
+    });
+  }
+});
+
 // Crear chat.
-// El usuario autenticado sale SIEMPRE del token.
-// El cliente solamente indica con quién quiere iniciar el chat.
+// El usuario autenticado sale siempre del token.
 router.post("/create", authorization, async (req, res) => {
   try {
     const userId = Number(req.user?.id);

@@ -68,3 +68,58 @@ exports.getAllChats = async () => {
   }
 };
 
+exports.getChatsByUserId = async (userId) => {
+  try {
+    console.log("🔎 getChatsByUserId - userId:", userId);
+
+    const chats = await Chat.findAll({
+      where: {
+        [Op.or]: [
+          { user1Id: userId },
+          { user2Id: userId },
+        ],
+      },
+      include: [
+        {
+          model: User,
+          as: "user1",
+          attributes: ["id", "username", "image"],
+        },
+        {
+          model: User,
+          as: "user2",
+          attributes: ["id", "username", "image"],
+        },
+      ],
+      order: [["updatedAt", "DESC"]],
+    });
+
+    console.log("✅ Chats encontrados:", chats.length);
+
+    return chats.map((chat) => {
+      const chatData = chat.toJSON();
+
+      const otherUser =
+        Number(chatData.user1Id) === Number(userId)
+          ? chatData.user2
+          : chatData.user1;
+
+      return {
+        id: chatData.id,
+        user1Id: chatData.user1Id,
+        user2Id: chatData.user2Id,
+        otherUser,
+      };
+    });
+  } catch (error) {
+    console.error("❌ ERROR REAL getChatsByUserId:");
+    console.error(error);
+    console.error("❌ message:", error.message);
+    console.error("❌ name:", error.name);
+    console.error("❌ parent:", error.parent);
+    console.error("❌ original:", error.original);
+
+    throw error;
+  }
+};
+

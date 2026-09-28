@@ -1,5 +1,4 @@
-/* eslint-disable no-unused-vars */
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import style from "./Loading.module.css";
 
@@ -14,33 +13,34 @@ const Loading = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  if (showSpinner) {
+    return (
+      <div className={style.spinnerContainer} role="status" aria-label="Cargando">
+        <div className={style.spinner}>
+          <span className={style.bounce1}></span>
+          <span className={style.bounce2}></span>
+          <span className={style.bounce3}></span>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <>
-      {showSpinner ? (
-        <div className={style.sppiner}>
-          <div className="spinner">
-            <div className="bounce1"></div>
-            <div className="bounce2"></div>
-            <div className="bounce3"></div>
-          </div>
-        </div>
-      ) : (
-        <div className={style.loading}>
-          <img
-            width="48"
-            height="48"
-            src="https://img.icons8.com/emoji/48/warning-emoji.png"
-            alt="warning-emoji"
-          />
-          <h3>
-            Debes iniciar sesión para acceder a todas las funcionalidades.
-          </h3>
-          <Link to="/login">
-            <button>Iniciar sesión</button>
-          </Link>
-        </div>
-      )}
-    </>
+    <main className={style.loading}>
+      <img
+        src="https://img.icons8.com/emoji/48/warning-emoji.png"
+        alt=""
+        aria-hidden="true"
+      />
+
+      <h3>
+        Debes iniciar sesión para acceder a todas las funcionalidades.
+      </h3>
+
+      <Link to="/login" className={style.loginButton}>
+        Iniciar sesión
+      </Link>
+    </main>
   );
 };
 

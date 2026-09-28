@@ -1,137 +1,269 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/api";
-export default function PaymentSuccess() {
+import style from "./PaymentSuccess.module.css";
+
+const MAX_ATTEMPTS = 8;
+const RETRY_INTERVAL = 2000;
+
+const PaymentSuccess = () => {
   const navigate = useNavigate();
+
   const [status, setStatus] = useState("loading");
+  const [attempt, setAttempt] = useState(0);
 
-  useEffect(() => {
-    const checkPremium = async () => {
-      try {
-        const res = await api.get("/users/me");
+  const checkPremium = useCallback(async () => {
+    try {
+      const response = await api.get("/users/me");
 
-        if (res.data.plan === "premium") {
-          setStatus("premium");
-        } else {
-          setStatus("pending");
-        }
-      } catch (error) {
-        setStatus("error");
+      if (response?.data?.plan === "premium") {
+        setStatus("premium");
+        return true;
       }
-    };
 
-    checkPremium();
+      return false;
+    } catch (error) {
+      console.error(
+        "Error al verificar el plan Premium:",
+        error
+      );
+
+      setStatus("error");
+      return false;
+    }
   }, []);
 
-  const container = {
-    minHeight: "100vh",
-    background: "linear-gradient(135deg, #e8f8ef, #ffffff)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontFamily: "system-ui, sans-serif",
-    padding: "20px"
-  };
+  useEffect(() => {
+    let cancelled = false;
+    let timeoutId;
 
-  const card = {
-    background: "white",
-    borderRadius: "18px",
-    boxShadow: "0 15px 40px rgba(0,0,0,0.1)",
-    padding: "40px",
-    maxWidth: "520px",
-    width: "100%",
-    textAlign: "center"
-  };
+    const verifyPayment = async (currentAttempt = 0) => {
+      if (cancelled) return;
 
-  const button = {
-    marginTop: "20px",
-    padding: "14px 22px",
-    borderRadius: "10px",
-    border: "none",
-    background: "#1db954",
-    color: "white",
-    fontWeight: "600",
-    fontSize: "16px",
-    cursor: "pointer"
-  };
+      setAttempt(currentAttempt);
 
-  const secondaryButton = {
-    ...button,
-    background: "#e9ecef",
-    color: "#333"
+      const isPremium = await checkPremium();
+
+      if (cancelled) return;
+
+      if (isPremium) {
+        return;
+      }
+
+      if (currentAttempt >= MAX_ATTEMPTS - 1) {
+        setStatus("pending");
+        return;
+      }
+
+      setStatus("loading");
+
+      timeoutId = window.setTimeout(() => {
+        verifyPayment(currentAttempt + 1);
+      }, RETRY_INTERVAL);
+    };
+
+    verifyPayment();
+
+    return () => {
+      cancelled = true;
+
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [checkPremium]);
+
+  const handleRetry = async () => {
+    setStatus("loading");
+
+    const isPremium = await checkPremium();
+
+    if (!isPremium) {
+      setStatus("pending");
+    }
   };
 
   return (
-    <div style={container}>
-      <div style={card}>
+    <main className={style.container}>
+      <section className={style.card}>
         {status === "loading" && (
           <>
-            <h2>🔄 Confirmando tu pago...</h2>
-            <p>Estamos activando tu plan Premium 💛</p>
+            <div
+              className={style.icon}
+              aria-hidden="true"
+            >
+              🔄
+            </div>
+
+            <h1 className={style.title}>
+              Confirmando tu pago...
+            </h1>
+
+            <p className={style.text}>
+              Estamos verificando la activación de tu
+              plan Premium.
+            </p>
+
+            <div
+              className={style.loader}
+              role="status"
+              aria-label="Verificando pago"
+            >
+              <span />
+              <span />
+              <span />
+            </div>
+
+            <p className={style.progress}>
+              Verificación {Math.min(attempt + 1, MAX_ATTEMPTS)}{" "}
+              de {MAX_ATTEMPTS}
+            </p>
           </>
         )}
 
         {status === "pending" && (
           <>
-            <h2>⏳ Pago aprobado — activando Premium...</h2>
-            <p>Esto puede tardar unos segundos.</p>
+            <div
+              className={style.icon}
+              aria-hidden="true"
+            >
+              ⏳
+            </div>
+
+            <h1 className={style.title}>
+              Pago aprobado
+            </h1>
+
+            <p className={style.text}>
+              El pago fue recibido, pero Premium todavía
+              no aparece activado en tu cuenta.
+            </p>
+
+            <div className={style.notice}>
+              Esto puede ocurrir mientras el servidor
+              termina de procesar la confirmación del pago.
+            </div>
+
+            <div className={style.actions}>
+              <button
+                type="button"
+                className={style.primaryButton}
+                onClick={handleRetry}
+              >
+                Revisar nuevamente
+              </button>
+
+              <button
+                type="button"
+                className={style.secondaryButton}
+                onClick={() => navigate("/")}
+              >
+                Volver al inicio
+              </button>
+            </div>
           </>
         )}
 
         {status === "premium" && (
           <>
-            <h1 style={{ color: "#1db954" }}>🎉 ¡Pago aprobado!</h1>
+            <div
+              className={style.icon}
+              aria-hidden="true"
+            >
+              🎉
+            </div>
 
-            <h2>👑 Ahora eres usuario Premium</h2>
+            <h1 className={style.successTitle}>
+              ¡Pago aprobado!
+            </h1>
 
-            <p style={{ marginTop: "10px" }}>
-              Disfruta de todas las funciones exclusivas de Circula
+            <h2 className={style.subtitle}>
+              👑 Ahora sos usuario Premium
+            </h2>
+
+            <p className={style.text}>
+              Disfrutá de todas las funciones exclusivas
+              de Circula.
             </p>
 
-            <hr style={{ margin: "25px 0" }} />
+            <hr className={style.separator} />
 
-            <div style={{ textAlign: "left" }}>
-              <h3>💎 Beneficios que ya tienes:</h3>
+            <div className={style.benefits}>
+              <h3>💎 Beneficios que ya tenés</h3>
 
-              <ul style={{ lineHeight: "1.8", paddingLeft: "18px" }}>
+              <ul>
                 <li>🚀 Publicaciones ilimitadas</li>
-                <li>👀 Ver quién quiere canjear contigo</li>
-                <li>⭐ Mayor visibilidad de tus artículos</li>
+                <li>
+                  👀 Ver quién quiere canjear contigo
+                </li>
+                <li>
+                  ⭐ Mayor visibilidad de tus artículos
+                </li>
                 <li>⚡ Prioridad en búsquedas</li>
                 <li>🔒 Acceso a funciones exclusivas</li>
               </ul>
             </div>
 
-            <button
-              style={button}
-              onClick={() => navigate("/perfil")}
-            >
-              👤 Ir a mi perfil
-            </button>
+            <div className={style.actions}>
+              <button
+                type="button"
+                className={style.primaryButton}
+                onClick={() => navigate("/perfil")}
+              >
+                👤 Ir a mi perfil
+              </button>
 
-            <button
-              style={secondaryButton}
-              onClick={() => navigate("/")}
-            >
-              🏠 Volver al inicio
-            </button>
+              <button
+                type="button"
+                className={style.secondaryButton}
+                onClick={() => navigate("/")}
+              >
+                🏠 Volver al inicio
+              </button>
+            </div>
           </>
         )}
 
         {status === "error" && (
           <>
-            <h2>❌ No pudimos verificar el pago</h2>
-            <p>Si el problema persiste, contacta soporte.</p>
-
-            <button
-              style={secondaryButton}
-              onClick={() => navigate("/")}
+            <div
+              className={style.icon}
+              aria-hidden="true"
             >
-              Volver al inicio
-            </button>
+              ❌
+            </div>
+
+            <h1 className={style.title}>
+              No pudimos verificar el pago
+            </h1>
+
+            <p className={style.text}>
+              Ocurrió un problema al consultar el estado
+              actual de tu cuenta.
+            </p>
+
+            <div className={style.actions}>
+              <button
+                type="button"
+                className={style.primaryButton}
+                onClick={handleRetry}
+              >
+                Intentar nuevamente
+              </button>
+
+              <button
+                type="button"
+                className={style.secondaryButton}
+                onClick={() => navigate("/")}
+              >
+                Volver al inicio
+              </button>
+            </div>
           </>
         )}
-      </div>
-    </div>
+      </section>
+    </main>
   );
-}
+};
+
+export default PaymentSuccess;

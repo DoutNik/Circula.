@@ -139,10 +139,21 @@ const removeLike = async (likeId) => {
   }
 };
 
+const getLikesEnviados = async (myUserId) => {
+  const likes = await Like.findAll({
+    where: {
+      myUserId: myUserId,
+    },
+  });
+
+  return likes;
+};
+
 module.exports = {
   createLike,
   getAllLikes,
   getLikesRecibidos,
+  getLikesEnviados,
   removeLike,
   rejectLike,
   acceptLike,

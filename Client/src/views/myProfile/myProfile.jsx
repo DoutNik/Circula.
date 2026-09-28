@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -10,7 +9,15 @@ import api from "../../api/api";
 import Swal from "sweetalert2";
 import { handlePremiumPurchase } from "../../services/paymentService";
 
+const BANNER_1 =
+  "https://res.cloudinary.com/dlahgnpwp/image/upload/v1699885578/emailAssets/itncfxbtlnpm7e6tsffu.jpg";
+
+const BANNER_2 =
+  "https://res.cloudinary.com/dlahgnpwp/image/upload/v1699885577/emailAssets/pql2ueup71odoj5lm7wk.jpg";
+
 const MyProfile = ({ userData, setAuth, toggleDarkMode }) => {
+  const navigate = useNavigate();
+
   const [isPremium, setPremium] = useState(null);
   const [postCount, setPostCount] = useState(0);
 
@@ -18,47 +25,59 @@ const MyProfile = ({ userData, setAuth, toggleDarkMode }) => {
     if (!userData?.id) return;
 
     try {
-      const res = await api.get(`/posts/userPosts/${userData.id}`);
-      setPostCount(Array.isArray(res.data) ? res.data.length : 0);
+      const response = await api.get(
+        `/posts/userPosts/${userData.id}`
+      );
+
+      setPostCount(
+        Array.isArray(response.data)
+          ? response.data.length
+          : 0
+      );
     } catch (error) {
-      console.error("Error al obtener posteos:", error);
+      console.error(
+        "Error al obtener posteos:",
+        error
+      );
     }
   }, [userData?.id]);
 
-  const premium = async () => {
+  const getPremiumStatus = useCallback(async () => {
+    if (!userData?.id) return;
+
     try {
       const token = localStorage.getItem("token");
-      const usuario = await api.get("/users/userId", {
+
+      const response = await api.get("/users/userId", {
         headers: {
-          token: token,
+          token,
         },
-        params: { id: userData.id },
+        params: {
+          id: userData.id,
+        },
       });
 
-      if (usuario?.data?.plan === "premium") {
-        setPremium(true);
-      } else {
-        setPremium(false);
-      }
+      setPremium(response?.data?.plan === "premium");
     } catch (error) {
-      console.error("Error al obtener la información del usuario:", error);
+      console.error(
+        "Error al obtener la información del usuario:",
+        error
+      );
+
       setPremium(false);
     }
-  };
+  }, [userData?.id]);
 
   useEffect(() => {
-    if (userData?.id) {
-      premium();
-      getPostCount();
-    }
-  }, [userData?.id, getPostCount]);
+    if (!userData?.id) return;
 
-  const Banner3 =
-    "https://res.cloudinary.com/dlahgnpwp/image/upload/v1699885578/emailAssets/itncfxbtlnpm7e6tsffu.jpg";
-  const Banner4 =
-    "https://res.cloudinary.com/dlahgnpwp/image/upload/v1699885577/emailAssets/pql2ueup71odoj5lm7wk.jpg";
-
-  const navigate = useNavigate();
+    getPremiumStatus();
+    getPostCount();
+  }, [
+    userData?.id,
+    getPremiumStatus,
+    getPostCount,
+  ]);
 
   const handleAddClick = async () => {
     if (postCount >= 3 && !isPremium) {
@@ -70,13 +89,22 @@ const MyProfile = ({ userData, setAuth, toggleDarkMode }) => {
         confirmButtonText: "💎 Hacerse Premium",
         cancelButtonText: "Cancelar",
         showLoaderOnConfirm: true,
+
         preConfirm: async () => {
           try {
             await handlePremiumPurchase(userData.id);
           } catch (error) {
-            Swal.showValidationMessage("Error al iniciar el pago");
+            console.error(
+              "Error al iniciar el pago:",
+              error
+            );
+
+            Swal.showValidationMessage(
+              "Error al iniciar el pago"
+            );
           }
         },
+
         allowOutsideClick: () => !Swal.isLoading(),
       });
 
@@ -88,34 +116,58 @@ const MyProfile = ({ userData, setAuth, toggleDarkMode }) => {
 
   return (
     <>
-      <Header banner1={Banner3} banner2={Banner4}></Header>
-      <motion.div
+      <Header
+        banner1={BANNER_1}
+        banner2={BANNER_2}
+      />
+
+      <motion.main
         initial={{
           opacity: 0,
-          y: 50,
+          y: 30,
         }}
         animate={{
           opacity: 1,
           y: 0,
         }}
+        transition={{
+          duration: 0.35,
+        }}
         className={style.myProfile}
       >
-        <div className={style.avatar}>
+        <section className={style.avatar}>
           <Avatar
             userData={userData}
             setAuth={setAuth}
             toggleDarkMode={toggleDarkMode}
           />
-        </div>
-        <div className={style.publications}>
-          <h3>Publicaciones</h3>
-          <button className={style.agregar} onClick={handleAddClick}>
-            Agregar
-          </button>
-          {isPremium === false && <p>{postCount}/3 publicaciones usadas</p>}
-          <Publication userData={userData} onPostDeleted={getPostCount} />
-        </div>
-      </motion.div>
+        </section>
+
+        <section className={style.publications}>
+          <div className={style.publicationHeader}>
+            <h2>Publicaciones</h2>
+
+            <button
+              type="button"
+              className={style.agregar}
+              onClick={handleAddClick}
+            >
+              Agregar
+            </button>
+          </div>
+
+          {isPremium === false && (
+            <p className={style.postLimit}>
+              {postCount}/3 publicaciones usadas
+            </p>
+          )}
+
+          <Publication
+            userData={userData}
+            onPostDeleted={getPostCount}
+          />
+        </section>
+      </motion.main>
     </>
   );
 };
