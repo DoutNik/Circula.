@@ -17,33 +17,23 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get(
-  "/allDisabledPosts",
-  authorization,
-  isAdmin,
-  async (req, res) => {
-    try {
-      const response = await postsController.getAllDisabled();
-      return res.status(200).json(response);
-    } catch (error) {
-      return res.status(400).json(error.message);
-    }
-  },
-);
+router.get("/allDisabledPosts", authorization, isAdmin, async (req, res) => {
+  try {
+    const response = await postsController.getAllDisabled();
+    return res.status(200).json(response);
+  } catch (error) {
+    return res.status(400).json(error.message);
+  }
+});
 
-router.get(
-  "/allExistingPosts",
-  authorization,
-  isAdmin,
-  async (req, res) => {
-    try {
-      const response = await postsController.getAllExisting();
-      return res.status(200).json(response);
-    } catch (error) {
-      return res.status(400).json(error.message);
-    }
-  },
-);
+router.get("/allExistingPosts", authorization, isAdmin, async (req, res) => {
+  try {
+    const response = await postsController.getAllExisting();
+    return res.status(200).json(response);
+  } catch (error) {
+    return res.status(400).json(error.message);
+  }
+});
 
 router.get("/categories/:category", async (req, res) => {
   const { category } = req.params;
@@ -122,7 +112,10 @@ router.get("/:id", async (req, res) => {
 // Crear una publicación requiere estar logueado; el post queda asociado
 // al usuario del token, nunca a un UserId que mande el cliente.
 router.post("/", authorization, async (req, res) => {
-  const postData = { ...req.body, UserId: req.body.user };
+  const postData = {
+    ...req.body,
+    UserId: req.authUserId,
+  };
   try {
     const newPost = await postsController.createPost(postData);
     return res.status(201).json(newPost);
@@ -131,22 +124,17 @@ router.post("/", authorization, async (req, res) => {
   }
 });
 
-router.put(
-  "/:id",
-  authorization,
-  isPostOwnerOrAdmin,
-  async (req, res) => {
-    const { id } = req.params;
-    // Nunca permitir que el cliente cambie el dueño del post
-    const { UserId, ...updatedData } = req.body;
-    try {
-      const updatedPost = await postsController.updatePost(id, updatedData);
-      return res.status(200).json({ message: "Resource updated successfully" });
-    } catch (error) {
-      return res.status(404).json({ error: error.message });
-    }
-  },
-);
+router.put("/:id", authorization, isPostOwnerOrAdmin, async (req, res) => {
+  const { id } = req.params;
+  // Nunca permitir que el cliente cambie el dueño del post
+  const { UserId, ...updatedData } = req.body;
+  try {
+    const updatedPost = await postsController.updatePost(id, updatedData);
+    return res.status(200).json({ message: "Resource updated successfully" });
+  } catch (error) {
+    return res.status(404).json({ error: error.message });
+  }
+});
 
 router.delete(
   "/deletePost/:id",
@@ -171,20 +159,15 @@ router.delete(
   },
 );
 
-router.put(
-  "/restorePost/:id",
-  authorization,
-  isAdmin,
-  async (req, res) => {
-    const { id } = req.params;
-    try {
-      const restoredPost = await postsController.restorePost(id);
-      return res.status(200).json({ restoredPost });
-    } catch (error) {
-      return res.status(400).json({ error: error.message });
-    }
-  },
-);
+router.put("/restorePost/:id", authorization, isAdmin, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const restoredPost = await postsController.restorePost(id);
+    return res.status(200).json({ restoredPost });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
 
 router.put(
   "/disablePost/:id",

@@ -4,7 +4,7 @@ const { User } = require("../DB_config");
 // el id del usuario autenticado en req.body.user
 module.exports = async (req, res, next) => {
   try {
-    const userId = req.body.user;
+    const userId = req.authUserId;
 
     if (!userId) {
       return res.status(403).json("Not Authorize - No user");

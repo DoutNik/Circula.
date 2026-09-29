@@ -75,14 +75,24 @@ exports.getAllExisting = async () => {
 exports.getPostById = async (id) => {
   try {
     const postById = await Post.findByPk(id, {
-      include: User,
+      include: {
+        model: User,
+        as: "owner",
+        attributes: ["id", "username", "image"],
+      },
     });
 
     if (!postById) {
       throw new Error("No post found with the specified id");
     }
 
-    return postById;
+    const postData = postById.toJSON();
+
+    // Mantenemos "User" para no romper tu frontend actual.
+    return {
+      ...postData,
+      User: postData.owner,
+    };
   } catch (error) {
     throw error;
   }

@@ -3,7 +3,7 @@ const { Post, User } = require("../DB_config");
 // Debe usarse SIEMPRE después de `authorization`.
 module.exports = async (req, res, next) => {
   try {
-    const requesterId = String(req.body.user);
+    const requesterId = String(req.authUserId);
     const post = await Post.findByPk(req.params.id, { paranoid: false });
 
     if (!post) {
