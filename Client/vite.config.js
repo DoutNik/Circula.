@@ -12,8 +12,8 @@ const manifestForPlugIn = {
     "android-chrome-512x512.png",
   ],
   manifest: {
-    name: "LoCanjeamos",
-    short_name: "LoCanjeamos",
+    name: "Circula",
+    short_name: "Circula",
     description: "Cambiá lo que tenés por algo que querés!",
     icons: [
       {
@@ -46,7 +46,7 @@ const manifestForPlugIn = {
       {
         name: "Agregar",
         description: "Agrega un producto",
-        url: "https://locanjeamos.com.ar/#/addProduct",
+        url: "https://circula.com.ar/#/addProduct",
         icons: [
           {
             src: "add.png",
@@ -57,7 +57,7 @@ const manifestForPlugIn = {
       {
         name: "Mi perfil",
         description: "Tu perfil",
-        url: "https://locanjeamos.com.ar/#/login",
+        url: "https://circula.com.ar/#/login",
         icons: [
           {
             src: "user.png",
