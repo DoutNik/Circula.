@@ -52,62 +52,60 @@
 }
 
 .messageWreapper {
-  display: grid;
+  width: 100%;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.myMessage,
+.otherMessage {
+  width: fit-content;
+  max-width: 70%;
 }
 
 .myMessage {
-  display: grid;
-  justify-items: end;
-  min-width: 0;
-  margin: 0.65rem 0;
+  align-self: flex-end;
   text-align: right;
 }
 
 .otherMessage {
-  display: grid;
-  justify-items: start;
-  min-width: 0;
-  margin: 0.65rem 0;
+  align-self: flex-start;
   text-align: left;
 }
 
+
 .myUserLabel,
 .otherUserLabel {
-  min-height: auto;
-  margin-bottom: 0.25rem;
-  color: grey;
-  font-size: clamp(0.7rem, 2vw, 0.8rem);
+  margin: 0;
+  padding: 0;
+  color: black;
 }
 
 .myUserLabel {
   text-align: right;
+  padding-right: 0.5rem;
 }
 
 .otherUserLabel {
-  padding-left: 0.5rem;
   text-align: left;
+  padding-left: 0.5rem;
 }
 
 .myUserLabel p,
 .otherUserLabel p {
   margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
 .myMessage h5,
 .otherMessage h5 {
   width: fit-content;
-  max-width: min(78%, 42rem);
-  margin: 0;
-  padding: 0.55rem 0.7rem;
-  color: whitesmoke;
-  font-size: clamp(0.8rem, 2.5vw, 1rem);
-  font-weight: 500;
-  line-height: 1.35;
-  overflow-wrap: anywhere;
+  max-width: 100%;
+  margin: 0.15rem 0;
+  padding: 0.6rem 0.8rem;
   word-break: break-word;
-  text-align: left;
-  box-shadow: 0 0.3rem 0.65rem rgba(128, 128, 128, 0.25);
 }
 
 .myMessage h5 {

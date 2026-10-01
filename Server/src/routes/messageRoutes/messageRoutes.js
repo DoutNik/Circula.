@@ -10,7 +10,7 @@ const { Chat } = require("../../DB_config");
 // pueden leer/escribir mensajes.
 const isChatParticipantOrAdmin = async (req, res, next) => {
   try {
-    const requesterId = Number(req.user?.id);
+    const requesterId = Number(req.authUserId);
 
     if (!Number.isInteger(requesterId) || requesterId <= 0) {
       return res.status(401).json({
@@ -101,58 +101,64 @@ router.get(
 );
 
 // Crear mensaje
-router.post(
-  "/:chatId",
-  authorization,
-  isChatParticipantOrAdmin,
-  async (req, res) => {
-    try {
-      const chatId = Number(req.params.chatId);
-      const userId = Number(req.user?.id);
-      const { content } = req.body;
+router.post("/:chatId", authorization, isChatParticipantOrAdmin, async (req, res) => {
+  try {
+    const chatId = Number(req.params.chatId);
+    const userId = Number(req.authUserId);
+    const { content } = req.body;
 
-      if (!Number.isInteger(userId) || userId <= 0) {
-        return res.status(401).json({
-          error: "Usuario no autenticado",
-        });
-      }
-
-      if (typeof content !== "string") {
-        return res.status(400).json({
-          error: "El contenido del mensaje es inválido",
-        });
-      }
-
-      const cleanContent = content.trim();
-
-      if (!cleanContent) {
-        return res.status(400).json({
-          error: "El mensaje no puede estar vacío",
-        });
-      }
-
-      if (cleanContent.length > 2000) {
-        return res.status(400).json({
-          error: "El mensaje no puede superar los 2000 caracteres",
-        });
-      }
-
-      const newMessage = await messageController.createMessage(
-        chatId,
-        userId,
-        cleanContent,
-      );
-
-      return res.status(201).json(newMessage);
-    } catch (error) {
-      console.error("Error al crear mensaje:", error);
-
-      return res.status(500).json({
-        error: "Error interno del servidor",
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.status(401).json({
+        error: "Usuario no autenticado",
       });
     }
-  },
-);
+
+    if (typeof content !== "string") {
+      return res.status(400).json({
+        error: "El contenido del mensaje es inválido",
+      });
+    }
+
+    const cleanContent = content.trim();
+
+    if (!cleanContent) {
+      return res.status(400).json({
+        error: "El mensaje no puede estar vacío",
+      });
+    }
+
+    if (cleanContent.length > 2000) {
+      return res.status(400).json({
+        error: "El mensaje no puede superar los 2000 caracteres",
+      });
+    }
+
+    const newMessage = await messageController.createMessage(
+      chatId,
+      userId,
+      cleanContent
+    );
+
+    // Obtener Socket.IO
+    const io = req.app.get("io");
+
+    if (io) {
+      io.to(`chat:${chatId}`).emit(
+        "chat message",
+        newMessage.toJSON()
+      );
+    }
+
+    return res.status(201).json(newMessage);
+
+  } catch (error) {
+    console.error("Error al crear mensaje:", error);
+
+    return res.status(500).json({
+      error: "Error interno del servidor",
+    });
+  }
+});
 
 module.exports = router;
 

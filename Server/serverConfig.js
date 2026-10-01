@@ -21,6 +21,8 @@ const io = new Server(httpServer, {
   },
 });
 
+app.set("io", io);
+
 // Cada conexión de socket debe mandar el JWT (igual que las requests REST)
 // para poder identificarse. Sin esto, cualquiera podía unirse a cualquier
 // sala de chat y leer/mandar mensajes sin haber iniciado sesión.
@@ -41,47 +43,45 @@ io.use((socket, next) => {
 io.on("connection", (socket) => {
   console.log("Un cliente se ha conectado");
 
-  socket.on("joinRoom", async (chatId) => {
-    try {
-      const chat = await Chat.findByPk(chatId);
-      if (
-        chat &&
-        (String(chat.user1Id) === socket.userId ||
-          String(chat.user2Id) === socket.userId)
-      ) {
-        socket.join(String(chatId));
-      }
-    } catch (error) {
-      console.error("Error al unirse a la sala:", error.message);
+socket.on("joinRoom", async (chatId) => {
+  try {
+    const numericChatId = Number(chatId);
+
+    if (!Number.isInteger(numericChatId) || numericChatId <= 0) {
+      return;
     }
-  });
+
+    const chat = await Chat.findByPk(numericChatId);
+
+    if (!chat) {
+      return;
+    }
+
+    const isParticipant =
+      String(chat.user1Id) === socket.userId ||
+      String(chat.user2Id) === socket.userId;
+
+    if (!isParticipant) {
+      return;
+    }
+
+    socket.join(`chat:${numericChatId}`);
+
+    console.log(
+      `Usuario ${socket.userId} ingresó a chat:${numericChatId}`
+    );
+  } catch (error) {
+    console.error(
+      "Error al unirse a la sala:",
+      error.message
+    );
+  }
+});
 
   socket.on("disconnect", () => {
     console.log("Un cliente se ha desconectado");
   });
 
-  socket.on("chat message", async (messageData) => {
-    try {
-      const { chatId, content } = messageData;
-      const chat = await Chat.findByPk(chatId);
-
-      const isParticipant =
-        chat &&
-        (String(chat.user1Id) === socket.userId ||
-          String(chat.user2Id) === socket.userId);
-
-      if (!isParticipant) return;
-
-      // El userId siempre sale del socket autenticado, nunca del payload
-      io.to(String(chatId)).emit("chat message", {
-        userId: socket.userId,
-        chatId,
-        content,
-      });
-    } catch (error) {
-      console.error("Error en chat message:", error.message);
-    }
-  });
 });
 
 const morgan = require("morgan");

@@ -48,7 +48,7 @@ router.get("/myChats", authorization, async (req, res) => {
 // El usuario autenticado sale siempre del token.
 router.post("/create", authorization, async (req, res) => {
   try {
-    const userId = Number(req.user?.id);
+    const userId = Number(req.authUserId);
     const anotherUserId = Number(req.body?.anotherUserId);
 
     if (!Number.isInteger(userId) || userId <= 0) {

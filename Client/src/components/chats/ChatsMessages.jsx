@@ -18,8 +18,8 @@ const ChatsMessages = ({ chatId, userData }) => {
   const dispatch = useDispatch();
   const messagesEndRef = useRef(null);
   const socketRef = useRef(null);
-  const senderId = userData.id;
-  const userId = userData.id;
+  const senderId = Number(userData?.id);
+  const userId = Number(userData?.id);
 
   const chats = useSelector((state) => state.chats);
   const allUsers = useSelector((state) => state.allUsers);
@@ -42,24 +42,34 @@ const ChatsMessages = ({ chatId, userData }) => {
     fetchMessageHistory();
   }, [chatId]);
 
+useEffect(() => {
+  const list = messagesEndRef.current;
+
+  if (!list) return;
+
+  list.scrollTo({
+    top: list.scrollHeight,
+    behavior: "smooth",
+  });
+}, [messageHistory]);
+
   const handleInputChange = (event) => {
     setNewMessage(event.target.value);
   };
 
   //Mandar info al servidor y guardar mensaje en base de datos
   const sendMessage = async () => {
-    if (!newMessage.trim()) {
-      return;
-    }
+    const content = newMessage.trim();
 
-    const messageData = {
-      chatId: chatId,
-      content: newMessage,
-    };
-    socketRef.current?.emit("chat message", messageData);
-    await dispatch(createMessage(chatId, userId, newMessage));
-    setNewMessage("");
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    if (!content) return;
+
+    try {
+      await dispatch(createMessage(chatId, content));
+
+      setNewMessage("");
+    } catch (error) {
+      console.error("Error al enviar mensaje:", error);
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -82,21 +92,23 @@ const ChatsMessages = ({ chatId, userData }) => {
     socketServer.emit("joinRoom", chatId);
 
     socketServer.on("chat message", (messageData) => {
-      const { userId, chatId: receivedChatId, content } = messageData;
+      const receivedChatId = Number(messageData.chatId);
 
-      if (receivedChatId === chatId) {
-        const position = userId == senderId ? "myMessage" : "otherMessage";
-        setMessageHistory((prevMessages) => [
-          ...prevMessages,
-          { content, position, userId },
-        ]);
-        setTimeout(() => {
-          messagesEndRef.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "end",
-          });
-        }, 100);
+      if (receivedChatId !== Number(chatId)) {
+        return;
       }
+
+      setMessageHistory((prevMessages) => {
+        // Evitar duplicados
+        if (
+          messageData.id &&
+          prevMessages.some((msg) => Number(msg.id) === Number(messageData.id))
+        ) {
+          return prevMessages;
+        }
+
+        return [...prevMessages, messageData];
+      });
     });
 
     return () => {
@@ -115,17 +127,19 @@ const ChatsMessages = ({ chatId, userData }) => {
     if (chats.length > 0) {
       window.scrollTo(0, document.body.scrollHeight);
       // Realiza la búsqueda del username del otro usuario en allUsers
-      const chat = chats.find((chat) => chat.id == chatId);
+      const chat = chats.find((chat) => Number(chat.id) === Number(chatId));
       if (!chat) return;
       let otherUserId;
-      if (senderId == chat.user1Id) {
+      if (Number(senderId) === Number(chat.user1Id)) {
         otherUserId = chat.user2Id;
-      } else if (senderId != chat.user1Id) {
+      } else if (Number(senderId) !== Number(chat.user1Id)) {
         otherUserId = chat.user1Id;
       }
 
       if (otherUserId) {
-        const otherUser = allUsers.find((user) => user.id === otherUserId);
+        const otherUser = allUsers.find(
+          (user) => Number(user.id) === Number(otherUserId),
+        );
         if (otherUser) {
           const otherUserName = otherUser.username;
           const otherUserImage = otherUser.image;
@@ -150,29 +164,46 @@ const ChatsMessages = ({ chatId, userData }) => {
       </div>
 
       <ul className={style.listMsg} ref={messagesEndRef}>
-        {messageHistory.map((msg, index) => (
-          <li key={index}>
-            <div className={style.messageWreapper}>
-              {msg.userId !== senderId && (
-                <div className={style.otherUserLabel}>
-                  <p>{otherUsername}</p>
-                </div>
-              )}
-              <div
-                className={
-                  msg.userId === senderId ? style.myMessage : style.otherMessage
-                }
-              >
-                {msg.userId === senderId && (
-                  <div className={style.myUserLabel}>
-                    <p>Yo</p>
-                  </div>
-                )}
-                <h5>{msg.content}</h5>
-              </div>
-            </div>
-          </li>
-        ))}
+        {messageHistory.map((msg, index) => {
+  const isMine = Number(msg.userId) === Number(senderId);
+
+  const previousMessage = messageHistory[index - 1];
+
+  const previousIsMine =
+    previousMessage &&
+    Number(previousMessage.userId) === Number(senderId);
+
+  const isFirstInGroup =
+    !previousMessage || isMine !== previousIsMine;
+
+  return (
+    <li key={msg.id || index}>
+      <div className={style.messageWreapper}>
+        {isFirstInGroup && (
+          <div
+            className={
+              isMine
+                ? style.myUserLabel
+                : style.otherUserLabel
+            }
+          >
+            <p>{isMine ? "Yo" : otherUsername}</p>
+          </div>
+        )}
+
+        <div
+          className={
+            isMine
+              ? style.myMessage
+              : style.otherMessage
+          }
+        >
+          <h5>{msg.content}</h5>
+        </div>
+      </div>
+    </li>
+  );
+})}
       </ul>
 
       <div className={style.input}>
