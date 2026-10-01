@@ -57,8 +57,7 @@ const PostsLiked = ({ userData }) => {
     return myLikes
       .filter(
         (like) =>
-          Number(like.myUserId) === Number(userId) &&
-          !matchedPostIds.has(Number(like.likedPostId)),
+          Number(like.myUserId) === Number(userId) && like.status === "pending",
       )
       .map((like) => ({
         id: `${like.myPostId}-${like.likedPostId}`,

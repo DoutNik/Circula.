@@ -12,13 +12,18 @@ const transporter = nodemailer.createTransport(
       user: process.env.MAIL_USER,
       pass: process.env.MAIL_PASS,
     },
-    tls: {
-      rejectUnauthorized: false,
-    },
   },
   {
     from: process.env.MAIL_FROM || '"Circula" <no-reply@circula.app>',
   },
 );
+
+transporter.verify((error, success) => {
+  if (error) {
+    console.error("❌ Error SMTP:", error);
+  } else {
+    console.log("✅ Servidor SMTP listo para enviar emails");
+  }
+});
 
 module.exports = { transporter };

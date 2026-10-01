@@ -11,7 +11,7 @@ const RecivedLikes = ({ userData }) => {
   const loading = useSelector((state) => state.loadingLikes);
   useEffect(() => {
     if (userId) {
-      dispatch(fetchReceivedLikes(userId));
+      dispatch(fetchReceivedLikes());
     }
   }, [dispatch, userId]);
   const showSafetyModal = () => {

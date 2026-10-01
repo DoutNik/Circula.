@@ -542,7 +542,7 @@
 
   box-sizing: border-box;
 
-  background: white;
+  background: var(--surface-secondary);
 
   padding: clamp(16px, 3vw, 25px);
 
@@ -559,6 +559,8 @@
   font-size: clamp(18px, 3vw, 24px);
 
   overflow-wrap: anywhere;
+
+  color: var(--text-primary);
 }
 
 
@@ -598,13 +600,14 @@
     background 0.2s ease,
     border-color 0.2s ease;
 
-  background: white;
+  background: var(--surface-secondary);
 
   min-width: 0;
 }
 
 .postRow:hover {
-  background: #f5f5f5;
+  background: var(--surface-secondary);
+  border-color: green;
 }
 
 .rowImg {
@@ -645,7 +648,7 @@
 
 .selected {
   border-color: #00c853;
-  background: #f1fff5;
+  background: var(--surface-secondary);
 }
 
 .disabled {

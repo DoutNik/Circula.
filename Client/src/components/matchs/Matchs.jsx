@@ -86,9 +86,7 @@ const Matchs = ({ userData }) => {
        * { chatId: response.id }
        */
       const chatId =
-        result?.payload?.chatId ??
-        result?.chatId ??
-        result?.data?.chatId;
+        result?.payload?.chatId ?? result?.chatId ?? result?.data?.chatId;
 
       if (chatId) {
         navigate(`/chats/${chatId}`);
@@ -100,10 +98,7 @@ const Matchs = ({ userData }) => {
        * no debemos intentar adivinarlo desde el estado,
        * porque "chats" puede todavía estar desactualizado.
        */
-      console.error(
-        "No se recibió chatId al crear el chat.",
-        result,
-      );
+      console.error("No se recibió chatId al crear el chat.", result);
     } catch (error) {
       console.error("Error al crear o abrir el chat:", error);
     } finally {
@@ -118,27 +113,15 @@ const Matchs = ({ userData }) => {
   };
 
   if (!userId) {
-    return (
-      <p className={style.statusMessage}>
-        Cargando usuario...
-      </p>
-    );
+    return <p className={style.statusMessage}>Cargando usuario...</p>;
   }
 
   if (loading) {
-    return (
-      <p className={style.statusMessage}>
-        Cargando matches...
-      </p>
-    );
+    return <p className={style.statusMessage}>Cargando matches...</p>;
   }
 
   if (!Array.isArray(matches) || matches.length === 0) {
-    return (
-      <p className={style.statusMessage}>
-        No tenés matches todavía
-      </p>
-    );
+    return <p className={style.statusMessage}>No tenés matches todavía</p>;
   }
 
   return (
@@ -154,70 +137,44 @@ const Matchs = ({ userData }) => {
         const anotherUserId = anotherPost.UserId;
 
         return (
-          <article
-            key={match.id}
-            className={style.matchCard}
-          >
+          <article key={match.id} className={style.matchCard}>
             <div className={style.exchangeRow}>
               {/* TU PRODUCTO */}
               <div className={style.product}>
-                <span className={style.label}>
-                  Ofrecés
-                </span>
-
-                <Link
-                  to={`/detail/${myPost.id}`}
-                  className={style.imageLink}
-                >
+                <Link to={`/detail/${myPost.id}`} className={style.imageLink}>
                   <img
                     className={style.img}
                     src={myPost.image?.[0] || "/placeholder.png"}
-                    alt={
-                      myPost.title ||
-                      "Producto ofrecido"
-                    }
+                    alt={myPost.title || "Producto ofrecido"}
                     loading="lazy"
                     decoding="async"
                   />
                 </Link>
+                <span className={style.label}>Ofrecés</span>
 
-                <h4 className={style.title}>
-                  {myPost.title || "Sin título"}
-                </h4>
+                <h4 className={style.title}>{myPost.title || "Sin título"}</h4>
               </div>
 
               {/* FLECHA */}
-              <div
-                className={style.center}
-                aria-hidden="true"
-              >
+              <div className={style.center} aria-hidden="true">
                 <span className={style.arrow}>⇄</span>
               </div>
 
               {/* PRODUCTO DEL OTRO USUARIO */}
               <div className={style.product}>
-                <span className={style.label}>
-                  Recibís
-                </span>
-
                 <Link
                   to={`/detail/${anotherPost.id}`}
                   className={style.imageLink}
                 >
                   <img
                     className={style.img}
-                    src={
-                      anotherPost.image?.[0] ||
-                      "/placeholder.png"
-                    }
-                    alt={
-                      anotherPost.title ||
-                      "Producto recibido"
-                    }
+                    src={anotherPost.image?.[0] || "/placeholder.png"}
+                    alt={anotherPost.title || "Producto recibido"}
                     loading="lazy"
                     decoding="async"
                   />
                 </Link>
+                <span className={style.label}>Recibís</span>
 
                 <h4 className={style.title}>
                   {anotherPost.title || "Sin título"}
@@ -230,15 +187,10 @@ const Matchs = ({ userData }) => {
               <button
                 type="button"
                 className={style.chatBtn}
-                onClick={() =>
-                  handleGoChat(anotherUserId)
-                }
+                onClick={() => handleGoChat(anotherUserId)}
                 disabled={!anotherUserId}
               >
-                <span
-                  className={style.buttonIcon}
-                  aria-hidden="true"
-                >
+                <span className={style.buttonIcon} aria-hidden="true">
                   💬
                 </span>
 
@@ -248,25 +200,19 @@ const Matchs = ({ userData }) => {
               <button
                 type="button"
                 className={style.profileBtn}
-                onClick={() =>
-                  handleGoProfile(anotherUserId)
-                }
+                onClick={() => handleGoProfile(anotherUserId)}
                 disabled={!anotherUserId}
               >
                 <img
                   className={style.profileImg}
-                  src={
-                    anotherPost.owner?.image ||
-                    "/placeholder.png"
-                  }
+                  src={anotherPost.owner?.image || "/placeholder.png"}
                   alt=""
                   loading="lazy"
                   decoding="async"
                 />
 
                 <span className={style.profileBtnName}>
-                  {anotherPost.owner?.username ||
-                    "Usuario"}
+                  {anotherPost.owner?.username || "Usuario"}
                 </span>
               </button>
             </div>

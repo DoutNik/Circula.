@@ -256,12 +256,12 @@ export const setReceivedLikes = (likes) => {
   };
 };
 
-// 🔹 FETCH completo (mejor que hacerlo en el componente)
-export const fetchReceivedLikes = (userId) => async (dispatch) => {
+// FETCH completo
+export const fetchReceivedLikes = () => async (dispatch) => {
   try {
     dispatch({ type: LIKES_LOADING });
 
-    const res = await api.get(`/likes/getLikesRecibidos/${userId}`);
+    const res = await api.get("/likes/getLikesRecibidos");
 
     const requests = await Promise.all(
       res.data.map(async (like) => {

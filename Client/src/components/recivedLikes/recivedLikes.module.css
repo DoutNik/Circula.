@@ -20,7 +20,8 @@
 .card {
   width: 100%;
   min-width: 0;
-  background: #ffffff;
+  background: var(--surface-secondary);
+  border: 1px solid #ddd;
   border-radius: clamp(12px, 1.2vw, 20px);
   padding: clamp(12px, 1.5vw, 24px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);

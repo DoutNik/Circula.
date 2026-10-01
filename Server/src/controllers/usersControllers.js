@@ -333,26 +333,35 @@ exports.deleteUser = async (id) => {
 
 exports.forgotPassword = async (email) => {
   try {
-    const usuario = await User.findOne({ where: { email } });
+    const normalizedEmail = email?.trim().toLowerCase();
 
-    if (!email) {
-      return res.status(400).json({ message: "Email requerido" });
+    if (!normalizedEmail) {
+      throw new Error("Email requerido");
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ message: "Email inválido" });
+    if (!emailRegex.test(normalizedEmail)) {
+      throw new Error("Email inválido");
     }
+
+    const usuario = await User.findOne({
+      where: {
+        email: normalizedEmail,
+      },
+    });
 
     if (!usuario) {
       throw new Error("El usuario no existe");
     }
-    transporter
-      .sendMail(passwordForgot(email, usuario.id))
-      .catch((err) => console.error("Email error:", err));
+
+    await transporter.sendMail(
+      passwordForgot(normalizedEmail, usuario.id)
+    );
+
     return "El mail fue enviado correctamente";
   } catch (error) {
+    console.error("ERROR forgotPassword controller:", error);
     throw error;
   }
 };

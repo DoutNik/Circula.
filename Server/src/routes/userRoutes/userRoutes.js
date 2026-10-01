@@ -139,11 +139,19 @@ router.delete("/:id", authorization, isSelfOrAdmin("id"), async (req, res) => {
 
 router.post("/forgot-password", authLimiter, async (req, res) => {
   const { email } = req.body;
+
   try {
     const result = await userController.forgotPassword(email);
-    return res.status(200).json(result);
+
+    return res.status(200).json({
+      message: result,
+    });
   } catch (error) {
-    return res.status(404).json({ error: error.message });
+    console.error("ERROR forgot-password:", error);
+
+    return res.status(400).json({
+      error: error.message,
+    });
   }
 });
 
