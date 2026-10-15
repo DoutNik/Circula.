@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { logoutUser } from "../logButtons/LogoutButton";
 import PayModal from "../payModal/PayModal";
 import api from "../../api/api";
 import style from "./Avatar.module.css";
@@ -20,35 +21,53 @@ const Avatar = ({ userData, setAuth, toggleDarkMode }) => {
     Math.max(0, Math.round(Number(userData?.averageRating) || 0)),
   );
 
-  useEffect(() => {
-    if (!userData?.id) {
+
+useEffect(() => {
+  let cancelled = false;
+
+  const getPremiumStatus = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!userData?.id || !token) {
       setPremium(false);
       return;
     }
 
-    const getPremiumStatus = async () => {
-      try {
-        const token = localStorage.getItem("token");
+    try {
+      const response = await api.get("/users/userId", {
+        headers: { token },
+        params: { id: userData.id },
+      });
 
-        const response = await api.get("/users/userId", {
-          headers: { token },
-          params: { id: userData.id },
-        });
-
+      if (!cancelled) {
         setPremium(response.data.plan === "premium");
-      } catch (error) {
-        console.error("Error al obtener la información del usuario:", error);
-        setPremium(false);
       }
-    };
+    } catch (error) {
+      if (!cancelled) {
+        setPremium(false);
 
-    getPremiumStatus();
-  }, [userData?.id]);
-
-  const logout = () => {
-    localStorage.removeItem("token");
-    setAuth(false, null);
+        if (error.response?.status !== 401) {
+          console.error(
+            "Error al obtener el estado Premium:",
+            error
+          );
+        }
+      }
+    }
   };
+
+  getPremiumStatus();
+
+  return () => {
+    cancelled = true;
+  };
+}, [userData?.id]);
+
+
+const logout = async () => {
+  await logoutUser();
+  setAuth(false, null);
+};
 
   const handleThemeToggle = () => {
     const updatedDarkMode = !isDarkMode;

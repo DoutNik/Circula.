@@ -2,19 +2,26 @@ import { Link, useLocation } from "react-router-dom";
 import Logo from "../../assets/locan.png";
 import style from "./Nabvar.module.css";
 import { logoutUser } from "../logButtons/LogoutButton";
+import { useNavigate } from "react-router-dom";
 
 const NavBar = ({ isAuthenticated, userData }) => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const imageUrl = userData?.image?.split("=")[0];
 
-  const handleLogout = async () => {
-    try {
-      await logoutUser();
-    } catch (error) {
-      console.error("Error al cerrar sesión:", error);
-    }
-  };
+
+
+const handleLogout = async () => {
+  try {
+    await logoutUser();
+  } finally {
+    navigate("/login", { replace: true });
+    window.location.reload();
+  }
+};
+
+
 
   return (
     <nav
