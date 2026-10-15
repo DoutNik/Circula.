@@ -1,0 +1,239 @@
+/* =========================
+   CONTENEDOR PRINCIPAL
+========================= */
+
+.container {
+  box-sizing: border-box;
+
+  width: min(100% - 2rem, 56rem);
+
+  margin: 2rem auto 4rem;
+  padding: clamp(1.5rem, 5vw, 3rem);
+
+  background-color: #fff;
+
+  border-radius: 0.75rem;
+
+  box-shadow: 0 0.3rem 0.8rem rgba(128, 128, 128, 0.2);
+
+  color: #444;
+
+  font-family: "DM Sans", sans-serif;
+  line-height: 1.7;
+}
+
+/* =========================
+   ENCABEZADO
+========================= */
+
+.header {
+  margin-bottom: 2.5rem;
+
+  text-align: center;
+}
+
+.header h1 {
+  margin: 0 0 0.75rem;
+
+  color: #4ecdc4;
+
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  font-weight: 700;
+
+  line-height: 1.2;
+}
+
+.subtitle {
+  max-width: 38rem;
+
+  margin: 0 auto;
+
+  color: #777;
+
+  font-size: clamp(1rem, 2vw, 1.15rem);
+}
+
+/* =========================
+   SECCIONES
+========================= */
+
+.section {
+  margin-bottom: 2.25rem;
+}
+
+.section h2 {
+  margin: 0 0 1rem;
+  padding-bottom: 0.5rem;
+
+  border-bottom: 2px solid #4ecdc4;
+
+  color: #444;
+
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.section p {
+  margin: 0 0 1rem;
+
+  color: #666;
+
+  font-size: 0.98rem;
+
+  text-align: left;
+}
+
+.section p:last-child {
+  margin-bottom: 0;
+}
+
+/* =========================
+   VALORES
+========================= */
+
+.values {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 1rem;
+
+  margin-top: 1.25rem;
+}
+
+.value {
+  box-sizing: border-box;
+
+  padding: 1.25rem;
+
+  border: 1px solid #e5f5f3;
+  border-radius: 0.65rem;
+
+  background-color: #f8fdfc;
+
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+
+.value:hover {
+  transform: translateY(-3px);
+
+  border-color: #4ecdc4;
+
+  box-shadow: 0 0.35rem 0.8rem rgba(78, 205, 196, 0.15);
+}
+
+.value h3 {
+  margin: 0 0 0.65rem;
+
+  color: #333;
+
+  font-size: 1.05rem;
+  font-weight: 700;
+
+  line-height: 1.4;
+}
+
+.value p {
+  margin: 0;
+
+  color: #666;
+
+  font-size: 0.9rem;
+
+  line-height: 1.65;
+}
+
+/* =========================
+   CIERRE
+========================= */
+
+.footer {
+  margin-top: 2.5rem;
+  padding: 1.5rem;
+
+  border-radius: 0.65rem;
+
+  background-color: #eafaf8;
+
+  text-align: center;
+}
+
+.footer p {
+  margin: 0;
+
+  color: #368f89;
+
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+/* =========================
+   TABLETS Y MÓVILES
+========================= */
+
+@media (max-width: 600px) {
+  .container {
+    width: calc(100% - 1.5rem);
+
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+
+    padding: 1.25rem;
+  }
+
+  .header {
+    margin-bottom: 2rem;
+  }
+
+  .section {
+    margin-bottom: 1.75rem;
+  }
+
+  .section h2 {
+    font-size: 1.2rem;
+  }
+
+  .section p {
+    font-size: 0.92rem;
+  }
+
+  .values {
+    grid-template-columns: 1fr;
+
+    gap: 0.85rem;
+  }
+
+  .value {
+    padding: 1rem;
+  }
+
+  .value h3 {
+    font-size: 1rem;
+  }
+
+  .footer {
+    margin-top: 2rem;
+    padding: 1.15rem;
+  }
+
+  .footer p {
+    font-size: 0.92rem;
+  }
+}
+
+/* =========================
+   ACCESIBILIDAD
+========================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .value {
+    transition: none;
+  }
+
+  .value:hover {
+    transform: none;
+  }
+}

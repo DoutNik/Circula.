@@ -57,10 +57,7 @@ const Login = ({ setAuth }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const validationErrors = validateLogin(
-      input.username,
-      input.password
-    );
+    const validationErrors = validateLogin(input.username, input.password);
 
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -189,11 +186,9 @@ const Login = ({ setAuth }) => {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      const email =
-        user.email || `${user.uid}@facebook.local`;
+      const email = user.email || `${user.uid}@facebook.local`;
 
-      const username =
-        user.displayName || email.split("@")[0];
+      const username = user.displayName || email.split("@")[0];
 
       const response = await api.post("/users/social-login", {
         username,
@@ -254,28 +249,17 @@ const Login = ({ setAuth }) => {
     }
   };
 
-  const isAnyLoading =
-    isLoading || Boolean(socialLoading);
+  const isAnyLoading = isLoading || Boolean(socialLoading);
 
   return (
     <main className={style.container}>
-      <img
-        className={style.logo}
-        src={Logo}
-        alt="Circula"
-      />
+      <img className={style.logo} src={Logo} alt="Circula" />
 
       <h1>Iniciar sesión</h1>
 
-      <form
-        className={style.form}
-        onSubmit={handleSubmit}
-        noValidate
-      >
+      <form className={style.form} onSubmit={handleSubmit} noValidate>
         <div className={style.field}>
-          <label htmlFor="username">
-            Usuario
-          </label>
+          <label htmlFor="username">Usuario</label>
 
           <input
             id="username"
@@ -287,27 +271,18 @@ const Login = ({ setAuth }) => {
             autoComplete="username"
             disabled={isAnyLoading}
             aria-invalid={Boolean(errors.username)}
-            aria-describedby={
-              errors.username
-                ? "username-error"
-                : undefined
-            }
+            aria-describedby={errors.username ? "username-error" : undefined}
           />
 
           {errors.username && (
-            <span
-              id="username-error"
-              className={style.fieldError}
-            >
+            <span id="username-error" className={style.fieldError}>
               {errors.username}
             </span>
           )}
         </div>
 
         <div className={style.field}>
-          <label htmlFor="password">
-            Contraseña
-          </label>
+          <label htmlFor="password">Contraseña</label>
 
           <input
             id="password"
@@ -319,18 +294,11 @@ const Login = ({ setAuth }) => {
             autoComplete="current-password"
             disabled={isAnyLoading}
             aria-invalid={Boolean(errors.password)}
-            aria-describedby={
-              errors.password
-                ? "password-error"
-                : undefined
-            }
+            aria-describedby={errors.password ? "password-error" : undefined}
           />
 
           {errors.password && (
-            <span
-              id="password-error"
-              className={style.fieldError}
-            >
+            <span id="password-error" className={style.fieldError}>
               {errors.password}
             </span>
           )}
@@ -347,19 +315,14 @@ const Login = ({ setAuth }) => {
           className={style.loginButton}
           disabled={isAnyLoading}
         >
-          {isLoading
-            ? "Iniciando sesión..."
-            : "Iniciar sesión"}
+          {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
         </button>
       </form>
 
       <div className={style.registerSection}>
         <span>¿No tienes una cuenta?</span>
 
-        <Link
-          to="/register"
-          className={style.register}
-        >
+        <Link to="/register" className={style.register}>
           Regístrate
         </Link>
       </div>
@@ -374,12 +337,21 @@ const Login = ({ setAuth }) => {
         onClick={handleGoogleLogin}
         disabled={isAnyLoading}
       >
-        {socialLoading === "google"
-          ? "Conectando..."
-          : "Iniciar sesión con Google"}
+        {socialLoading === "google" ? (
+          "Conectando..."
+        ) : (
+          <>
+            Iniciar sesión con Google
+            <img
+              src="https://img.icons8.com/color/48/google-logo.png"
+              alt=""
+              className={style.googleIcon}
+            />
+          </>
+        )}
       </button>
 
-      <button
+      {/*       <button
         type="button"
         className={style.facebookButton}
         onClick={handleFacebookLogin}
@@ -388,15 +360,12 @@ const Login = ({ setAuth }) => {
         {socialLoading === "facebook"
           ? "Conectando..."
           : "Iniciar sesión con Facebook"}
-      </button>
+      </button> */}
 
       <div className={style.recover}>
         <span>¿Olvidaste la contraseña?</span>
 
-        <Link
-          to="/forgotpassword"
-          className={style.recoverLink}
-        >
+        <Link to="/forgotpassword" className={style.recoverLink}>
           Recuperar contraseña
         </Link>
       </div>

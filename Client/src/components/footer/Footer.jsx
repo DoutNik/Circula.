@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import style from "./Footer.module.css";
 
 const Footer = () => {
@@ -12,7 +13,9 @@ const Footer = () => {
         onClick={() => setIsCollapsed((current) => !current)}
         aria-expanded={!isCollapsed}
         aria-controls="footer-content"
-        aria-label={isCollapsed ? "Expandir pie de página" : "Ocultar pie de página"}
+        aria-label={
+          isCollapsed ? "Expandir pie de página" : "Ocultar pie de página"
+        }
       >
         <img
           src={
@@ -30,18 +33,14 @@ const Footer = () => {
       >
         <section className={style.left}>
           <h3>Acerca de</h3>
-          <p>Términos y condiciones</p>
-          <p>Nosotros</p>
+          <Link to="/terminos-y-condiciones">Términos y condiciones</Link>
+          <Link to="/nosotros">Nosotros</Link>
         </section>
 
         <section className={style.right}>
           <h3>Contacto</h3>
 
-          <a
-            href="https://www.instagram.com/"
-            target="_blank"
-            rel="noreferrer"
-          >
+          <a href="https://www.instagram.com/" target="_blank" rel="noreferrer">
             <img
               src="https://img.icons8.com/color-glass/48/instagram-new--v1.png"
               alt=""
@@ -49,12 +48,9 @@ const Footer = () => {
             Instagram
           </a>
 
-          <a href="mailto:correo@ejemplo.com">
-            <img
-              src="https://img.icons8.com/color/48/apple-mail.png"
-              alt=""
-            />
-            Centro de ayuda
+          <a href="mailto:carlosklema@hotmail.com">
+            <img src="https://img.icons8.com/color/48/apple-mail.png" alt="" />
+            Email de ayuda
           </a>
         </section>
 

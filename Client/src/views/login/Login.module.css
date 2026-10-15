@@ -306,12 +306,26 @@
    GOOGLE
 ========================= */
 
+
 .googleButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
   background-color: #fff;
-
   border: 1px solid #ddd;
-
   color: #444;
+}
+
+.googleIcon {
+  display: block;
+
+  width: 1.25rem;
+  height: 1.25rem;
+
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 /* =========================

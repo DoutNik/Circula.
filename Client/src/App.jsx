@@ -24,6 +24,8 @@ import PaymentSuccess from "./views/payment/paymentSuccess";
 import PaymentFailure from "./views/payment/paymentFailure";
 import PaymentPending from "./views/payment/paymentPending";
 import FormReview from "./components/formReview/FormReview";
+import Nosotros from "./components/sobreNosotros/sobreNosotros";
+import TerminosCondiciones from "./components/terminosCondiciones/terminosCondiciones";
 
 import "./App.css";
 
@@ -37,133 +39,64 @@ const App = () => {
   useAutoLogout();
 
   const [darkMode, setDarkMode] = useState(
-    () => localStorage.getItem("darkMode") === "true"
+    () => localStorage.getItem("darkMode") === "true",
   );
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userData, setUserData] = useState(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
-useEffect(() => {
-  const root = document.documentElement;
+  useEffect(() => {
+    const root = document.documentElement;
 
-  if (darkMode) {
-    root.style.setProperty(
-      "--page-background",
-      "#19191e"
-    );
+    if (darkMode) {
+      root.style.setProperty("--page-background", "#19191e");
 
-    root.style.setProperty(
-      "--surface",
-      "#24242b"
-    );
+      root.style.setProperty("--surface", "#24242b");
 
-    root.style.setProperty(
-      "--surface-secondary",
-      "#2d2d35"
-    );
+      root.style.setProperty("--surface-secondary", "#2d2d35");
 
-    root.style.setProperty(
-      "--surface-hover",
-      "#34343d"
-    );
+      root.style.setProperty("--surface-hover", "#34343d");
 
-    root.style.setProperty(
-      "--text-primary",
-      "#f1f1f1"
-    );
+      root.style.setProperty("--text-primary", "#f1f1f1");
 
-    root.style.setProperty(
-      "--text-secondary",
-      "#cccccc"
-    );
+      root.style.setProperty("--text-secondary", "#cccccc");
 
-    root.style.setProperty(
-      "--text-muted",
-      "#a5a5a5"
-    );
+      root.style.setProperty("--text-muted", "#a5a5a5");
 
-    root.style.setProperty(
-      "--border",
-      "#41414a"
-    );
+      root.style.setProperty("--border", "#41414a");
 
-    root.style.setProperty(
-      "--border-strong",
-      "#50505a"
-    );
+      root.style.setProperty("--border-strong", "#50505a");
 
-    root.style.setProperty(
-      "--shadow",
-      "rgba(0, 0, 0, 0.35)"
-    );
+      root.style.setProperty("--shadow", "rgba(0, 0, 0, 0.35)");
 
-    root.style.setProperty(
-      "color-scheme",
-      "dark"
-    );
-  } else {
-    root.style.setProperty(
-      "--page-background",
-      "whitesmoke"
-    );
+      root.style.setProperty("color-scheme", "dark");
+    } else {
+      root.style.setProperty("--page-background", "whitesmoke");
 
-    root.style.setProperty(
-      "--surface",
-      "#ffffff"
-    );
+      root.style.setProperty("--surface", "#ffffff");
 
-    root.style.setProperty(
-      "--surface-secondary",
-      "#f5f5f5"
-    );
+      root.style.setProperty("--surface-secondary", "#f5f5f5");
 
-    root.style.setProperty(
-      "--surface-hover",
-      "#fafafa"
-    );
+      root.style.setProperty("--surface-hover", "#fafafa");
 
-    root.style.setProperty(
-      "--text-primary",
-      "#333333"
-    );
+      root.style.setProperty("--text-primary", "#333333");
 
-    root.style.setProperty(
-      "--text-secondary",
-      "#666666"
-    );
+      root.style.setProperty("--text-secondary", "#666666");
 
-    root.style.setProperty(
-      "--text-muted",
-      "#888888"
-    );
+      root.style.setProperty("--text-muted", "#888888");
 
-    root.style.setProperty(
-      "--border",
-      "#eeeeee"
-    );
+      root.style.setProperty("--border", "#eeeeee");
 
-    root.style.setProperty(
-      "--border-strong",
-      "#dddddd"
-    );
+      root.style.setProperty("--border-strong", "#dddddd");
 
-    root.style.setProperty(
-      "--shadow",
-      "rgba(128, 128, 128, 0.2)"
-    );
+      root.style.setProperty("--shadow", "rgba(128, 128, 128, 0.2)");
 
-    root.style.setProperty(
-      "color-scheme",
-      "light"
-    );
-  }
+      root.style.setProperty("color-scheme", "light");
+    }
 
-  localStorage.setItem(
-    "darkMode",
-    String(darkMode)
-  );
-}, [darkMode]);
+    localStorage.setItem("darkMode", String(darkMode));
+  }, [darkMode]);
 
   const toggleDarkMode = () => {
     setDarkMode((prev) => !prev);
@@ -176,18 +109,11 @@ useEffect(() => {
 
     const registerServiceWorker = async () => {
       try {
-        const registration =
-          await navigator.serviceWorker.register("/sw.js");
+        const registration = await navigator.serviceWorker.register("/sw.js");
 
-        console.log(
-          "✅ Service Worker registrado con éxito:",
-          registration
-        );
+        console.log("✅ Service Worker registrado con éxito:", registration);
       } catch (error) {
-        console.error(
-          "❌ Falló el registro del Service Worker:",
-          error
-        );
+        console.error("❌ Falló el registro del Service Worker:", error);
       }
     };
 
@@ -210,24 +136,15 @@ useEffect(() => {
           console.warn("No se recibió token FCM.");
         }
       } catch (error) {
-        console.error(
-          "Error al obtener token FCM:",
-          error
-        );
+        console.error("Error al obtener token FCM:", error);
       }
     };
 
     initializeFirebaseMessaging();
 
-    unsubscribeMessage = onMessage(
-      messaging,
-      (payload) => {
-        console.log(
-          "Mensaje en primer plano:",
-          payload
-        );
-      }
-    );
+    unsubscribeMessage = onMessage(messaging, (payload) => {
+      console.log("Mensaje en primer plano:", payload);
+    });
 
     return () => {
       if (unsubscribeMessage) {
@@ -242,11 +159,7 @@ useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem("token");
 
-      if (
-        !token ||
-        token === "undefined" ||
-        token.trim() === ""
-      ) {
+      if (!token || token === "undefined" || token.trim() === "") {
         if (mounted) {
           setIsAuthenticated(false);
           setUserData(null);
@@ -258,27 +171,21 @@ useEffect(() => {
       }
 
       try {
-        const verifyResponse = await api.get(
-          "/users/verify",
-          {
-            headers: {
-              token,
-            },
-          }
-        );
+        const verifyResponse = await api.get("/users/verify", {
+          headers: {
+            token,
+          },
+        });
 
         if (verifyResponse.data !== true) {
           throw new Error("Token no autorizado");
         }
 
-        const userResponse = await api.get(
-          "/users/userId",
-          {
-            headers: {
-              token,
-            },
-          }
-        );
+        const userResponse = await api.get("/users/userId", {
+          headers: {
+            token,
+          },
+        });
 
         if (!mounted) return;
 
@@ -296,7 +203,7 @@ useEffect(() => {
       } catch (error) {
         console.error(
           "⚠️ Token inválido o expirado:",
-          error.response?.data || error.message
+          error.response?.data || error.message,
         );
 
         if (mounted) {
@@ -339,10 +246,7 @@ useEffect(() => {
       <div className="appContent">
         <Routes>
           {/* Público */}
-          <Route
-            path="/"
-            element={<Home />}
-          />
+          <Route path="/" element={<Home />} />
 
           <Route
             path="/login"
@@ -374,15 +278,9 @@ useEffect(() => {
             }
           />
 
-          <Route
-            path="/forgotpassword"
-            element={<ForgotPassword />}
-          />
+          <Route path="/forgotpassword" element={<ForgotPassword />} />
 
-          <Route
-            path="/resetpassword/:id"
-            element={<ResetPassword />}
-          />
+          <Route path="/resetpassword/:id" element={<ResetPassword />} />
 
           {/* Protegidas */}
           <Route
@@ -461,27 +359,21 @@ useEffect(() => {
             }
           />
 
+          <Route path="/nosotros" element={<Nosotros />} />
+          <Route
+            path="/terminos-y-condiciones"
+            element={<TerminosCondiciones />}
+          />
+
           {/* Pagos */}
-          <Route
-            path="/success"
-            element={<PaymentSuccess />}
-          />
+          <Route path="/success" element={<PaymentSuccess />} />
 
-          <Route
-            path="/failure"
-            element={<PaymentFailure />}
-          />
+          <Route path="/failure" element={<PaymentFailure />} />
 
-          <Route
-            path="/pending"
-            element={<PaymentPending />}
-          />
+          <Route path="/pending" element={<PaymentPending />} />
 
           {/* Admin */}
-          <Route
-            path="/admin"
-            element={<AdminDash />}
-          />
+          <Route path="/admin" element={<AdminDash />} />
         </Routes>
       </div>
     </>
