@@ -25,7 +25,7 @@ import PaymentFailure from "./views/payment/paymentFailure";
 import PaymentPending from "./views/payment/paymentPending";
 import FormReview from "./components/formReview/FormReview";
 import Nosotros from "./components/sobreNosotros/sobreNosotros";
-import TerminosCondiciones from "./components/terminosCondiciones/terminosCondiciones";
+import TerminosCondiciones from "./components/TermsAndConditions/TermsAndConditions";
 
 import "./App.css";
 
