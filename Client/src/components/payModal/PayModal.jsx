@@ -2,20 +2,11 @@ import React from "react";
 import { motion } from "framer-motion";
 import style from "./PayModal.module.css";
 import api from "../../api/api";
-const PayModal = ({ userData, user, isOpen, onClose }) => {
+const PayModal = ({ isOpen, onClose }) => {
   const handlePremium = async () => {
     try {
-      const currentUser = userData || user;
-      if (!currentUser?.id) {
-        console.error("No se encontró el ID del usuario");
-        return;
-      }
       const paymentData = {
-        userId: currentUser.id,
         title: "Premium",
-        quantity: 1,
-        currency_id: "ARS",
-        description: "Usuario premium",
       };
       const response = await api.post("/plans/create-order", paymentData);
       if (response?.data?.init_point) {

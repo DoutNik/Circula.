@@ -113,10 +113,9 @@ export const sortUsersByStatus = (status) => {
   };
 };
 
-export function createGoogleUser(user) {
-  console.log("actions entrega", user);
+export function createGoogleUser(idToken) {
   return async (dispatch) => {
-    const result = await api.post("/users/registerGoogle", user);
+    const result = await api.post("/users/social-login", { idToken });
     dispatch({
       type: CREATE_USER,
       payload: result.data,
@@ -146,7 +145,7 @@ export function updateUser(id, user) {
 
 export function deleteUser(id) {
   return async (dispatch) => {
-    const result = await api.delete(`/users/${id}`);
+    const result = await api.put(`/users/disable/${id}`);
     dispatch({
       type: DELETE_USER,
       payload: result.data,
@@ -210,14 +209,12 @@ export function getPostById(id) {
   };
 }
 
-export const likePost = (myUserId, likedPostId, myPostId, anotherUserId) => {
+export const likePost = (likedPostId, myPostId) => {
   return async (dispatch) => {
     try {
       const response = await api.post("/likes", {
-        myUserId: myUserId,
-        likedPostId: likedPostId,
-        myPostId: myPostId,
-        anotherUserId: anotherUserId,
+        likedPostId,
+        myPostId,
       });
       const likedPost = response.data.like;
       dispatch({

@@ -1,7 +1,7 @@
 import Swal from "sweetalert2";
 import api from "../api/api";
 
-const handlePremiumPurchase = async (userId) => {
+const handlePremiumPurchase = async () => {
   try {
     const paymentData = {
       title: "Premium",

@@ -119,12 +119,10 @@ const Login = ({ setAuth }) => {
 
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
+      const idToken = await user.getIdToken();
 
       const response = await api.post("/users/social-login", {
-        username: user.displayName || user.email?.split("@")[0],
-        email: user.email,
-        image: user.photoURL,
-        origin: "google",
+        idToken,
       });
 
       localStorage.setItem("token", response.data.token);
@@ -134,7 +132,7 @@ const Login = ({ setAuth }) => {
       await Swal.fire({
         icon: "success",
         title: "Login exitoso",
-        text: `¡Bienvenido ${user.displayName || "de nuevo"}!`,
+        text: `¡Bienvenido ${response.data.usuario.username || "de nuevo"}!`,
         timer: 1500,
         showConfirmButton: false,
       });
@@ -185,16 +183,10 @@ const Login = ({ setAuth }) => {
 
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-
-      const email = user.email || `${user.uid}@facebook.local`;
-
-      const username = user.displayName || email.split("@")[0];
+      const idToken = await user.getIdToken();
 
       const response = await api.post("/users/social-login", {
-        username,
-        email,
-        image: user.photoURL,
-        origin: "facebook",
+        idToken,
       });
 
       localStorage.setItem("token", response.data.token);
@@ -206,7 +198,7 @@ const Login = ({ setAuth }) => {
       await Swal.fire({
         icon: "success",
         title: "Login exitoso",
-        text: `¡Bienvenido ${username}!`,
+        text: `¡Bienvenido ${response.data.usuario.username}!`,
         timer: 1500,
         showConfirmButton: false,
       });

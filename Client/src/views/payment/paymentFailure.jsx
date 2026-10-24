@@ -47,7 +47,7 @@ const PaymentFailure = () => {
           <button
             type="button"
             className={style.primaryButton}
-            onClick={() => navigate("/premium")}
+            onClick={() => navigate("/profile")}
           >
             Intentar nuevamente
           </button>

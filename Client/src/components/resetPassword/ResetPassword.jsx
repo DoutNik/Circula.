@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import style from "./ResetPassword.module.css";
 import api from "../../api/api";
 import { validatePassw, validateRepeat } from "./validate";
 import Swal from "sweetalert2";
 const ResetPassword = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
   const [input, setInput] = useState({ password: "", passwordRepeat: "" });
   const [error, setError] = useState({ password: null, passwordRepeat: null });
   const [showPassword, setShowPassword] = useState(false);
@@ -34,6 +35,16 @@ const ResetPassword = () => {
   };
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (!token) {
+      await Swal.fire({
+        icon: "error",
+        title: "Enlace inválido",
+        text: "Solicitá un nuevo enlace para restablecer tu contraseña.",
+      });
+      return;
+    }
+
     const passwordError = validatePassw(input.password);
     const passwordRepeatError = validateRepeat(
       input.passwordRepeat,
@@ -45,8 +56,9 @@ const ResetPassword = () => {
     }
     try {
       setLoading(true);
-      const response = await api.post(`/users/reset-password/${id}`, {
+      const response = await api.post("/users/reset-password", {
         password: input.password,
+        token,
       });
       if (response?.data) {
         await Swal.fire({

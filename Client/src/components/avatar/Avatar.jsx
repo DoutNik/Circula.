@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { logoutUser } from "../logButtons/LogoutButton";
 import PayModal from "../payModal/PayModal";
 import api from "../../api/api";
+import Swal from "sweetalert2";
 import style from "./Avatar.module.css";
 
 const DEFAULT_AVATAR =
   "https://img.icons8.com/fluency-systems-regular/96/user.png";
 
 const Avatar = ({ userData, setAuth, toggleDarkMode }) => {
+  const navigate = useNavigate();
   const [isPremium, setPremium] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(
     localStorage.getItem("darkMode") === "true",
   );
@@ -68,6 +71,44 @@ const logout = async () => {
   await logoutUser();
   setAuth(false, null);
 };
+
+  const handleDeleteAccount = async () => {
+    const result = await Swal.fire({
+      icon: "warning",
+      title: "¿Eliminar tu cuenta?",
+      text: "Esta acción es permanente y eliminará tus publicaciones, canjes, chats, mensajes y reseñas.",
+      showCancelButton: true,
+      confirmButtonText: "Sí, eliminar mi cuenta",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#c0392b",
+      reverseButtons: true,
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      setIsDeleting(true);
+      await api.delete("/users/me");
+      await logoutUser();
+      setAuth(false, null);
+      await Swal.fire({
+        icon: "success",
+        title: "Cuenta eliminada",
+        text: "Tus datos asociados fueron eliminados correctamente.",
+      });
+      navigate("/", { replace: true });
+    } catch (error) {
+      await Swal.fire({
+        icon: "error",
+        title: "No se pudo eliminar la cuenta",
+        text:
+          error.response?.data?.error ||
+          "Intentá nuevamente o contactá a soporte.",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const handleThemeToggle = () => {
     const updatedDarkMode = !isDarkMode;
@@ -147,11 +188,19 @@ const logout = async () => {
         <button type="button" className={style.logout} onClick={logout}>
           Salir
         </button>
+
+        <button
+          type="button"
+          className={style.deleteAccount}
+          onClick={handleDeleteAccount}
+          disabled={isDeleting}
+        >
+          {isDeleting ? "Eliminando..." : "Eliminar cuenta"}
+        </button>
       </div>
 
       <PayModal
         isOpen={isModalOpen}
-        userData={userData}
         onClose={() => setIsModalOpen(false)}
       />
     </div>

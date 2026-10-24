@@ -14,7 +14,7 @@ const PaymentSuccess = () => {
 
   const checkPremium = useCallback(async () => {
     try {
-      const response = await api.get("/users/me");
+      const response = await api.get("/users/userId");
 
       if (response?.data?.plan === "premium") {
         setStatus("premium");
@@ -208,7 +208,7 @@ const PaymentSuccess = () => {
               <button
                 type="button"
                 className={style.primaryButton}
-                onClick={() => navigate("/perfil")}
+                onClick={() => navigate("/profile")}
               >
                 👤 Ir a mi perfil
               </button>

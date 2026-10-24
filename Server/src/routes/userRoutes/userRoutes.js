@@ -64,12 +64,11 @@ router.get("/verify", authorization, async (req, res) => {
 });
 
 router.post("/social-login", authLimiter, async (req, res) => {
-  const user = req.body;
   try {
-    const response = await userController.socialRegisterOrLogin(user);
+    const response = await userController.socialRegisterOrLogin(req.body.idToken);
     return res.status(200).json(response);
   } catch (error) {
-    return res.status(400).json(error.message);
+    return res.status(401).json({ error: error.message });
   }
 });
 
@@ -108,7 +107,9 @@ router.put("/:id", authorization, isSelfOrAdmin("id"), async (req, res) => {
   const { id } = req.params;
   const updatedData = req.body;
   try {
-    const requester = await userController.getUserId(req.body.user);
+    // El solicitante sale del JWT verificado, no del body controlado por el
+    // navegador. Solo un admin autenticado puede modificar el plan.
+    const requester = await userController.getUserId(req.authUserId);
     await userController.updateUser(id, updatedData, requester);
     return res.status(200).json({ message: "Resource updated successfully" });
   } catch (error) {
@@ -126,11 +127,34 @@ router.get("/logueado", async (req, res) => {
   }
 });
 
-// Solo el dueño de la cuenta (o un admin) puede borrarla
+// El usuario autenticado puede borrar definitivamente su propia cuenta y sus
+// datos asociados. Esta ruta no depende de un id que llegue desde el cliente.
+router.delete("/me", authorization, async (req, res) => {
+  try {
+    await userController.deleteUser(req.authUserId);
+    return res.status(200).json({ message: "Cuenta eliminada correctamente" });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+// Solo un administrador puede deshabilitar una cuenta de forma reversible.
+// No se borran datos en este flujo porque la restauración debe conservarlos.
+router.put("/disable/:id", authorization, isAdmin, async (req, res) => {
+  try {
+    await userController.disableUser(req.params.id);
+    return res.status(200).json({ message: "Usuario deshabilitado" });
+  } catch (error) {
+    return res.status(404).json({ error: error.message });
+  }
+});
+
+// Un borrado por id es definitivo; solo lo permite al propio usuario o a un
+// administrador para conservar la compatibilidad de API existente.
 router.delete("/:id", authorization, isSelfOrAdmin("id"), async (req, res) => {
   const { id } = req.params;
   try {
-    const response = await userController.deleteUser(id);
+    await userController.deleteUser(id);
     return res.status(200).json({ message: "User successfully deleted" });
   } catch (error) {
     return res.status(404).json({ error: error.message });
@@ -155,11 +179,10 @@ router.post("/forgot-password", authLimiter, async (req, res) => {
   }
 });
 
-router.post("/reset-password/:id", authLimiter, async (req, res) => {
-  const { id } = req.params;
-  const { password } = req.body;
+router.post("/reset-password", authLimiter, async (req, res) => {
+  const { password, token } = req.body;
   try {
-    const result = await userController.resetPassword(id, password);
+    const result = await userController.resetPassword(token, password);
     return res.status(200).json(result);
   } catch (error) {
     return res.status(400).json({ error: error.message });

@@ -6,8 +6,6 @@ const { Op } = require("sequelize");
 exports.getAllPosts = async () => {
   try {
     const Posts = await Post.findAll({
-      paranoid: false, // trae activos y deshabilitados
-
       attributes: {
         include: [
           [
@@ -50,7 +48,8 @@ exports.getAllPosts = async () => {
 exports.getAllDisabled = async () => {
   try {
     const disabledPosts = await Post.findAll({
-      where: { paranoid: false },
+      paranoid: false,
+      where: { Deshabilitado: { [Op.not]: null } },
     });
 
     return disabledPosts;

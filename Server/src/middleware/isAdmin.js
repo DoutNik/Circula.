@@ -1,7 +1,7 @@
 const { User } = require("../DB_config");
 
-// Debe usarse SIEMPRE después de `authorization`, que ya deja
-// el id del usuario autenticado en req.body.user
+// Debe usarse SIEMPRE después de `authorization`, que deja el id del usuario
+// autenticado en req.authUserId.
 module.exports = async (req, res, next) => {
   try {
     const userId = req.authUserId;

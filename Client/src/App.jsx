@@ -25,7 +25,7 @@ import PaymentFailure from "./views/payment/paymentFailure";
 import PaymentPending from "./views/payment/paymentPending";
 import FormReview from "./components/formReview/FormReview";
 import Nosotros from "./components/sobreNosotros/sobreNosotros";
-import TerminosCondiciones from "./components/TermsAndConditions/TermsAndConditions";
+import TerminosCondiciones from "./components/termsAndConditions/TermsAndConditions";
 
 import "./App.css";
 
@@ -280,7 +280,7 @@ const App = () => {
 
           <Route path="/forgotpassword" element={<ForgotPassword />} />
 
-          <Route path="/resetpassword/:id" element={<ResetPassword />} />
+          <Route path="/resetpassword" element={<ResetPassword />} />
 
           {/* Protegidas */}
           <Route
@@ -300,7 +300,7 @@ const App = () => {
             path="/addProduct"
             element={
               <ProtectedRoute userData={userData}>
-                <AddProduct userData={userData} />
+                <AddProduct />
               </ProtectedRoute>
             }
           />

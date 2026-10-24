@@ -91,7 +91,7 @@ const Detail = ({ userData }) => {
     if (myPostId) {
       if (!isPostLiked && !isMatched) {
         await dispatch(
-          likePost(myUserId, likedPostId, myPostId, anotherUserId),
+          likePost(likedPostId, myPostId),
         );
 
         await dispatch(getAllLikes());
@@ -246,10 +246,8 @@ const Detail = ({ userData }) => {
 
                   dispatch(
                     likePost(
-                      myUserId,
                       likedPostId,
                       selectedPostId,
-                      anotherUserId,
                     ),
                   );
 

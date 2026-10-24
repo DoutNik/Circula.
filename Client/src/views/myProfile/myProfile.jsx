@@ -92,7 +92,7 @@ const MyProfile = ({ userData, setAuth, toggleDarkMode }) => {
 
         preConfirm: async () => {
           try {
-            await handlePremiumPurchase(userData.id);
+            await handlePremiumPurchase();
           } catch (error) {
             console.error(
               "Error al iniciar el pago:",

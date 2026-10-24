@@ -46,7 +46,7 @@ const getErrorMessage = (error) => {
     "Ocurrió un error inesperado."
   );
 };
-export default function AddProduct({ userData }) {
+export default function AddProduct() {
   const navigate = useNavigate();
   const [files, setFiles] = useState([]);
   const filesRef = useRef([]);
@@ -215,14 +215,9 @@ export default function AddProduct({ userData }) {
     async () => {
       try {
         const response = await api.post("/plans/create-order", {
-          /* El backend debe validar el usuario autenticado. No debe confiar únicamente en este ID enviado por el cliente. */ userId:
-            userData?.id,
           title: "Premium",
-          quantity: 1,
-          currency_id: "ARS",
-          description: "Usuario premium",
         });
-        const initPoint = response.data?.response?.body?.init_point;
+        const initPoint = response.data?.init_point;
         if (!initPoint || !initPoint.startsWith("https://")) {
           throw new Error("No se recibió un enlace de pago válido.");
         }
@@ -307,8 +302,6 @@ export default function AddProduct({ userData }) {
           image: imageUrls,
           ubication: `${selectedProvince}, ${localidad}`,
           category: selectedCategory,
-          /* Idealmente eliminá UserId del cliente y hacé que el backend lo derive del token. Se deja aquí solo por compatibilidad con tu API actual. */ UserId:
-            userData?.id,
         };
         await api.post("/posts/", newPost);
         clearFiles();

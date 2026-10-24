@@ -53,7 +53,8 @@ let capsEntries = entries.map((entry) => [
 ]);
 sequelize.models = Object.fromEntries(capsEntries);
 
-const { Post, User, Like, Matches, Message, Chat, Review } = sequelize.models;
+const { Post, User, Like, Matches, Message, Chat, Review, PasswordResetToken } =
+  sequelize.models;
 
 // User - Post
 User.hasMany(Post, {
@@ -130,6 +131,16 @@ User.hasMany(Review, {
 Review.belongsTo(User, {
   as: "reviewer",
   foreignKey: "reviewedUserId",
+});
+
+// User - PasswordResetToken
+User.hasMany(PasswordResetToken, {
+  foreignKey: "userId",
+  as: "passwordResetTokens",
+});
+
+PasswordResetToken.belongsTo(User, {
+  foreignKey: "userId",
 });
 
 // Matches - Post

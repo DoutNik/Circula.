@@ -57,7 +57,7 @@ const PaymentPending = () => {
           <button
             type="button"
             className={style.secondaryButton}
-            onClick={() => navigate("/premium")}
+            onClick={() => navigate("/profile")}
           >
             Ver estado del plan
           </button>

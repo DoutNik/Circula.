@@ -1,11 +1,22 @@
-const { User } = require("../DB_config");
+const {
+  User,
+  PasswordResetToken,
+  Post,
+  Like,
+  Matches,
+  Chat,
+  Message,
+  Review,
+  conn: sequelize,
+} = require("../DB_config");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const { transporter } = require("../config/mailer");
 const { registerMail, passwordForgot } = require("../utils/mailObjects");
 const jwtGenerator = require("../utils/jwtGenerator");
 const admin = require("../config/firebaseAdmin");
-const { randomUUID } = require("crypto");
+const { randomUUID, randomBytes, createHash } = require("crypto");
+const { Op } = require("sequelize");
 
 const adminList = process.env.ADMIN_USERS.split(",").map((email) =>
   email.trim(),
@@ -26,6 +37,17 @@ const sanitizeUser = (userInstance) => {
 // "rol" y "plan" quedan afuera a propósito: rol solo se calcula en el
 // backend (ver adminList) y plan solo lo cambia el webhook de pagos.
 const EDITABLE_USER_FIELDS = ["username", "image", "ubication"];
+const RESET_TOKEN_TTL_MS = 30 * 60 * 1000;
+const RESET_SUCCESS_MESSAGE =
+  "Si existe una cuenta con ese correo, enviaremos un enlace para restablecer la contraseña.";
+
+const hashResetToken = (token) =>
+  createHash("sha256").update(token).digest("hex");
+
+const isValidResetPassword = (password) =>
+  typeof password === "string" &&
+  Buffer.byteLength(password, "utf8") <= 72 &&
+  /^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(password);
 
 const pickEditableFields = (updatedData = {}) => {
   const result = {};
@@ -35,6 +57,31 @@ const pickEditableFields = (updatedData = {}) => {
     }
   }
   return result;
+};
+
+const socialProviderNames = {
+  "google.com": "google",
+  "facebook.com": "facebook",
+};
+
+const buildUniqueSocialUsername = async (name, email, firebaseUid) => {
+  const preferredName = name || email.split("@")[0] || "usuario";
+  const normalizedBase = preferredName
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9_.-]/g, "")
+    .slice(0, 40) || "usuario";
+  const suffix = firebaseUid.replace(/[^a-zA-Z0-9]/g, "").slice(-8) || "social";
+  const baseUsername = `${normalizedBase}-${suffix}`;
+  let username = baseUsername;
+  let attempt = 1;
+
+  while (await User.findOne({ where: { username }, paranoid: false })) {
+    username = `${baseUsername}-${attempt}`;
+    attempt += 1;
+  }
+
+  return username;
 };
 
 exports.getAllUser = async () => {
@@ -58,7 +105,8 @@ exports.getAllUser = async () => {
 exports.getAllDisabled = async () => {
   try {
     const disabledUsers = await User.findAll({
-      where: { paranoid: false },
+      paranoid: false,
+      where: { Deshabilitado: { [Op.not]: null } },
     });
 
     return disabledUsers.map(sanitizeUser);
@@ -125,7 +173,7 @@ exports.createUser = async (user) => {
       image: user.image,
       ubication: user.ubication,
       rol,
-      origin: user.origin || "local",
+      origin: "local",
       firebaseUid,
     });
 
@@ -156,46 +204,69 @@ exports.createUser = async (user) => {
   }
 };
 
-exports.socialRegisterOrLogin = async (user) => {
+exports.socialRegisterOrLogin = async (idToken) => {
   try {
-    let usuarios = await User.findAll({ where: { email: user.email } });
-    let usuario;
-    let firebaseUid;
+    if (typeof idToken !== "string" || !idToken.trim()) {
+      throw new Error("Falta el token de identidad de Firebase.");
+    }
 
-    const rolCalculado = adminList.includes(user.email) ? "admin" : "user";
+    // La identidad, email, nombre, foto y proveedor salen exclusivamente de
+    // un token firmado por Firebase; nunca del body que controla el navegador.
+    const decodedToken = await admin.auth().verifyIdToken(idToken, true);
+    const firebaseUid = decodedToken.uid;
+    const email = decodedToken.email?.trim().toLowerCase();
+    const provider = decodedToken.firebase?.sign_in_provider;
 
-    if (usuarios.length === 0) {
-      // Crear usuario si no existe
-      firebaseUid = randomUUID();
+    if (!email || decodedToken.email_verified !== true) {
+      throw new Error("La cuenta social debe tener un correo verificado.");
+    }
+
+    if (!socialProviderNames[provider]) {
+      throw new Error("Proveedor de inicio de sesión no permitido.");
+    }
+
+    let usuario = await User.findOne({
+      where: {
+        [Op.or]: [{ firebaseUid }, { email }],
+      },
+      paranoid: false,
+    });
+
+    if (usuario?.Deshabilitado) {
+      throw new Error("Esta cuenta no está disponible.");
+    }
+
+    const rolCalculado = adminList.includes(email) ? "admin" : "user";
+
+    if (!usuario) {
+      const username = await buildUniqueSocialUsername(
+        decodedToken.name,
+        email,
+        firebaseUid,
+      );
+
       usuario = await User.create({
-        username: user.username,
-        email: user.email,
-        password: "SOCIAL_LOGIN",
-        image: user.image,
-        ubication: user.ubication || "No especificada",
-        origin: user.origin,
+        username,
+        email,
+        // Las cuentas sociales no pueden autenticarse por el endpoint local;
+        // se conserva un hash para cumplir el esquema, no una clave utilizable.
+        password: await bcrypt.hash(randomBytes(32).toString("hex"), 10),
+        image: decodedToken.picture || null,
+        ubication: "No especificada",
+        origin: socialProviderNames[provider],
         rol: rolCalculado,
         firebaseUid,
       });
-    } else {
-      usuario = usuarios[0];
-
-      // Verificar si el rol cambió y actualizar
-      if (usuario.rol !== rolCalculado) {
-        await usuario.update({ rol: rolCalculado });
-      }
+    } else if (usuario.rol !== rolCalculado) {
+      // El rol sigue derivándose del servidor, nunca de datos del cliente.
+      await usuario.update({ rol: rolCalculado });
     }
 
     const token = jwtGenerator(usuario.id);
 
-    const firebaseToken = await admin
-      .auth()
-      .createCustomToken(usuario.firebaseUid);
-
     return {
       usuario: sanitizeUser(usuario),
       token,
-      firebaseToken,
       rol: rolCalculado,
     };
   } catch (error) {
@@ -205,26 +276,16 @@ exports.socialRegisterOrLogin = async (user) => {
 };
 
 exports.loginUser = async (user) => {
-  let usuario;
+  const usuario = await User.findOne({ where: { username: user.username } });
 
-  if (user.origin === "google") {
-    usuario = await User.findOne({ where: { email: user.email } });
-  } else {
-    usuario = await User.findOne({ where: { username: user.username } });
-
-    if (usuario && !(await bcrypt.compare(user.password, usuario.password))) {
-      throw new Error("La contraseña es incorrecta");
-    }
+  if (usuario && !(await bcrypt.compare(user.password, usuario.password))) {
+    throw new Error("La contraseña es incorrecta");
   }
 
   if (!usuario) throw new Error("No existe ningún usuario con ese nombre");
 
   // determinar rol
   const rolCalculado = adminList.includes(usuario.email) ? "admin" : "user";
-  console.log(adminList);
-  console.log(usuario.email, rolCalculado);
-  console.log(usuario.rol);
-
   // actualizar rol si cambió
   if (usuario.rol !== rolCalculado) {
     await usuario.update({ rol: rolCalculado });
@@ -234,7 +295,7 @@ exports.loginUser = async (user) => {
 
   const firebaseToken = await admin
     .auth()
-    .createCustomToken(usuario.id.toString());
+    .createCustomToken(usuario.firebaseUid || usuario.id.toString());
 
   return {
     usuario: sanitizeUser(usuario),
@@ -305,85 +366,236 @@ exports.updateUser = async (id, updatedData, requester) => {
 };
 
 exports.deleteUser = async (id) => {
-  const user = await User.findByPk(id);
+  const user = await User.findByPk(id, { paranoid: false });
 
-  if (!user) {
+  if (!user || user.Deshabilitado) {
     throw new Error("User not found");
   }
 
   try {
     if (user.firebaseUid) {
-      await admin.auth().deleteUser(user.firebaseUid);
+      try {
+        await admin.auth().deleteUser(user.firebaseUid);
+      } catch (error) {
+        // La identidad ya puede haber sido eliminada en Firebase. En ese caso
+        // todavía debemos borrar todos los datos locales de la cuenta.
+        if (error.code !== "auth/user-not-found") {
+          throw error;
+        }
+      }
     }
 
-    await user.destroy();
+    await sequelize.transaction(async (transaction) => {
+      const [posts, chats, reviewsWritten] = await Promise.all([
+        Post.findAll({
+          where: { UserId: id },
+          attributes: ["id"],
+          paranoid: false,
+          transaction,
+          lock: transaction.LOCK.UPDATE,
+        }),
+        Chat.findAll({
+          where: { [Op.or]: [{ user1Id: id }, { user2Id: id }] },
+          attributes: ["id"],
+          transaction,
+          lock: transaction.LOCK.UPDATE,
+        }),
+        Review.findAll({
+          where: { userId: id },
+          attributes: ["reviewedUserId"],
+          transaction,
+        }),
+      ]);
+
+      const postIds = posts.map((post) => post.id);
+      const chatIds = chats.map((chat) => chat.id);
+      const affectedRevieweeIds = [
+        ...new Set(reviewsWritten.map((review) => review.reviewedUserId)),
+      ].filter((reviewedUserId) => Number(reviewedUserId) !== Number(id));
+
+      const likeConditions = [{ myUserId: id }, { anotherUserId: id }];
+      const matchConditions = [{ UserId1: id }, { UserId2: id }];
+
+      if (postIds.length) {
+        likeConditions.push(
+          { myPostId: { [Op.in]: postIds } },
+          { likedPostId: { [Op.in]: postIds } },
+        );
+        matchConditions.push(
+          { PostId1: { [Op.in]: postIds } },
+          { PostId2: { [Op.in]: postIds } },
+        );
+      }
+
+      const messageConditions = [{ userId: id }];
+      if (chatIds.length) {
+        messageConditions.push({ chatId: { [Op.in]: chatIds } });
+      }
+
+      await Promise.all([
+        Message.destroy({
+          where: { [Op.or]: messageConditions },
+          force: true,
+          transaction,
+        }),
+        Chat.destroy({
+          where: { [Op.or]: [{ user1Id: id }, { user2Id: id }] },
+          force: true,
+          transaction,
+        }),
+        Like.destroy({
+          where: { [Op.or]: likeConditions },
+          force: true,
+          transaction,
+        }),
+        Matches.destroy({
+          where: { [Op.or]: matchConditions },
+          force: true,
+          transaction,
+        }),
+        Review.destroy({
+          where: { [Op.or]: [{ userId: id }, { reviewedUserId: id }] },
+          force: true,
+          transaction,
+        }),
+        PasswordResetToken.destroy({
+          where: { userId: id },
+          force: true,
+          transaction,
+        }),
+      ]);
+
+      if (postIds.length) {
+        await Post.destroy({
+          where: { id: { [Op.in]: postIds } },
+          force: true,
+          transaction,
+        });
+      }
+
+      for (const reviewedUserId of affectedRevieweeIds) {
+        const remainingReviews = await Review.findAll({
+          where: { reviewedUserId },
+          attributes: ["rating"],
+          transaction,
+        });
+        const averageRating = remainingReviews.length
+          ? Number(
+              (
+                remainingReviews.reduce(
+                  (sum, review) => sum + review.rating,
+                  0,
+                ) / remainingReviews.length
+              ).toFixed(2),
+            )
+          : 0;
+
+        await User.update(
+          { averageRating },
+          { where: { id: reviewedUserId }, transaction },
+        );
+      }
+
+      await user.destroy({ force: true, transaction });
+    });
 
     return true;
   } catch (error) {
-    // Si Firebase ya no tenía la cuenta, igualmente elimina el usuario local.
-    if (error.code === "auth/user-not-found") {
-      await user.destroy();
-      return true;
-    }
-
     console.error("Error al eliminar usuario:", error);
-    throw new Error("No se pudo eliminar el usuario de Firebase");
+    throw new Error("No se pudo eliminar la cuenta y sus datos asociados");
   }
+};
+
+exports.disableUser = async (id) => {
+  const user = await User.findByPk(id);
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  await user.destroy();
+  return true;
 };
 
 exports.forgotPassword = async (email) => {
+  const normalizedEmail = email?.trim().toLowerCase();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  // La respuesta no revela si un correo existe, para evitar enumeración de
+  // cuentas. Los errores operativos se registran únicamente en el servidor.
+  if (!normalizedEmail || !emailRegex.test(normalizedEmail)) {
+    return RESET_SUCCESS_MESSAGE;
+  }
+
   try {
-    const normalizedEmail = email?.trim().toLowerCase();
-
-    if (!normalizedEmail) {
-      throw new Error("Email requerido");
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailRegex.test(normalizedEmail)) {
-      throw new Error("Email inválido");
-    }
-
     const usuario = await User.findOne({
-      where: {
-        email: normalizedEmail,
-      },
+      where: { email: normalizedEmail },
     });
 
     if (!usuario) {
-      throw new Error("El usuario no existe");
+      return RESET_SUCCESS_MESSAGE;
     }
 
-    await transporter.sendMail(
-      passwordForgot(normalizedEmail, usuario.id)
-    );
+    const resetToken = randomBytes(32).toString("base64url");
+    const expiresAt = new Date(Date.now() + RESET_TOKEN_TTL_MS);
 
-    return "El mail fue enviado correctamente";
+    // Solo queda un enlace válido por usuario. Solicitar uno nuevo invalida el
+    // anterior y el token en claro nunca entra a la base de datos.
+    await PasswordResetToken.upsert({
+      userId: usuario.id,
+      tokenHash: hashResetToken(resetToken),
+      expiresAt,
+      usedAt: null,
+    });
+
+    await transporter.sendMail(passwordForgot(normalizedEmail, resetToken));
   } catch (error) {
     console.error("ERROR forgotPassword controller:", error);
-    throw error;
   }
+
+  return RESET_SUCCESS_MESSAGE;
 };
 
-exports.resetPassword = async (id, newPassword) => {
-  try {
-    const user = await User.findOne({ where: { id } });
+exports.resetPassword = async (resetToken, newPassword) => {
+  if (typeof resetToken !== "string" || resetToken.length < 40) {
+    throw new Error("El enlace de recuperación es inválido o venció.");
+  }
+
+  if (!isValidResetPassword(newPassword)) {
+    throw new Error(
+      "La contraseña debe tener al menos 8 caracteres, una letra y un número.",
+    );
+  }
+
+  const tokenHash = hashResetToken(resetToken);
+
+  return sequelize.transaction(async (transaction) => {
+    const passwordReset = await PasswordResetToken.findOne({
+      where: {
+        tokenHash,
+        usedAt: null,
+        expiresAt: { [Op.gt]: new Date() },
+      },
+      transaction,
+      lock: transaction.LOCK.UPDATE,
+    });
+
+    if (!passwordReset) {
+      throw new Error("El enlace de recuperación es inválido o venció.");
+    }
+
+    const user = await User.findByPk(passwordReset.userId, { transaction });
 
     if (!user) {
-      throw new Error("User not found", error);
+      throw new Error("El enlace de recuperación es inválido o venció.");
     }
-    const saltRounds = 10;
-    const salt = await bcrypt.genSalt(saltRounds);
-    const bcryptPassword = await bcrypt.hash(newPassword, salt);
 
-    await user.update({ password: bcryptPassword });
+    const bcryptPassword = await bcrypt.hash(newPassword, 10);
+
+    await user.update({ password: bcryptPassword }, { transaction });
+    await passwordReset.update({ usedAt: new Date() }, { transaction });
 
     return "Contraseña actualizada correctamente";
-  } catch (error) {
-    console.error(error);
-    throw new Error("No se pudo actualizar la contraseña", error);
-  }
+  });
 };
 
 exports.restoreUser = async (id) => {

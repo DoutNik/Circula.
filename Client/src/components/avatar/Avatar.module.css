@@ -101,7 +101,8 @@
 .dark,
 .light,
 .premium,
-.logout {
+.logout,
+.deleteAccount {
   min-height: 2.1rem;
   padding: 0.35rem 0.7rem;
   border: none;
@@ -133,10 +134,16 @@
   color: whitesmoke;
 }
 
+.deleteAccount {
+  background-color: #c0392b;
+  color: whitesmoke;
+}
+
 .premium:disabled,
 .dark:disabled,
 .light:disabled,
-.logout:disabled {
+.logout:disabled,
+.deleteAccount:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -169,7 +176,8 @@
   .dark,
   .light,
   .premium,
-  .logout {
+  .logout,
+  .deleteAccount {
     width: 100%;
   }
 }

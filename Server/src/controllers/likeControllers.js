@@ -8,11 +8,38 @@ const createLike = async (
   myUserId,
   likedPostId,
   myPostId,
-  anotherUserId,
 ) => {
   const transaction = await sequelize.transaction();
 
   try {
+    const [myPost, likedPost] = await Promise.all([
+      Post.findOne({
+        where: { id: myPostId, UserId: myUserId },
+        transaction,
+        lock: transaction.LOCK.UPDATE,
+      }),
+      Post.findByPk(likedPostId, {
+        transaction,
+        lock: transaction.LOCK.UPDATE,
+      }),
+    ]);
+
+    // El post ofrecido debe ser del usuario autenticado y el post objetivo
+    // debe existir/estar activo. El destinatario se deriva del post objetivo,
+    // nunca de un ID enviado por el navegador.
+    if (!myPost) {
+      throw new Error("La publicación ofrecida no te pertenece o no existe");
+    }
+
+    if (!likedPost) {
+      throw new Error("La publicación objetivo no existe o está deshabilitada");
+    }
+
+    const anotherUserId = Number(likedPost.UserId);
+    if (anotherUserId === Number(myUserId)) {
+      throw new Error("No puedes solicitar un canje con tu propia publicación");
+    }
+
     // 1. Evitar duplicar exactamente el mismo intento
     const existing = await Like.findOne({
       where: {
@@ -271,15 +298,14 @@ const rejectLike = async (likeId) => {
 
 const removeLike = async (likeId) => {
   try {
-    // Busca el like por la propiedad "likedPostId"
-    const likeToRemove = await Like.findOne({
-      where: { likedPostId: likeId },
-    });
+    // `likeId` es el id de la relación autorizada, no el id de una
+    // publicación. Buscar por likedPostId permitía borrar un like ajeno.
+    const likeToRemove = await Like.findByPk(likeId);
 
     // Verifica si el like existe
     if (!likeToRemove) {
       throw new Error(
-        "No se encontró el like con el likedPostId proporcionado",
+        "No se encontró el like indicado",
       );
     }
 

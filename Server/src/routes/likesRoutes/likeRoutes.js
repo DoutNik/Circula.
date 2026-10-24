@@ -6,7 +6,7 @@ const authorization = require("../../middleware/authorization");
 const isAdmin = require("../../middleware/isAdmin");
 const { Like, User } = require("../../DB_config");
 
-// Solo quien recibió el like (o un admin) puede aceptarlo/rechazarlo/borrarlo
+// Solo participantes del like (o un admin) pueden borrarlo.
 const isLikePartyOrAdmin = async (req, res, next) => {
   try {
     const idParam = req.params.id || req.params.likeId;
@@ -38,13 +38,37 @@ const isLikePartyOrAdmin = async (req, res, next) => {
   }
 };
 
+// Aceptar o rechazar un canje cambia el estado de la solicitud, por lo que
+// solo puede hacerlo quien la recibió (o un administrador).
+const isLikeRecipientOrAdmin = async (req, res, next) => {
+  try {
+    const like = await Like.findByPk(req.params.id);
+    if (!like) {
+      return res.status(404).json("Like not found");
+    }
+
+    const requesterId = Number(req.authUserId);
+    if (requesterId === Number(like.anotherUserId)) {
+      return next();
+    }
+
+    const user = await User.findByPk(requesterId);
+    if (user?.rol === "admin") {
+      return next();
+    }
+
+    return res.status(403).json("Not Authorize");
+  } catch (error) {
+    return res.status(500).json(error.message);
+  }
+};
+
 // Crear like
 router.post("/", authorization, async (req, res) => {
   try {
     const {
       likedPostId,
       myPostId,
-      anotherUserId,
     } = req.body;
 
     // El usuario sale SIEMPRE del token
@@ -54,7 +78,6 @@ router.post("/", authorization, async (req, res) => {
       myUserId,
       likedPostId,
       myPostId,
-      anotherUserId,
     );
 
     if (result) {
@@ -68,7 +91,7 @@ router.post("/", authorization, async (req, res) => {
       error: "Error al registrar el like",
     });
   } catch (error) {
-    return res.status(500).json({
+    return res.status(400).json({
       error: error.message,
     });
   }
@@ -147,7 +170,7 @@ router.get(
 router.put(
   "/respond/:id",
   authorization,
-  isLikePartyOrAdmin,
+  isLikeRecipientOrAdmin,
   async (req, res) => {
     const { action } = req.body;
 

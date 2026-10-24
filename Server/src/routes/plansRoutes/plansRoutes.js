@@ -5,10 +5,8 @@ const authorization = require("../../middleware/authorization");
 
 // Requiere login: el userId del pago sale del token, nunca del body
 router.post("/create-order", authorization, async (req, res) => {
-  const { title } = req.body;
-  const userId = req.body.user;
   try {
-    const response = await plansController.createOrder(userId, title);
+    const response = await plansController.createOrder(req.authUserId);
     return res.status(200).json(response);
   } catch (error) {
     return res.status(400).json({ error: error.message });

@@ -57,12 +57,15 @@ const matchMail = (firstUser, secondUser, firstPost, secondPost) => {
   }
 };
 
-const passwordForgot = (email, id) => {
+const passwordForgot = (email, resetToken) => {
+  const frontendUrl = process.env.FRONTEND_URL?.replace(/\/+$/, "");
 
-  const idUsuario = id
-  const urlPersonalizada = `https://circula-pvpn.onrender.com/#/resetpassword/${idUsuario}`;
-  // const urlPersonalizada = `http://localhost:5173/#/resetpassword/${idUsuario}`;
-  const forgotTemplateWithLink = forgotTemplate.replace("{{reset_password_link}}", urlPersonalizada);
+  if (!frontendUrl) {
+    throw new Error("FRONTEND_URL no está configurada");
+  }
+
+  const resetUrl = `${frontendUrl}/#/resetpassword?token=${encodeURIComponent(resetToken)}`;
+  const forgotTemplateWithLink = forgotTemplate.replace("{{reset_password_link}}", resetUrl);
   
   return {
     to: email,
