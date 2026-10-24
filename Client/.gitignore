@@ -11,8 +11,9 @@ node_modules
 dist
 dist-ssr
 *.local
-.env.production
 .env.development
+# Solo contiene URLs públicas que Vite necesita durante el build de Render.
+!.env.production
 
 # Editor directories and files
 .vscode/*

@@ -4,5 +4,7 @@
 
 # Ignorar el archivo .env en el directorio del servidor
 /Server/.env
+/Server/.env.*
+!/Server/.env.example
 /Server/ngrok.exe
 /Server/firebaseKey.json
