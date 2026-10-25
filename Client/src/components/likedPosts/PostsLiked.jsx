@@ -20,11 +20,8 @@ const PostsLiked = ({ userData }) => {
 
   const userId = userData?.id;
 
-  const allPosts = useSelector((state) => state.allPosts) || [];
-
-  const myLikes = useSelector((state) => state.myLikes) || [];
-
-  const matchedPairs = useSelector((state) => state.matchedPairs) || [];
+  const allPosts = useSelector((state) => state.allPosts);
+  const myLikes = useSelector((state) => state.myLikes);
 
   const [dataLoaded, setDataLoaded] = useState(false);
 
@@ -48,13 +45,9 @@ const PostsLiked = ({ userData }) => {
   }, [dispatch, userId]);
 
   const exchangeAttempts = useMemo(() => {
-    const postsMap = new Map(allPosts.map((post) => [post.id, post]));
+    const postsMap = new Map((allPosts || []).map((post) => [post.id, post]));
 
-    const matchedPostIds = new Set(
-      matchedPairs.map((pair) => pair.anotherUserPost?.id).filter(Boolean),
-    );
-
-    return myLikes
+    return (myLikes || [])
       .filter(
         (like) =>
           Number(like.myUserId) === Number(userId) && like.status === "pending",
@@ -65,7 +58,7 @@ const PostsLiked = ({ userData }) => {
         wantedProduct: postsMap.get(like.likedPostId),
       }))
       .filter((attempt) => attempt.myProduct && attempt.wantedProduct);
-  }, [myLikes, allPosts, matchedPairs, userId]);
+  }, [myLikes, allPosts, userId]);
 
   if (!userId || !dataLoaded) {
     return <p className={style.loading}>Cargando likes...</p>;

@@ -1,21 +1,26 @@
 import { useState } from "react";
-import { useClerk } from "@clerk/clerk-react";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth } from "../../firebase";
+import api from "../../api/api";
 import style from "./LoginButton.module.css";
 
-const LoginButton = () => {
-  const { signInWithRedirect } = useClerk();
+// Componente reutilizable de acceso con Google. Antes dependía de Clerk, que
+// no forma parte de este proyecto ni era el proveedor que valida la API.
+const LoginButton = ({ onAuthenticated }) => {
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   const handleLogin = async () => {
     try {
       setIsRedirecting(true);
+      const result = await signInWithPopup(auth, new GoogleAuthProvider());
+      const idToken = await result.user.getIdToken();
+      const response = await api.post("/users/social-login", { idToken });
 
-      await signInWithRedirect({
-        strategy: "oauth_google",
-        redirectUrl: "/",
-      });
+      localStorage.setItem("token", response.data.token);
+      onAuthenticated?.(true, response.data.usuario);
     } catch (error) {
       console.error("Error al iniciar sesión con Google:", error);
+    } finally {
       setIsRedirecting(false);
     }
   };

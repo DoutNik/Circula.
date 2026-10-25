@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Navigate, Routes, Route } from "react-router-dom";
 import { getToken, onMessage, messaging } from "./firebase";
 
 import api from "./api/api";
@@ -26,13 +26,20 @@ import PaymentPending from "./views/payment/paymentPending";
 import FormReview from "./components/formReview/FormReview";
 import Nosotros from "./components/sobreNosotros/sobreNosotros";
 import TerminosCondiciones from "./components/termsAndConditions/TermsAndConditions";
+import PrivacyPolicy from "./views/legal/PrivacyPolicy";
+import DeleteAccount from "./views/deleteAccount/DeleteAccount";
 
 import "./App.css";
 
 api.defaults.baseURL = import.meta.env.VITE_API_URL;
 
 const ProtectedRoute = ({ userData, children }) => {
-  return userData ? children : <Loading />;
+  return userData ? children : <Navigate to="/login" replace />;
+};
+
+const AdminRoute = ({ userData, children }) => {
+  if (!userData) return <Navigate to="/login" replace />;
+  return userData.rol === "admin" ? children : <Navigate to="/" replace />;
 };
 
 const App = () => {
@@ -103,35 +110,28 @@ const App = () => {
   };
 
   useEffect(() => {
-    if (!("serviceWorker" in navigator)) {
-      return;
-    }
-
-    const registerServiceWorker = async () => {
-      try {
-        const registration = await navigator.serviceWorker.register("/sw.js");
-
-        console.log("✅ Service Worker registrado con éxito:", registration);
-      } catch (error) {
-        console.error("❌ Falló el registro del Service Worker:", error);
-      }
-    };
-
-    registerServiceWorker();
-  }, []);
-
-  useEffect(() => {
     let unsubscribeMessage;
 
     const initializeFirebaseMessaging = async () => {
       try {
+        if (!isAuthenticated || !("serviceWorker" in navigator) || !("Notification" in window)) {
+          return;
+        }
+        // VitePWA gestiona /sw.js. El worker de Firebase usa un scope propio
+        // para que ambos puedan coexistir sin reemplazarse mutuamente.
+        if (Notification.permission !== "granted") return;
+        const firebaseRegistration = await navigator.serviceWorker.register(
+          "/firebase-messaging-sw.js",
+          { scope: "/firebase-messaging-push-scope" },
+        );
         const currentToken = await getToken(messaging, {
           vapidKey:
             "BIgcX_H0G3MswOLcfly2-S_b8SY-LI9zu4ihlf5jK2GOgJUhsTMrKZ0nLJUUwwMNqkSQSt76cT_qOpZ9o7QNBzA",
+          serviceWorkerRegistration: firebaseRegistration,
         });
 
         if (currentToken) {
-          // Enviar el token al backend si corresponde.
+          await api.put("/users/me/push-token", { token: currentToken });
         } else {
           console.warn("No se recibió token FCM.");
         }
@@ -151,7 +151,7 @@ const App = () => {
         unsubscribeMessage();
       }
     };
-  }, []);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     let mounted = true;
@@ -364,6 +364,8 @@ const App = () => {
             path="/terminos-y-condiciones"
             element={<TerminosCondiciones />}
           />
+          <Route path="/privacidad" element={<PrivacyPolicy />} />
+          <Route path="/eliminar-cuenta" element={<DeleteAccount />} />
 
           {/* Pagos */}
           <Route path="/success" element={<PaymentSuccess />} />
@@ -373,7 +375,15 @@ const App = () => {
           <Route path="/pending" element={<PaymentPending />} />
 
           {/* Admin */}
-          <Route path="/admin" element={<AdminDash />} />
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute userData={userData}>
+                <AdminDash />
+              </AdminRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
     </>

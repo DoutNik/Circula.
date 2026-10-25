@@ -2,6 +2,7 @@ const { conn: sequelize, Post, User, Like, Matches } = require("../DB_config");
 const { transporter } = require("../config/mailer");
 const { postCreated } = require("../utils/mailObjects");
 const { Op } = require("sequelize");
+const { assertAllowedText } = require("../utils/contentModeration");
 
 exports.getAllPosts = async () => {
   try {
@@ -113,6 +114,7 @@ exports.getPostsByCategory = async (category) => {
 
 exports.createPost = async (postData) => {
   try {
+    assertAllowedText(postData.title, postData.description);
     const posteos = await Post.findAll({
       where: {
         UserId: postData.UserId,
@@ -144,6 +146,7 @@ exports.updatePost = async (id, updatedData) => {
       throw new Error("Post not found");
     }
 
+    assertAllowedText(updatedData.title ?? post.title, updatedData.description ?? post.description);
     await post.update(updatedData);
 
     return post;

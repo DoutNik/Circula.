@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import style from "./Login.module.css";
 
 import {
-  FacebookAuthProvider,
   GoogleAuthProvider,
   signInWithCustomToken,
   signInWithPopup,
@@ -157,84 +156,6 @@ const Login = ({ setAuth }) => {
         icon: "error",
         title: "Error al iniciar sesión",
         text: "No se pudo autenticar con Google.",
-      });
-    } finally {
-      setSocialLoading("");
-    }
-  };
-
-  const handleFacebookLogin = async () => {
-    try {
-      setSocialLoading("facebook");
-
-      Swal.fire({
-        title: "Conectando con Facebook...",
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
-
-      const provider = new FacebookAuthProvider();
-
-      provider.addScope("email");
-      provider.addScope("public_profile");
-
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      const idToken = await user.getIdToken();
-
-      const response = await api.post("/users/social-login", {
-        idToken,
-      });
-
-      localStorage.setItem("token", response.data.token);
-
-      Swal.close();
-
-      setAuth(true, response.data.usuario);
-
-      await Swal.fire({
-        icon: "success",
-        title: "Login exitoso",
-        text: `¡Bienvenido ${response.data.usuario.username}!`,
-        timer: 1500,
-        showConfirmButton: false,
-      });
-    } catch (error) {
-      Swal.close();
-
-      console.error("Error Facebook login:", error);
-
-      if (error.code === "auth/popup-closed-by-user") {
-        return;
-      }
-
-      if (error.code === "auth/account-exists-with-different-credential") {
-        Swal.fire({
-          icon: "warning",
-          title: "Cuenta existente",
-          text: "Ya existe una cuenta con este email utilizando otro método.",
-        });
-
-        return;
-      }
-
-      if (error.code === "auth/operation-not-allowed") {
-        Swal.fire({
-          icon: "error",
-          title: "Login no disponible",
-          text: "Facebook login no está habilitado.",
-        });
-
-        return;
-      }
-
-      Swal.fire({
-        icon: "error",
-        title: "Error al iniciar sesión",
-        text: "No se pudo autenticar con Facebook.",
       });
     } finally {
       setSocialLoading("");

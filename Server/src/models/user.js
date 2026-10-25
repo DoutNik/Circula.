@@ -49,6 +49,12 @@ module.exports = (sequelize) => {
       type: DataTypes.FLOAT,
       defaultValue: 0, 
     },
+    // Un único token activo por usuario. Se renueva cuando el dispositivo lo
+    // informa de nuevo; no se expone nunca en respuestas públicas.
+    fcmToken: {
+      type: DataTypes.STRING(512),
+      allowNull: true,
+    },
   },
   {
     paranoid: true,

@@ -72,6 +72,7 @@ const initialState = {
   selectedPostImage: "",
   matches: [],
   allLikes: [],
+  myLikes: [],
   likedPosts: [],
   receivedLikes: [],
   loadingLikes: false,
@@ -211,7 +212,7 @@ function rootReducer(state = initialState, action) {
         allExistingUsers: state.allExistingUsersCopy,
       };
 
-    case GET_ALL_POSTS:
+    case GET_ALL_POSTS: {
       // Aplicar los filtros directamente a action.payload
       let filteredAllPosts = action.payload;
 
@@ -238,6 +239,7 @@ function rootReducer(state = initialState, action) {
         allPosts: filteredAllPosts,
         allPostsCopy: action.payload,
       };
+    }
 
     case GET_ALL_DISABLED_POSTS:
       return {
@@ -333,7 +335,7 @@ function rootReducer(state = initialState, action) {
 
     case GET_POST_BY_CATEGORY:
     case GET_POST_BY_PROVINCE:
-    case GET_POST_BY_LOCALITY:
+    case GET_POST_BY_LOCALITY: {
       let filteredPosts = state.allPostsCopy;
 
       if (state.selectedCategory) {
@@ -358,6 +360,7 @@ function rootReducer(state = initialState, action) {
         ...state,
         allPosts: filteredPosts,
       };
+    }
 
     case CREATE_POST:
       return {
@@ -419,7 +422,7 @@ function rootReducer(state = initialState, action) {
         allLikes: action.payload,
       };
 
-    case DELETE_LIKE:
+    case DELETE_LIKE: {
       const deletedLikeId = action.payload.id;
 
       // Filtra los likes que deben eliminarse
@@ -438,6 +441,7 @@ function rootReducer(state = initialState, action) {
         allLikes: updatedLikes,
         matches: updatedMatches,
       };
+    }
 
     case LIKE_POST:
       return {
@@ -477,7 +481,7 @@ function rootReducer(state = initialState, action) {
         ),
       };
 
-    case LIKED_POSTS:
+    case LIKED_POSTS: {
       const userId = action.payload;
       const filteredLikes = state.allLikes.filter(
         (like) => like.myUserId === userId,
@@ -490,6 +494,7 @@ function rootReducer(state = initialState, action) {
         ...state,
         likedPosts: likedPosts,
       };
+    }
 
     case CLEAR_DETAIL:
       return {
@@ -527,7 +532,7 @@ function rootReducer(state = initialState, action) {
         chats: action.payload,
       };
 
-    case "GET_MY_CHATS":
+    case GET_MY_CHATS:
       return {
         ...state,
         chats: action.payload,

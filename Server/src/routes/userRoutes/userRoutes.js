@@ -117,16 +117,6 @@ router.put("/:id", authorization, isSelfOrAdmin("id"), async (req, res) => {
   }
 });
 
-router.get("/logueado", async (req, res) => {
-  const { email } = req.query;
-  try {
-    const logueado = await userController.userLogueado({ email });
-    return res.status(200).json(logueado);
-  } catch (error) {
-    return res.status(404).json({ error: error.message });
-  }
-});
-
 // El usuario autenticado puede borrar definitivamente su propia cuenta y sus
 // datos asociados. Esta ruta no depende de un id que llegue desde el cliente.
 router.delete("/me", authorization, async (req, res) => {
@@ -138,24 +128,23 @@ router.delete("/me", authorization, async (req, res) => {
   }
 });
 
+// El token FCM pertenece a la sesión autenticada, no a un id enviado por el
+// navegador. El valor se trata como secreto y no se devuelve en ningún perfil.
+router.put("/me/push-token", authorization, async (req, res) => {
+  try {
+    await userController.savePushToken(req.authUserId, req.body?.token);
+    return res.status(204).end();
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
 // Solo un administrador puede deshabilitar una cuenta de forma reversible.
 // No se borran datos en este flujo porque la restauración debe conservarlos.
 router.put("/disable/:id", authorization, isAdmin, async (req, res) => {
   try {
     await userController.disableUser(req.params.id);
     return res.status(200).json({ message: "Usuario deshabilitado" });
-  } catch (error) {
-    return res.status(404).json({ error: error.message });
-  }
-});
-
-// Un borrado por id es definitivo; solo lo permite al propio usuario o a un
-// administrador para conservar la compatibilidad de API existente.
-router.delete("/:id", authorization, isSelfOrAdmin("id"), async (req, res) => {
-  const { id } = req.params;
-  try {
-    await userController.deleteUser(id);
-    return res.status(200).json({ message: "User successfully deleted" });
   } catch (error) {
     return res.status(404).json({ error: error.message });
   }
@@ -176,6 +165,35 @@ router.post("/forgot-password", authLimiter, async (req, res) => {
     return res.status(400).json({
       error: error.message,
     });
+  }
+});
+
+// Página pública exigida por las tiendas: solicita un enlace de confirmación
+// sin revelar si el correo posee una cuenta.
+router.post("/request-account-deletion", authLimiter, async (req, res) => {
+  const message = await userController.requestAccountDeletion(req.body?.email);
+  return res.status(200).json({ message });
+});
+
+router.delete("/delete-by-token", authLimiter, async (req, res) => {
+  try {
+    await userController.deleteUserByToken(req.body?.token);
+    return res.status(200).json({ message: "Cuenta eliminada correctamente." });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+});
+
+// Un borrado por id es definitivo; solo lo permite al propio usuario o a un
+// administrador para conservar la compatibilidad de API existente. Debe ir
+// después de las rutas literales, para que no capture "delete-by-token".
+router.delete("/:id", authorization, isSelfOrAdmin("id"), async (req, res) => {
+  const { id } = req.params;
+  try {
+    await userController.deleteUser(id);
+    return res.status(200).json({ message: "User successfully deleted" });
+  } catch (error) {
+    return res.status(404).json({ error: error.message });
   }
 });
 

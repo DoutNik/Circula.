@@ -73,6 +73,8 @@ export default function AddProduct() {
           URL.revokeObjectURL(file.preview);
         }
       });
+      // Se leen los controladores más recientes a propósito al desmontar.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       provinceAbortRef.current?.abort();
       localityAbortRef.current?.abort();
     };

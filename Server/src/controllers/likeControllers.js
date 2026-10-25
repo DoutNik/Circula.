@@ -1,4 +1,5 @@
 const { Like, Matches, User, Post, conn: sequelize } = require("../DB_config");
+const { isEitherUserBlocked } = require("./blocksController");
 const { Op } = require("sequelize");
 const { transporter } = require("../config/mailer");
 const { matchMail } = require("../utils/mailObjects");
@@ -38,6 +39,10 @@ const createLike = async (
     const anotherUserId = Number(likedPost.UserId);
     if (anotherUserId === Number(myUserId)) {
       throw new Error("No puedes solicitar un canje con tu propia publicación");
+    }
+
+    if (await isEitherUserBlocked(myUserId, anotherUserId, { transaction })) {
+      throw new Error("No puedes iniciar un canje con esta persona.");
     }
 
     // 1. Evitar duplicar exactamente el mismo intento

@@ -6,7 +6,7 @@ const manifestForPlugIn = {
   registerType: "prompt",
   includeAssets: [
     "favicon.ico",
-    "apple-touc-icon.png",
+    "apple-touch-icon.png",
     "maskable_icon.png",
     "android-chrome-192x192.png",
     "android-chrome-512x512.png",
@@ -20,19 +20,19 @@ const manifestForPlugIn = {
         src: "/android-chrome-192x192.png",
         sizes: "192x192",
         type: "image/png",
-        purpose: "favicon",
+        purpose: "any",
       },
       {
         src: "/android-chrome-512x512.png",
         sizes: "512x512",
         type: "image/png",
-        purpose: "favicon",
+        purpose: "any",
       },
       {
         src: "/apple-touch-icon.png",
         sizes: "180x180",
         type: "image/png",
-        purpose: "apple touch icon",
+        purpose: "any",
       },
       {
         src: "/maskable_icon.png",
@@ -46,7 +46,7 @@ const manifestForPlugIn = {
       {
         name: "Agregar",
         description: "Agrega un producto",
-        url: "https://circula.com.ar/#/addProduct",
+        url: "/#/addProduct",
         icons: [
           {
             src: "add.png",
@@ -57,7 +57,7 @@ const manifestForPlugIn = {
       {
         name: "Mi perfil",
         description: "Tu perfil",
-        url: "https://circula.com.ar/#/login",
+        url: "/#/profile",
         icons: [
           {
             src: "user.png",

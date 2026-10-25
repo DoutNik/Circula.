@@ -1,5 +1,6 @@
 const { Op } = require("sequelize");
 const { Chat, User } = require("../DB_config");
+const { isEitherUserBlocked } = require("./blocksController");
 
 const createHttpError = (statusCode, message) => {
   const error = new Error(message);
@@ -9,6 +10,9 @@ const createHttpError = (statusCode, message) => {
 
 exports.createChat = async (userId, anotherUserId) => {
   try {
+    if (await isEitherUserBlocked(userId, anotherUserId)) {
+      throw createHttpError(403, "No puedes chatear con esta persona.");
+    }
     const existingChat = await Chat.findOne({
       where: {
         [Op.or]: [
@@ -91,7 +95,13 @@ exports.getChatsByUserId = async (userId) => {
     order: [["updatedAt", "DESC"]],
   });
 
-  return chats.map((chat) => {
+  const visibleChats = [];
+  for (const chat of chats) {
+    const otherUserId = Number(chat.user1Id) === Number(userId) ? chat.user2Id : chat.user1Id;
+    if (!(await isEitherUserBlocked(userId, otherUserId))) visibleChats.push(chat);
+  }
+
+  return visibleChats.map((chat) => {
     const chatData = chat.toJSON();
 
     const otherUser =

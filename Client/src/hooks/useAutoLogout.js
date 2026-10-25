@@ -1,13 +1,12 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
 import Swal from 'sweetalert2';
 
 const useAutoLogout = (timeout = 60 * 60 * 1000) => { // 60 minutos
   const timer = useRef(null);
-  const logInterval = useRef(null);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
      try {
       await Swal.fire({
         icon: "warning",
@@ -21,18 +20,19 @@ const useAutoLogout = (timeout = 60 * 60 * 1000) => { // 60 minutos
 
       await signOut(auth);
       localStorage.removeItem("token");
-      window.location.href = "/login";
+      // HashRouter no interpreta /login como ruta de la SPA al recargar.
+      window.location.assign("/#/login");
     } catch (error) {
       console.error("Error al cerrar sesión automáticamente:", error);
     }
-  };
+  }, []);
 
-  const resetTimer = () => {
+  const resetTimer = useCallback(() => {
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => {
       handleLogout();
     }, timeout);
-  };
+  }, [handleLogout, timeout]);
 
   useEffect(() => {
     const startTracking = () => {
@@ -43,7 +43,6 @@ const useAutoLogout = (timeout = 60 * 60 * 1000) => { // 60 minutos
       return () => {
         events.forEach((event) => window.removeEventListener(event, resetTimer));
         clearTimeout(timer.current);
-        clearInterval(logInterval.current);
       };
     };
 
@@ -53,16 +52,14 @@ const useAutoLogout = (timeout = 60 * 60 * 1000) => { // 60 minutos
         startTracking();
       } else {
         clearTimeout(timer.current);
-        clearInterval(logInterval.current);
       }
     });
 
     return () => {
       unsubscribe();
       clearTimeout(timer.current);
-      clearInterval(logInterval.current);
     };
-  }, [timeout]);
+  }, [resetTimer]);
 
   return null;
 };

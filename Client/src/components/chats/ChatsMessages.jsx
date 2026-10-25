@@ -3,12 +3,7 @@ import api from "../../api/api";
 
 import { useEffect, useState, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  createMessage,
-  getMyChats,
-  getAllUsers,
-  saveOtherUserData,
-} from "../../redux/actions";
+import { createMessage, getMyChats } from "../../redux/actions";
 
 import style from "./ChatsMessages.module.css";
 
@@ -19,12 +14,11 @@ const ChatsMessages = ({ chatId, userData }) => {
   const messagesEndRef = useRef(null);
   const socketRef = useRef(null);
   const senderId = Number(userData?.id);
-  const userId = Number(userData?.id);
 
   const chats = useSelector((state) => state.chats);
-  const allUsers = useSelector((state) => state.allUsers);
-  const otherUsername = useSelector((state) => state.otherUserName);
-  const otherUserImage = useSelector((state) => state.otherUserImage);
+  const activeChat = chats.find((chat) => Number(chat.id) === Number(chatId));
+  const otherUsername = activeChat?.otherUser?.username || "";
+  const otherUserImage = activeChat?.otherUser?.image || "";
 
   const [newMessage, setNewMessage] = useState("");
   const [messageHistory, setMessageHistory] = useState([]);
@@ -117,37 +111,17 @@ useEffect(() => {
     };
   }, [chatId]);
 
-  //Rellenar lista de usuarios
+  // El endpoint de chats ya incluye únicamente el interlocutor permitido.
+  // No se consulta el listado global de usuarios, que es exclusivo de admins.
   useEffect(() => {
-    dispatch(getAllUsers());
     dispatch(getMyChats());
   }, [dispatch]);
 
   useEffect(() => {
-    if (chats.length > 0) {
+    if (activeChat) {
       window.scrollTo(0, document.body.scrollHeight);
-      // Realiza la búsqueda del username del otro usuario en allUsers
-      const chat = chats.find((chat) => Number(chat.id) === Number(chatId));
-      if (!chat) return;
-      let otherUserId;
-      if (Number(senderId) === Number(chat.user1Id)) {
-        otherUserId = chat.user2Id;
-      } else if (Number(senderId) !== Number(chat.user1Id)) {
-        otherUserId = chat.user1Id;
-      }
-
-      if (otherUserId) {
-        const otherUser = allUsers.find(
-          (user) => Number(user.id) === Number(otherUserId),
-        );
-        if (otherUser) {
-          const otherUserName = otherUser.username;
-          const otherUserImage = otherUser.image;
-          dispatch(saveOtherUserData(otherUserName, otherUserImage));
-        }
-      }
     }
-  }, [chats, chatId, allUsers]);
+  }, [activeChat]);
 
   return (
     <div className={style.chat}>

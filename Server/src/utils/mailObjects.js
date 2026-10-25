@@ -7,16 +7,19 @@ const postTemplate = fs.readFileSync(__dirname + '/newPost.html', 'utf8');
 const matchTemplate = fs.readFileSync(__dirname + '/matchTemplate.html', 'utf8');
 
 const registerMail = (user) => {
+  const frontendUrl = process.env.FRONTEND_URL?.replace(/\/+$/, "");
+  if (!frontendUrl) throw new Error("FRONTEND_URL no está configurada");
+
   return {
     to: user.email,
     subject: "Registro completado",
-    html: registerTemplate,
+    html: registerTemplate.replace("{{app_link}}", `${frontendUrl}/#/`),
   };
 };
 
 const postCreated = (email, PostData) => {
   const { title, description, category, ubication, image } = PostData;
-  const urlPersonalizada = `https://circula-pvpn.onrender.com/#/login`;
+  const urlPersonalizada = `${process.env.FRONTEND_URL?.replace(/\/+$/, "") || "http://localhost:5173"}/#/login`;
   // const urlPersonalizada = `http://localhost:5173/#/login`;
   const notificationEmail = postTemplate
   .replace('{{title}}', title)
@@ -38,7 +41,7 @@ const matchMail = (firstUser, secondUser, firstPost, secondPost) => {
   const firstMail = firstUser.email;
   const secondMail = secondUser.email;
   
-  const urlPersonalizada = `https://circula-pvpn.onrender.com/#/exchanges`;
+  const urlPersonalizada = `${process.env.FRONTEND_URL?.replace(/\/+$/, "") || "http://localhost:5173"}/#/exchanges`;
   const currentDateTime = new Date().toLocaleString();
 
   const notificationEmail = matchTemplate
@@ -74,4 +77,18 @@ const passwordForgot = (email, resetToken) => {
   }
 }
 
-module.exports = { registerMail, postCreated, matchMail, passwordForgot };
+const accountDeletionMail = (email, deletionToken) => {
+  const frontendUrl = process.env.FRONTEND_URL?.replace(/\/+$/, "");
+  if (!frontendUrl) throw new Error("FRONTEND_URL no está configurada");
+  const deletionUrl = `${frontendUrl}/#/eliminar-cuenta?token=${encodeURIComponent(deletionToken)}`;
+  return {
+    to: email,
+    subject: "Confirmá la eliminación de tu cuenta de Circula",
+    html: `<p>Recibimos una solicitud para eliminar tu cuenta de Circula.</p>
+      <p>Para continuar, abrí este enlace dentro de los próximos 30 minutos:</p>
+      <p><a href="${deletionUrl}">Confirmar eliminación de mi cuenta</a></p>
+      <p>Si no hiciste esta solicitud, podés ignorar este correo.</p>`,
+  };
+};
+
+module.exports = { registerMail, postCreated, matchMail, passwordForgot, accountDeletionMail };

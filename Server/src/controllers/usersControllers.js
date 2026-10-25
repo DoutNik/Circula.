@@ -1,26 +1,30 @@
 const {
   User,
   PasswordResetToken,
+  AccountDeletionToken,
   Post,
   Like,
   Matches,
   Chat,
   Message,
   Review,
+  Report,
+  UserBlock,
   conn: sequelize,
 } = require("../DB_config");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const { transporter } = require("../config/mailer");
-const { registerMail, passwordForgot } = require("../utils/mailObjects");
+const { registerMail, passwordForgot, accountDeletionMail } = require("../utils/mailObjects");
 const jwtGenerator = require("../utils/jwtGenerator");
 const admin = require("../config/firebaseAdmin");
 const { randomUUID, randomBytes, createHash } = require("crypto");
 const { Op } = require("sequelize");
 
-const adminList = process.env.ADMIN_USERS.split(",").map((email) =>
-  email.trim(),
-);
+const adminList = (process.env.ADMIN_USERS || "")
+  .split(",")
+  .map((email) => email.trim().toLowerCase())
+  .filter(Boolean);
 
 // Nunca devolver el hash de la contraseña al cliente
 const sanitizeUser = (userInstance) => {
@@ -30,6 +34,20 @@ const sanitizeUser = (userInstance) => {
       ? userInstance.toJSON()
       : { ...userInstance };
   delete plain.password;
+  delete plain.fcmToken;
+  return plain;
+};
+
+// Perfil expuesto a otros usuarios: nunca incluye correo, identificadores de
+// Firebase, tokens ni el rol/plan interno.
+const sanitizePublicUser = (userInstance) => {
+  const plain = sanitizeUser(userInstance);
+  if (!plain) return plain;
+  delete plain.email;
+  delete plain.firebaseUid;
+  delete plain.rol;
+  delete plain.plan;
+  delete plain.origin;
   return plain;
 };
 
@@ -156,7 +174,7 @@ exports.createUser = async (user) => {
     const bcryptPassword = await bcrypt.hash(user.password, salt);
     firebaseUid = randomUUID();
 
-    const rol = adminList.includes(user.email) ? "admin" : "user";
+    const rol = adminList.includes(user.email.trim().toLowerCase()) ? "admin" : "user";
 
     // Firebase se crea con un identificador único, no con el id SQL.
     await admin.auth().createUser({
@@ -285,7 +303,7 @@ exports.loginUser = async (user) => {
   if (!usuario) throw new Error("No existe ningún usuario con ese nombre");
 
   // determinar rol
-  const rolCalculado = adminList.includes(usuario.email) ? "admin" : "user";
+  const rolCalculado = adminList.includes(usuario.email.toLowerCase()) ? "admin" : "user";
   // actualizar rol si cambió
   if (usuario.rol !== rolCalculado) {
     await usuario.update({ rol: rolCalculado });
@@ -319,23 +337,9 @@ exports.getUserById = async (id) => {
   try {
     const user = await User.findByPk(id);
 
-    return sanitizeUser(user);
+    return sanitizePublicUser(user);
   } catch (error) {
     throw error;
-  }
-};
-
-exports.userLogueado = async ({ email }) => {
-  try {
-    const user = await User.findOne({
-      where: {
-        email: email,
-      },
-    });
-
-    return user !== null;
-  } catch (error) {
-    throw new Error("Error al iniciar sesión");
   }
 };
 
@@ -460,6 +464,28 @@ exports.deleteUser = async (id) => {
         }),
         PasswordResetToken.destroy({
           where: { userId: id },
+          force: true,
+          transaction,
+        }),
+        AccountDeletionToken.destroy({
+          where: { userId: id },
+          force: true,
+          transaction,
+        }),
+        Report.destroy({
+          where: {
+            [Op.or]: [
+              { reporterUserId: id },
+              { targetUserId: id },
+            ],
+          },
+          force: true,
+          transaction,
+        }),
+        UserBlock.destroy({
+          where: {
+            [Op.or]: [{ blockerUserId: id }, { blockedUserId: id }],
+          },
           force: true,
           transaction,
         }),
@@ -617,8 +643,54 @@ exports.getAnotherUser = async (id) => {
   try {
     const userId = await User.findByPk(id);
 
-    return sanitizeUser(userId);
+    return sanitizePublicUser(userId);
   } catch (error) {
     throw new Error("Error al iniciar sesión");
   }
+};
+
+exports.savePushToken = async (userId, token) => {
+  if (typeof token !== "string" || token.length < 20 || token.length > 512) {
+    throw new Error("Token de notificación inválido.");
+  }
+  const user = await User.findByPk(userId);
+  if (!user) throw new Error("Usuario no encontrado.");
+  await user.update({ fcmToken: token });
+};
+
+exports.requestAccountDeletion = async (email) => {
+  const normalizedEmail = email?.trim().toLowerCase();
+  const genericMessage = "Si existe una cuenta con ese correo, enviaremos un enlace para confirmar su eliminación.";
+  if (!normalizedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+    return genericMessage;
+  }
+
+  try {
+    const user = await User.findOne({ where: { email: normalizedEmail } });
+    if (!user) return genericMessage;
+    const deletionToken = randomBytes(32).toString("base64url");
+    await AccountDeletionToken.upsert({
+      userId: user.id,
+      tokenHash: hashResetToken(deletionToken),
+      expiresAt: new Date(Date.now() + RESET_TOKEN_TTL_MS),
+      usedAt: null,
+    });
+    await transporter.sendMail(accountDeletionMail(user.email, deletionToken));
+  } catch (error) {
+    console.error("ERROR requestAccountDeletion:", error);
+  }
+  return genericMessage;
+};
+
+exports.deleteUserByToken = async (deletionToken) => {
+  if (typeof deletionToken !== "string" || deletionToken.length < 40) {
+    throw new Error("El enlace de eliminación es inválido o venció.");
+  }
+  const tokenHash = hashResetToken(deletionToken);
+  const deletion = await AccountDeletionToken.findOne({
+    where: { tokenHash, usedAt: null, expiresAt: { [Op.gt]: new Date() } },
+  });
+  if (!deletion) throw new Error("El enlace de eliminación es inválido o venció.");
+  await deletion.update({ usedAt: new Date() });
+  await exports.deleteUser(deletion.userId);
 };

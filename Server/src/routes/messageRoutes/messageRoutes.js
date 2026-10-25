@@ -4,7 +4,9 @@ const router = express.Router();
 const messageController = require("../../controllers/messageControllers.js");
 const authorization = require("../../middleware/authorization");
 const isAdmin = require("../../middleware/isAdmin");
-const { Chat } = require("../../DB_config");
+const { Chat, User } = require("../../DB_config");
+const { isEitherUserBlocked } = require("../../controllers/blocksController");
+const { assertAllowedText } = require("../../utils/contentModeration");
 
 // Solo los participantes del chat o un administrador
 // pueden leer/escribir mensajes.
@@ -35,7 +37,8 @@ const isChatParticipantOrAdmin = async (req, res, next) => {
     }
 
     // Admin: no necesita pertenecer al chat.
-    if (req.user?.rol === "admin") {
+    const requester = await User.findByPk(requesterId, { attributes: ["rol"] });
+    if (requester?.rol === "admin") {
       req.chat = chat;
       return next();
     }
@@ -48,6 +51,11 @@ const isChatParticipantOrAdmin = async (req, res, next) => {
       return res.status(403).json({
         error: "No autorizado para acceder a este chat",
       });
+    }
+
+    const otherUserId = requesterId === Number(chat.user1Id) ? chat.user2Id : chat.user1Id;
+    if (await isEitherUserBlocked(requesterId, otherUserId)) {
+      return res.status(403).json({ error: "Este chat no está disponible por un bloqueo." });
     }
 
     // Evita volver a consultar el chat en el controller.
@@ -133,6 +141,8 @@ router.post("/:chatId", authorization, isChatParticipantOrAdmin, async (req, res
       });
     }
 
+    assertAllowedText(cleanContent);
+
     const newMessage = await messageController.createMessage(
       chatId,
       userId,
@@ -154,8 +164,8 @@ router.post("/:chatId", authorization, isChatParticipantOrAdmin, async (req, res
   } catch (error) {
     console.error("Error al crear mensaje:", error);
 
-    return res.status(500).json({
-      error: "Error interno del servidor",
+    return res.status(error.statusCode || 500).json({
+      error: error.statusCode ? error.message : "Error interno del servidor",
     });
   }
 });

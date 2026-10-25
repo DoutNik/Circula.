@@ -1,5 +1,4 @@
 import Logo from "../../assets/locan.png";
-import React from "react";
 import { useState, useEffect } from "react";
 import style from "./Register.module.css";
 import api from "../../api/api.js";
@@ -121,15 +120,7 @@ const Register = ({ setAuth }) => {
         ...errors,
         repeatPassword: validatePasswordRepeat(value, input.password),
       });
-    } else if (name === "image") {
-      setErrors({ ...errors, image: validateImagen(value) });
     }
-  };
-
-  const [showPassword, setShowPassword] = useState(false);
-
-  const handleShowPassword = () => {
-    setShowPassword(!showPassword);
   };
 
   const handleFile = async (event) => {
@@ -346,19 +337,13 @@ const Register = ({ setAuth }) => {
 
           <div>
             <input
-              type={showPassword ? "text" : "password"}
+              type="password"
               name="password"
               placeholder="Contraseña"
               onChange={handleInputChange}
               value={input.password}
               disabled={input.disabled}
             />
-            {/* <input
-              type="checkbox"
-              id="showPassword"
-              onChange={handleShowPassword}
-              checked={showPassword}
-            /> */}
             {errors.password && (
               <span className={style.error}>{errors.password}</span>
             )}
@@ -376,12 +361,6 @@ const Register = ({ setAuth }) => {
               <span className={style.error}>{errors.repeatPassword}</span>
             )}
           </div>
-          {/* <input
-              type="checkbox"
-              id="showPassword"
-              onChange={handleShowPassword}
-              checked={showPassword}
-            /> */}
           <div className={style.fileInput}>
             <input
               type="file"

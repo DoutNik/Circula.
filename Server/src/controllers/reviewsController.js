@@ -1,4 +1,6 @@
-const { Review, User } = require("../DB_config");
+const { Op } = require("sequelize");
+const { Review, User, Matches } = require("../DB_config");
+const { assertAllowedText } = require("../utils/contentModeration");
 
 const createReview = async ({
   userId,
@@ -23,6 +25,35 @@ const createReview = async ({
 
     if (Number(userId) === Number(reviewedUserId)) {
       throw new Error("No puedes calificarte a ti mismo.");
+    }
+
+    if (
+      typeof title !== "string" ||
+      typeof description !== "string" ||
+      !Number.isInteger(Number(rating)) ||
+      Number(rating) < 1 ||
+      Number(rating) > 5
+    ) {
+      throw new Error("La reseña debe incluir título, descripción y una calificación válida.");
+    }
+
+    assertAllowedText(title, description);
+
+    // La reputación solo se forma tras un canje real entre ambas personas.
+    // Los pares se contrastan en ambos sentidos porque Matches guarda el
+    // orden en que se creó la solicitud.
+    const completedExchange = await Matches.findOne({
+      where: {
+        [Op.or]: [
+          { UserId1: userId, UserId2: reviewedUserId },
+          { UserId1: reviewedUserId, UserId2: userId },
+        ],
+      },
+      transaction,
+    });
+
+    if (!completedExchange) {
+      throw new Error("Solo puedes calificar a una persona con la que concretaste un canje.");
     }
 
     const existingReview = await Review.findOne({

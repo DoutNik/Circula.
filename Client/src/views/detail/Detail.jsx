@@ -7,7 +7,7 @@ import {
   getPostById,
   likePost,
   clearDetail,
-  getAllLikes,
+  getMyLikes,
   getAllPosts,
 } from "../../redux/actions";
 import { motion } from "framer-motion";
@@ -16,6 +16,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Swal from "sweetalert2";
+import api from "../../api/api";
 import style from "./Detail.module.css";
 
 const Detail = ({ userData }) => {
@@ -29,7 +30,7 @@ const Detail = ({ userData }) => {
   const myPostId = useSelector((state) => state.selectedPostToInteract);
   const allPosts2 = useSelector((state) => state.allPostsCopy);
 
-  const allLikes = useSelector((state) => state.allLikes);
+  const allLikes = useSelector((state) => state.myLikes || []);
   const matches = useSelector((state) => state.matches) || [];
   const [userPosts, setUserPosts] = useState([]);
   const [showPostSelector, setShowPostSelector] = useState(false);
@@ -83,7 +84,7 @@ const Detail = ({ userData }) => {
   }, [dispatch, id]);
 
   useEffect(() => {
-    dispatch(getAllLikes());
+    dispatch(getMyLikes());
     dispatch(getAllPosts());
   }, [dispatch]);
 
@@ -94,7 +95,7 @@ const Detail = ({ userData }) => {
           likePost(likedPostId, myPostId),
         );
 
-        await dispatch(getAllLikes());
+        await dispatch(getMyLikes());
 
         Swal.fire({
           title: "Solicitud de canje enviada",
@@ -162,6 +163,18 @@ const Detail = ({ userData }) => {
     }
   };
 
+  const handleReport = async () => {
+    const reason = window.prompt("Contanos brevemente por qué querés denunciar esta publicación:");
+    if (!reason?.trim()) return;
+
+    try {
+      await api.post("/reports", { targetPostId: likedPostId, reason: reason.trim() });
+      await Swal.fire("Denuncia enviada", "Moderación revisará el contenido.", "success");
+    } catch (error) {
+      await Swal.fire("No se pudo enviar", error.response?.data?.error || "Intentá nuevamente.", "error");
+    }
+  };
+
   const isPostAlreadyRequested = (myPostId, likedPostId) => {
     return allLikes.some(
       (like) =>
@@ -219,8 +232,7 @@ const Detail = ({ userData }) => {
 
                     {requested ? (
                       <div className={style.requestedLabel}>
-                        "Ya enviaste solicitud con este producto para este
-                        artículo"{" "}
+                        Ya enviaste una solicitud con este producto para este artículo.
                       </div>
                     ) : (
                       <div className={style.rowSelect}>
@@ -251,7 +263,7 @@ const Detail = ({ userData }) => {
                     ),
                   );
 
-                  dispatch(getAllLikes()); // ← actualizar estado
+                  dispatch(getMyLikes());
 
                   setSelectedPostId(null);
                   setShowPostSelector(false);
@@ -322,6 +334,7 @@ const Detail = ({ userData }) => {
           <Link to="/">
             <button className={style.back}>Principal</button>
           </Link>
+          <button type="button" className={style.back} onClick={handleReport}>Denunciar</button>
 
           <div className={style.tooltipWrapper}>
             <button

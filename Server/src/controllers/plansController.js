@@ -1,5 +1,5 @@
-const crypto = require("crypto");
 const { User } = require("../DB_config");
+const { verifyMercadoPagoSignature } = require("../utils/mercadoPagoWebhook");
 const config = require("../config/dotenv");
 require("dotenv").config();
 const { ACCESS_TOKEN, MP_WEBHOOK_SECRET, FRONTEND_URL } = process.env;
@@ -8,11 +8,16 @@ const { MercadoPagoConfig, Preference, Payment } = require("mercadopago");
 const mpClient = new MercadoPagoConfig({ accessToken: ACCESS_TOKEN });
 const PREMIUM_PRICE = 2000;
 const PREMIUM_CURRENCY = "ARS";
-const WEBHOOK_TOLERANCE_SECONDS = 5 * 60;
 
 const withoutTrailingSlash = (url) => url?.replace(/\/+$/, "");
 
 exports.createOrder = async (userId) => {
+  if (!ACCESS_TOKEN || (config.isProd && !ACCESS_TOKEN.startsWith("APP_USR-"))) {
+    throw new Error("Los pagos Premium todavía no están configurados para producción.");
+  }
+  if (config.isProd && !MP_WEBHOOK_SECRET) {
+    throw new Error("Falta configurar la validación de webhooks de Mercado Pago.");
+  }
   const user = await User.findByPk(userId);
   if (!user) {
     throw new Error("Usuario no encontrado");
@@ -75,76 +80,41 @@ exports.verifyWebhookSignature = (req) => {
     return !config.isProd;
   }
 
-  const xSignature = req.headers["x-signature"];
-  const xRequestId = req.headers["x-request-id"];
-  const dataId = req.query["data.id"];
-
-  if (!xSignature || !xRequestId || !dataId) return false;
-
-  const parts = xSignature.split(",");
-  let ts;
-  let hash;
-  parts.forEach((part) => {
-    const [key, value] = part.split("=");
-    if (key && key.trim() === "ts") ts = value?.trim();
-    if (key && key.trim() === "v1") hash = value?.trim();
+  return verifyMercadoPagoSignature({
+    headers: req.headers,
+    query: req.query,
+    secret: MP_WEBHOOK_SECRET,
   });
-
-  if (!ts || !hash) return false;
-
-  const timestamp = Number(ts);
-  const nowInSeconds = Math.floor(Date.now() / 1000);
-  if (
-    !Number.isFinite(timestamp) ||
-    Math.abs(nowInSeconds - timestamp) > WEBHOOK_TOLERANCE_SECONDS
-  ) {
-    return false;
-  }
-
-  const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
-  const expectedHash = crypto
-    .createHmac("sha256", MP_WEBHOOK_SECRET)
-    .update(manifest)
-    .digest("hex");
-
-  return (
-    expectedHash.length === hash.length &&
-    crypto.timingSafeEqual(Buffer.from(expectedHash), Buffer.from(hash))
-  );
 };
 
 exports.webhook = async (data) => {
-  try {
-    if (data.type !== "payment") return;
+  if (data.type !== "payment") return;
 
-    const paymentId = data["data.id"];
+  const paymentId = data["data.id"];
+  if (!paymentId) throw new Error("Webhook de pago sin identificador.");
 
-    const payment = await new Payment(mpClient).get({ id: paymentId });
+  const payment = await new Payment(mpClient).get({ id: paymentId });
 
-    if (payment.status !== "approved") return;
+  if (payment.status !== "approved") return;
 
-    if (
-      Number(payment.transaction_amount) !== PREMIUM_PRICE ||
-      payment.currency_id !== PREMIUM_CURRENCY
-    ) {
-      throw new Error("El pago no coincide con el precio del plan Premium");
-    }
-
-    const userId = Number(payment.external_reference);
-    if (!Number.isInteger(userId) || userId <= 0) {
-      throw new Error("El pago no tiene una referencia de usuario válida");
-    }
-
-    const user = await User.findByPk(userId);
-    if (!user) throw new Error("User not found");
-
-    if (user.plan === "premium") return; // evitar duplicados
-
-    await user.update({ plan: "premium" });
-
-    return true;
-  } catch (error) {
-    console.error("Webhook error:", error);
-    return { error: error.message };
+  if (
+    Number(payment.transaction_amount) !== PREMIUM_PRICE ||
+    payment.currency_id !== PREMIUM_CURRENCY
+  ) {
+    throw new Error("El pago no coincide con el precio del plan Premium");
   }
+
+  const userId = Number(payment.external_reference);
+  if (!Number.isInteger(userId) || userId <= 0) {
+    throw new Error("El pago no tiene una referencia de usuario válida");
+  }
+
+  const user = await User.findByPk(userId);
+  if (!user) throw new Error("User not found");
+
+  if (user.plan === "premium") return; // evitar duplicados
+
+  await user.update({ plan: "premium" });
+
+  return true;
 };

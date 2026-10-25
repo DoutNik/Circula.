@@ -30,6 +30,7 @@ import {
 import style from "./AdminDash.module.css";
 import Swal from "sweetalert2";
 import notpremium from "../../assets/not-premium.png";
+import api from "../../api/api";
 
 const AdminDash = () => {
   const dispatch = useDispatch();
@@ -53,6 +54,8 @@ const AdminDash = () => {
   const allMatches = useSelector(
     (state) => state.matches
   );
+
+  const [reports, setReports] = useState([]);
 
   const [
     selectedUserID,
@@ -87,7 +90,20 @@ const AdminDash = () => {
     dispatch(getAllExistingUsers());
     dispatch(getAllExistingPosts());
     dispatch(getAllMatches());
+    api.get("/reports")
+      .then((response) => setReports(response.data))
+      .catch((error) => console.error("No se pudieron cargar las denuncias:", error));
   }, [dispatch]);
+
+  const updateReportStatus = async (reportId, status) => {
+    try {
+      const response = await api.put(`/reports/${reportId}`, { status });
+      setReports((current) => current.map((report) => report.id === reportId ? response.data : report));
+      await showToast({ icon: "success", title: "Denuncia actualizada" });
+    } catch (error) {
+      await Swal.fire("Error", error.response?.data?.error || "No se pudo actualizar la denuncia.", "error");
+    }
+  };
 
   /* =====================================================
      CONTADORES
@@ -703,6 +719,36 @@ const AdminDash = () => {
                     loading="lazy"
                   />
                 </button>
+              </div>
+            ))}
+          </div>
+        </article>
+      </section>
+
+      <section className={style.bottomContainer}>
+        <article className={style.column}>
+          <h3 className={style.columnTitle}>Denuncias de moderación</h3>
+          <div className={style.list}>
+            {reports.length === 0 ? (
+              <p className={style.element}>No hay denuncias pendientes.</p>
+            ) : reports.map((report) => (
+              <div key={report.id} className={style.element}>
+                <div>
+                  <strong>{report.status}</strong>
+                  <p>{report.reason}</p>
+                  <small>
+                    Reportó: {report.reporter?.username || report.reporterUserId} · {report.reportedPost ? `Publicación: ${report.reportedPost.title}` : `Usuario: ${report.reportedUser?.username || report.targetUserId}`}
+                  </small>
+                </div>
+                {report.status === "open" && (
+                  <button type="button" onClick={() => updateReportStatus(report.id, "reviewing")}>Revisar</button>
+                )}
+                {!["resolved", "dismissed"].includes(report.status) && (
+                  <>
+                    <button type="button" onClick={() => updateReportStatus(report.id, "resolved")}>Resolver</button>
+                    <button type="button" onClick={() => updateReportStatus(report.id, "dismissed")}>Descartar</button>
+                  </>
+                )}
               </div>
             ))}
           </div>

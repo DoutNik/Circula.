@@ -5,6 +5,7 @@ const likeController = require("../../controllers/likeControllers");
 const authorization = require("../../middleware/authorization");
 const isAdmin = require("../../middleware/isAdmin");
 const { Like, User } = require("../../DB_config");
+const { isEitherUserBlocked } = require("../../controllers/blocksController");
 
 // Solo participantes del like (o un admin) pueden borrarlo.
 const isLikePartyOrAdmin = async (req, res, next) => {
@@ -49,6 +50,9 @@ const isLikeRecipientOrAdmin = async (req, res, next) => {
 
     const requesterId = Number(req.authUserId);
     if (requesterId === Number(like.anotherUserId)) {
+      if (await isEitherUserBlocked(like.myUserId, like.anotherUserId)) {
+        return res.status(403).json({ error: "No puedes responder un canje con un usuario bloqueado." });
+      }
       return next();
     }
 

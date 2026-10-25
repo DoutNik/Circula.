@@ -53,7 +53,19 @@ let capsEntries = entries.map((entry) => [
 ]);
 sequelize.models = Object.fromEntries(capsEntries);
 
-const { Post, User, Like, Matches, Message, Chat, Review, PasswordResetToken } =
+const {
+  Post,
+  User,
+  Like,
+  Matches,
+  Message,
+  Chat,
+  Review,
+  PasswordResetToken,
+  AccountDeletionToken,
+  Report,
+  UserBlock,
+} =
   sequelize.models;
 
 // User - Post
@@ -142,6 +154,18 @@ User.hasMany(PasswordResetToken, {
 PasswordResetToken.belongsTo(User, {
   foreignKey: "userId",
 });
+User.hasMany(AccountDeletionToken, { foreignKey: "userId", as: "accountDeletionTokens" });
+AccountDeletionToken.belongsTo(User, { foreignKey: "userId" });
+
+// Moderación y bloqueos. Estas relaciones permiten traer contexto mínimo para
+// que el panel de administración pueda revisar denuncias sin exponer datos al
+// resto de usuarios.
+User.hasMany(Report, { foreignKey: "reporterUserId", as: "reportsMade" });
+Report.belongsTo(User, { foreignKey: "reporterUserId", as: "reporter" });
+Report.belongsTo(User, { foreignKey: "targetUserId", as: "reportedUser" });
+Report.belongsTo(Post, { foreignKey: "targetPostId", as: "reportedPost" });
+User.hasMany(UserBlock, { foreignKey: "blockerUserId", as: "blocksMade" });
+UserBlock.belongsTo(User, { foreignKey: "blockedUserId", as: "blockedUser" });
 
 // Matches - Post
 Matches.belongsTo(Post, {

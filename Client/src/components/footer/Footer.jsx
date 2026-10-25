@@ -34,6 +34,8 @@ const Footer = () => {
         <section className={style.left}>
           <h3>Acerca de</h3>
           <Link to="/terminos-y-condiciones">Términos y condiciones</Link>
+          <Link to="/privacidad">Política de privacidad</Link>
+          <Link to="/eliminar-cuenta">Eliminar cuenta</Link>
           <Link to="/nosotros">Nosotros</Link>
         </section>
 
