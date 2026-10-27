@@ -8,3 +8,10 @@
 !/Server/.env.example
 /Server/ngrok.exe
 /Server/firebaseKey.json
+
+# Neon credentials and root tooling
+/.env
+/.env.*
+!/.env.example
+/node_modules
+.neon

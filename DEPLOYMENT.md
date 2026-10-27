@@ -1,98 +1,219 @@
-# Despliegue en Render
+# Despliegue: Cloudflare Pages + Render + Neon
 
-El proyecto usa dos servicios: el backend Node/Express y el frontend estático
-Vite. Configurar ambos con Node **22.12.0 o superior** y usar una única URL
-canónica por servicio antes de publicar.
+Circula se publica en tres servicios independientes que se comunican por HTTPS:
 
-## Backend
+```text
+Usuarios → https://circula.com.ar       → Cloudflare Pages (frontend)
+          https://api.circula.com.ar    → Render (API, chat y webhooks)
+                                           ↓
+                                         Neon (PostgreSQL)
+```
 
-Crear o actualizar un **Web Service** en Render con:
+Las URLs son deliberadamente distintas. El backend permite únicamente el
+origen definido en `FRONTEND_URL`, por lo que hay que completar las variables
+de los pasos siguientes antes de la salida pública.
 
-- Root directory: `Server`
-- Build command: `npm ci`
-- Start command: `npm start`
-- Health check path: `/health`
+## 1. Neon: base de datos
 
-Copiar las variables de `Server/.env` al panel de Environment de Render. El
-archivo real está ignorado por Git y no se sube al repositorio. La plantilla
-sin secretos está en [`Server/.env.example`](Server/.env.example). Además de
-las URLs se requieren `DATABASE_URL`, `JWTSECRET`, `FIREBASE_SERVICE_ACCOUNT`,
-las credenciales de correo y Cloudinary, y `ADMIN_USERS`.
+El repositorio incluye `neon.ts` y se vincula al proyecto
+`flat-moon-17532804`, organización `org-dawn-frost-13234366`, rama
+`production`. Desde la raíz:
 
-Mantener estos valores públicos:
+```sh
+neon login
+neon init -y --no-agent-setup --org-id org-dawn-frost-13234366 --project-id flat-moon-17532804 --branch production --services postgres
+neon deploy
+npm run build
+npm start
+```
+
+`neon deploy` configura PostgreSQL y descarga sus variables en `.env.local`
+(o `.env` si existe); estos archivos están excluidos de Git. No publica el
+frontend ni el proceso Node. La API carga primero las variables del hosting,
+después los archivos de la raíz y finalmente `Server/.env.local` y
+`Server/.env`. Usa `DATABASE_URL` también en desarrollo, con Sequelize y
+`pg` sobre TCP y un pool máximo de cinco conexiones, con TLS y validación de
+certificado. La sincronización de esquema usa `DATABASE_URL_UNPOOLED`; las
+consultas de la API usan `DATABASE_URL`. Nunca agregar estas credenciales a
+variables `VITE_*`.
+
+Usar Node 22.12.0 (la versión declarada en el proyecto) o una versión compatible
+posterior. Node 22.11.0 falla al cargar dependencias de Firebase Admin.
+Para repetir la prueba con la API local en el puerto 3101:
+
+```sh
+node Server/scripts/verify-neon.js http://127.0.0.1:3101
+```
+
+La prueba verifica TLS, disponibilidad y creación/lectura/actualización/borrado
+de una publicación mediante HTTP. Crea un usuario temporal y elimina los
+registros de prueba al finalizar.
+
+Neon ya está configurado. Copiar `DATABASE_URL` y `DATABASE_URL_UNPOOLED`
+desde `.env.local` a las variables privadas de Render. No crear otra base de
+datos ni copiar sus credenciales al frontend o al repositorio.
+
+La API ejecuta la sincronización de las tablas al iniciar. Neon es la fuente
+de datos persistente: Render no debe guardar datos ni archivos en su disco
+local.
+
+## 2. Render: API Node, Socket.IO y Mercado Pago
+
+Crear una aplicación y un **Web Service** desde el repositorio Git:
+
+Si el servicio anterior sigue existiendo, actualizarlo en lugar de crear otro.
+Aplicar los ajustes de la tabla y cargar las variables de abajo. Para un servicio
+nuevo también se puede usar **New → Blueprint** y seleccionar `render.yaml`.
+El Blueprint define únicamente la API Free; no crea bases de datos ni servicios
+pagos. Antes de aplicarlo a un servicio existente, hacer coincidir `name` con
+el nombre real del servicio. Subir los cambios a la rama conectada a Render
+antes de desplegar. Las variables marcadas `sync: false` se completan en el panel.
+
+| Ajuste de Render | Valor |
+| --- | --- |
+| Runtime | Node |
+| Rama | Rama de producción del repositorio |
+| Root Directory | `Server` |
+| Build Command | `npm ci` |
+| Start Command | `npm start` |
+| Instance Type | **Free** |
+| Health check | HTTP `GET /health` |
+| Node | `22.12.0` |
+
+Render proporciona `PORT` automáticamente; no lo agregues manualmente. El
+servidor lo lee de forma nativa. `render.yaml` declara el comando de arranque
+y las variables del servicio sin guardar secretos.
+
+En **Settings → Environment variables**, definir estas variables. Los secretos
+reales deben cargarse en Render, nunca en Git:
 
 ```text
 NODE_ENV=production
-FRONTEND_URL=https://circula-pvpn.onrender.com
-BACKEND_URL=https://circula-lj9f.onrender.com
+DATABASE_URL=<cadena pooled de Neon>
+DATABASE_URL_UNPOOLED=<cadena directa de Neon>
+JWTSECRET=<secreto aleatorio largo>
+
+# Usar primero las URLs temporales de Render/Pages; reemplazarlas por las
+# canónicas de abajo al validar los dominios.
+FRONTEND_URL=https://<tu-proyecto>.pages.dev
+BACKEND_URL=https://<tu-api>.onrender.com
+
+FIREBASE_SERVICE_ACCOUNT=<JSON completo de Firebase>
+MAIL_PROVIDER=resend
+RESEND_API_KEY=<clave de Resend>
+MAIL_FROM=<remitente verificado en Resend>
+CLOUD_NAME=
+API_KEY=
+API_SECRET=
+ACCESS_TOKEN=APP_USR-...
+MP_WEBHOOK_SECRET=
+ADMIN_USERS=<tu-correo-admin>
 ```
 
-Se deben obtener manualmente desde Mercado Pago antes de publicar:
-
-- `ACCESS_TOKEN`: token de producción que comienza por `APP_USR-`.
-- `MP_WEBHOOK_SECRET`: el valor **Webhook signature secret** del panel de
-  Mercado Pago para `https://circula-lj9f.onrender.com/plans/webhook`.
-
-No usar tokens `TEST-` en producción. El webhook rechaza llamadas sin firma
-válida cuando `NODE_ENV=production`. `/health` confirma que el proceso abrió
-el puerto; `/ready` responde 200 solo después de que PostgreSQL esté listo.
-
-## Frontend
-
-Crear o actualizar un **Static Site** en Render con:
-
-- Root directory: `Client`
-- Build command: `corepack enable && pnpm install --frozen-lockfile && pnpm run build`
-- Publish directory: `dist`
-
-`Client/.env.production` contiene estas variables públicas que Vite incorpora
-durante el build. La plantilla local es
-[`Client/.env.example`](Client/.env.example):
+Configurar el health check en `/health`, no en `/ready`: el primero confirma
+que el proceso está vivo y el segundo confirma adicionalmente que Neon ya está
+conectado. Tras desplegar, abrir:
 
 ```text
-VITE_API_URL=https://circula-lj9f.onrender.com
-VITE_SOCKET_URL=https://circula-lj9f.onrender.com
+https://<tu-api>.onrender.com/health
+https://<tu-api>.onrender.com/ready
 ```
 
-Si Render asigna una URL distinta al frontend, actualizar `FRONTEND_URL` del
-backend antes de desplegar: controla CORS, Socket.IO, enlaces de recuperación y
-las URLs de retorno de Mercado Pago.
+Ambas rutas deben devolver `200` antes de publicar el cliente. Render admite
+servicios HTTP y WebSocket, por lo que Socket.IO seguirá funcionando con la
+misma URL de API.
 
-El cliente usa `pnpm` y [`Client/pnpm-lock.yaml`](Client/pnpm-lock.yaml). El
-antiguo `package-lock.json` se retiró para no mantener dos resoluciones de
-dependencias distintas.
+## 3. Cloudflare Pages: frontend Vite
 
-## Dominio
+En Cloudflare: **Workers & Pages → Create application → Pages → Import an
+existing Git repository**. Seleccionar el mismo repositorio y completar:
 
-1. Agregar `circula.com.ar` y `www.circula.com.ar` en **Custom Domains** del
-   Static Site de Render.
-2. Crear en el proveedor del dominio exactamente los registros DNS que Render
-   indique y esperar su verificación. Hasta que el DNS resuelva, el dominio no
-   está listo para usuarios.
-3. Una vez validado, establecer `FRONTEND_URL=https://circula.com.ar` en la
-   API y volver a desplegarla. Volver a compilar el Static Site con la URL real
-   de la API en ambas variables `VITE_*`.
+| Ajuste de Pages | Valor |
+| --- | --- |
+| Framework preset | React (Vite) |
+| Production branch | Rama de producción |
+| Root directory | `Client` |
+| Build command | `pnpm install --frozen-lockfile && pnpm run build` |
+| Build output directory | `dist` |
 
-La API solo acepta el origen indicado por `FRONTEND_URL`; esto es intencional
-para proteger CORS y Socket.IO.
+En **Settings → Environment variables → Production**, definir:
 
-## Comprobación posterior
+```text
+NODE_VERSION=22.12.0
+VITE_API_URL=https://<tu-api>.onrender.com
+VITE_SOCKET_URL=https://<tu-api>.onrender.com
+```
 
-1. Confirmar que `GET /posts` responde desde el backend público.
-2. Probar registro, login local y login de Google.
-3. Solicitar recuperación de contraseña y abrir el enlace recibido.
-4. Ejecutar un pago de prueba y comprobar que el webhook activa Premium.
-5. Probar publicación, canje, chat, bloqueo, denuncia y resolución de denuncia
-   desde el administrador.
-6. Probar borrado de cuenta con sesión y desde `/#/eliminar-cuenta`.
-7. Validar legalmente Términos y Política de Privacidad, completando identidad
-   del titular, domicilio, edad mínima, jurisdicción y contacto oficial antes
-   de aceptar usuarios reales.
+El proyecto ya incluye `packageManager: pnpm@11.25.0`, su lockfile y
+[`Client/.node-version`](Client/.node-version). Las variables `VITE_*` se
+incorporan al JavaScript durante el build: cualquier cambio exige un nuevo
+despliegue de Pages.
 
-## App Store y Google Play
+## 4. Dominios definitivos
 
-La web/PWA queda separada de la publicación nativa. Para las tiendas hacen
-falta un proyecto Android/iOS, cuentas y firmas de sus titulares, pruebas en
-dispositivos, las fichas de privacidad, y cobro de Premium con Google Play
-Billing y StoreKit/In-App Purchase (Mercado Pago queda para la web). El detalle
-y la lista de preparación están en [`MOBILE_RELEASE.md`](MOBILE_RELEASE.md).
+Cuando los dos despliegues temporales estén saludables:
+
+1. En Cloudflare Pages, agregar `circula.com.ar` como dominio personalizado.
+2. En Render, agregar `api.circula.com.ar` como dominio personalizado.
+3. Crear los registros DNS exactamente como los pida cada plataforma. No usar
+   valores de ejemplos ni registros viejos de Render.
+4. Esperar la verificación TLS y DNS.
+5. Reemplazar las variables con los valores definitivos:
+
+En Render:
+
+```text
+FRONTEND_URL=https://circula.com.ar
+BACKEND_URL=https://api.circula.com.ar
+```
+
+En Cloudflare Pages:
+
+```text
+VITE_API_URL=https://api.circula.com.ar
+VITE_SOCKET_URL=https://api.circula.com.ar
+```
+
+Redeployar primero Render y después Cloudflare Pages. El archivo
+[`Client/.env.production`](Client/.env.production) ya usa las URLs canónicas
+como respaldo, pero las variables de Pages son la configuración efectiva de
+producción.
+
+## 5. Servicios externos posteriores
+
+- En Firebase Authentication, autorizar `circula.com.ar` y el dominio temporal
+  `pages.dev` usado durante las pruebas.
+- En Mercado Pago, registrar el webhook definitivo:
+
+  ```text
+  https://api.circula.com.ar/plans/webhook
+  ```
+
+  Cargar el **Webhook signature secret** como `MP_WEBHOOK_SECRET` y el token
+  de producción `APP_USR-...` como `ACCESS_TOKEN` en Render.
+- Comprobar registro, login Google, publicaciones, imágenes, chat, bloqueo,
+  denuncia, recuperación de contraseña, borrado de cuenta y un pago de prueba.
+
+## Límites del plan gratuito
+
+Render Free suspende la API tras 15 minutos sin tráfico HTTP o mensajes
+WebSocket y puede tardar alrededor de un minuto en reactivarla. Las 750 horas
+mensuales se comparten entre los servicios gratuitos del espacio de trabajo.
+
+**Correo:** Render Free bloquea las conexiones SMTP por los puertos 25, 465 y
+587. La app incluye una alternativa HTTPS con Resend: configurar
+`MAIL_PROVIDER=resend`, `RESEND_API_KEY` y `MAIL_FROM` con un remitente de dominio
+verificado. No alcanza con copiar las credenciales SMTP existentes. Sin esta
+configuración no funcionan los correos de recuperación, eliminación de cuenta
+y notificaciones; comprobar un envío real antes de habilitar esos flujos.
+No se creó una cuenta ni se envió correo como parte de la configuración local.
+
+Referencias: [límites oficiales de Render](https://render.com/docs/free) y
+[API de correo de Resend](https://resend.com/docs/api-reference/emails/send-email).
+
+Este conjunto sirve para beta y bajo tráfico. Revisar periódicamente los
+límites de Render y Neon, mantener copias de seguridad de Neon y pasar a planes
+pagos antes de depender de él para pagos o una comunidad activa.
+
+La salida nativa a App Store y Google Play sigue descrita en
+[`MOBILE_RELEASE.md`](MOBILE_RELEASE.md).

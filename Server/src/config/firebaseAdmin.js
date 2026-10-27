@@ -1,13 +1,14 @@
 // config/firebaseAdmin.js
-const admin = require("firebase-admin");
+const { initializeApp, cert } = require("firebase-admin/app");
+const { getAuth } = require("firebase-admin/auth");
 
 const serviceAccount = JSON.parse(
   process.env.FIREBASE_SERVICE_ACCOUNT
 );
 serviceAccount.private_key =
   serviceAccount.private_key.replace(/\\n/g, "\n");
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+const app = initializeApp({
+  credential: cert(serviceAccount),
 });
 
-module.exports = admin;
+module.exports = { auth: () => getAuth(app) };

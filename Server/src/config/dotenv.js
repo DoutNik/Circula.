@@ -1,4 +1,15 @@
-require("dotenv").config();
+const path = require("node:path");
+
+// Hosting variables take precedence; Neon writes credentials at the repo root.
+require("dotenv").config({
+  path: [
+    path.resolve(__dirname, "../../../.env.local"),
+    path.resolve(__dirname, "../../../.env"),
+    path.resolve(__dirname, "../../.env.local"),
+    path.resolve(__dirname, "../../.env"),
+  ],
+  quiet: true,
+});
 
 
 const ENV = process.env.NODE_ENV || "development";

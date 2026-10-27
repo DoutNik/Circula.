@@ -1,0 +1,13 @@
+{
+  "name": "circula",
+  "private": true,
+  "scripts": {
+    "build": "npm --prefix Client run build",
+    "start": "npm --prefix Server start",
+    "test": "npm --prefix Server test"
+  },
+  "dependencies": {
+    "@neon/config": "^1.9.4",
+    "@neon/env": "^1.6.5"
+  }
+}
