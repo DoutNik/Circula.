@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import Slider from "react-slick";
+import Slider from "../Slider";
 import Card from "../card/card";
 import fire from "../../assets/fire.gif";
 

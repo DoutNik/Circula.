@@ -12,7 +12,7 @@ import {
 } from "../../redux/actions";
 import { motion } from "framer-motion";
 
-import Slider from "react-slick";
+import Slider from "../../components/Slider";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Swal from "sweetalert2";

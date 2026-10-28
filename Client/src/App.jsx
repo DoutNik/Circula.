@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate, Routes, Route } from "react-router-dom";
-import { getToken, onMessage, messaging } from "./firebase";
+import { getToken, onMessage, getSupportedMessaging } from "./firebase";
 
 import api from "./api/api";
 
@@ -111,6 +111,7 @@ const App = () => {
 
   useEffect(() => {
     let unsubscribeMessage;
+    let cancelled = false;
 
     const initializeFirebaseMessaging = async () => {
       try {
@@ -120,6 +121,11 @@ const App = () => {
         // VitePWA gestiona /sw.js. El worker de Firebase usa un scope propio
         // para que ambos puedan coexistir sin reemplazarse mutuamente.
         if (Notification.permission !== "granted") return;
+        const messaging = await getSupportedMessaging();
+        if (!messaging || cancelled) return;
+        unsubscribeMessage = onMessage(messaging, (payload) => {
+          console.log("Mensaje en primer plano:", payload);
+        });
         const firebaseRegistration = await navigator.serviceWorker.register(
           "/firebase-messaging-sw.js",
           { scope: "/firebase-messaging-push-scope" },
@@ -142,11 +148,8 @@ const App = () => {
 
     initializeFirebaseMessaging();
 
-    unsubscribeMessage = onMessage(messaging, (payload) => {
-      console.log("Mensaje en primer plano:", payload);
-    });
-
     return () => {
+      cancelled = true;
       if (unsubscribeMessage) {
         unsubscribeMessage();
       }

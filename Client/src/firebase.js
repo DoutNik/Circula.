@@ -1,6 +1,6 @@
 // src/firebase.js
 import { initializeApp } from "firebase/app";
-import { getMessaging, getToken, onMessage } from "firebase/messaging";
+import { getMessaging, getToken, onMessage, isSupported } from "firebase/messaging";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
@@ -16,8 +16,9 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-const messaging = getMessaging(app);
+const getSupportedMessaging = async () =>
+  (await isSupported()) ? getMessaging(app) : null;
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-export { app, messaging, getToken, onMessage, auth, db };
+export { app, getSupportedMessaging, getToken, onMessage, auth, db };
