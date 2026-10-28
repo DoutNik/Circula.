@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import style from "./PaymentFailure.module.css";
+import style from "./paymentFailure.module.css";
 
 const PaymentFailure = () => {
   const { search } = useLocation();

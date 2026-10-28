@@ -1,4 +1,20 @@
-# Despliegue: Cloudflare Pages + Render + Neon
+# Despliegue: Cloudflare + Render + Neon
+
+## Configuración actual (Workers con archivos estáticos)
+
+Se reutiliza el Worker `circula`, con `Client/wrangler.jsonc`, en lugar de
+crear un proyecto Pages. Las secciones de Pages siguientes son una alternativa.
+
+- Rama: `codex/render-neon-deploy`; directorio: `Client`.
+- Compilación: `pnpm install --frozen-lockfile && npm run build`.
+- Publicación: `npx wrangler deploy`.
+- Variable de compilación `SKIP_DEPENDENCY_INSTALL=true` (la instalación se
+  ejecuta explícitamente con el comando anterior).
+- `VITE_API_URL` y `VITE_SOCKET_URL`: `https://circula-api-bmbv.onrender.com`.
+- URL del frontend: `https://circula.carlosklema.workers.dev`.
+- En Render, `FRONTEND_URL` debe coincidir exactamente con esa URL.
+
+Los dominios personalizados de abajo requieren configurar DNS antes de usarlos.
 
 Circula se publica en tres servicios independientes que se comunican por HTTPS:
 

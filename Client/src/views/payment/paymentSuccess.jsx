@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/api";
-import style from "./PaymentSuccess.module.css";
+import style from "./paymentSuccess.module.css";
 
 const MAX_ATTEMPTS = 8;
 const RETRY_INTERVAL = 2000;
