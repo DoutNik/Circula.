@@ -10,6 +10,7 @@ import {
 
 import { auth } from "../../firebase.js";
 import api from "../../api/api.js";
+import { retryLogin, serverUnavailableMessage } from "../../api/retryLogin.js";
 import Swal from "sweetalert2";
 
 import Logo from "../../assets/locan.png";
@@ -37,6 +38,7 @@ const Login = ({ setAuth }) => {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState("");
+  const [waitingForServer, setWaitingForServer] = useState(false);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -67,10 +69,10 @@ const Login = ({ setAuth }) => {
       setIsLoading(true);
       setErrors({});
 
-      const response = await api.post("/users/login", {
+      const response = await retryLogin(() => api.post("/users/login", {
         username: input.username.trim(),
         password: input.password,
-      });
+      }), { onWaiting: () => setWaitingForServer(true) });
 
       const { token, firebaseToken, usuario } = response.data;
 
@@ -103,16 +105,20 @@ const Login = ({ setAuth }) => {
       console.error("Error al iniciar sesión:", error);
 
       setErrors({
-        general: "Usuario o contraseña incorrectos",
+        general: error.response?.status === 503
+          ? serverUnavailableMessage
+          : "No se pudo iniciar sesión. Revisá tus datos e intentá nuevamente.",
       });
     } finally {
       setIsLoading(false);
+      setWaitingForServer(false);
     }
   };
 
   const handleGoogleLogin = async () => {
     try {
       setSocialLoading("google");
+      setErrors({});
 
       const provider = new GoogleAuthProvider();
 
@@ -120,9 +126,9 @@ const Login = ({ setAuth }) => {
       const user = result.user;
       const idToken = await user.getIdToken();
 
-      const response = await api.post("/users/social-login", {
+      const response = await retryLogin(() => api.post("/users/social-login", {
         idToken,
-      });
+      }), { onWaiting: () => setWaitingForServer(true) });
 
       localStorage.setItem("token", response.data.token);
 
@@ -155,10 +161,13 @@ const Login = ({ setAuth }) => {
       Swal.fire({
         icon: "error",
         title: "Error al iniciar sesión",
-        text: "No se pudo autenticar con Google.",
+        text: error.response?.status === 503
+          ? serverUnavailableMessage
+          : "No se pudo autenticar con Google.",
       });
     } finally {
       setSocialLoading("");
+      setWaitingForServer(false);
     }
   };
 
@@ -169,6 +178,10 @@ const Login = ({ setAuth }) => {
       <img className={style.logo} src={Logo} alt="Circula" />
 
       <h1>Iniciar sesión</h1>
+
+      {waitingForServer && (
+        <p role="status">El servidor está despertando. Esperá un momento; estamos reintentando el acceso.</p>
+      )}
 
       <form className={style.form} onSubmit={handleSubmit} noValidate>
         <div className={style.field}>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../../firebase";
 import api from "../../api/api";
+import { retryLogin } from "../../api/retryLogin.js";
 import style from "./LoginButton.module.css";
 
 // Componente reutilizable de acceso con Google. Antes dependía de Clerk, que
@@ -14,7 +15,7 @@ const LoginButton = ({ onAuthenticated }) => {
       setIsRedirecting(true);
       const result = await signInWithPopup(auth, new GoogleAuthProvider());
       const idToken = await result.user.getIdToken();
-      const response = await api.post("/users/social-login", { idToken });
+      const response = await retryLogin(() => api.post("/users/social-login", { idToken }));
 
       localStorage.setItem("token", response.data.token);
       onAuthenticated?.(true, response.data.usuario);
