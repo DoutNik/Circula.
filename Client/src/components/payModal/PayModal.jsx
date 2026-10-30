@@ -1,9 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import style from "./PayModal.module.css";
 import api from "../../api/api";
 const PayModal = ({ isOpen, onClose }) => {
+  const [paymentError, setPaymentError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const handlePremium = async () => {
+    if (isLoading) return;
+    setPaymentError("");
+    setIsLoading(true);
     try {
       const paymentData = {
         title: "Premium",
@@ -12,10 +17,16 @@ const PayModal = ({ isOpen, onClose }) => {
       if (response?.data?.init_point) {
         window.location.href = response.data.init_point;
       } else {
-        console.error("No se encontró init_point en la respuesta");
+        setPaymentError("No se recibió el enlace de pago. Intentá nuevamente.");
       }
     } catch (error) {
       console.error("Error al realizar solicitud de compra:", error);
+      const message = error.response?.data?.error;
+      setPaymentError(typeof message === "string" && message.trim()
+        ? message
+        : "No se pudo iniciar el pago. Intentá nuevamente en unos minutos.");
+    } finally {
+      setIsLoading(false);
     }
   };
   if (!isOpen) return null;
@@ -56,9 +67,10 @@ const PayModal = ({ isOpen, onClose }) => {
           <h2 id="premium-title"> ¡Sé Premium! </h2>{" "}
           <p> 💛 ¡Publicá todos los artículos que quieras! 💛 </p>{" "}
           <p> 👀 Mirá quién quiere canjear con vos 👀 </p>{" "}
-          <button type="button" className={style.pay} onClick={handlePremium}>
+          {paymentError && <p role="alert">{paymentError}</p>}
+          <button type="button" className={style.pay} onClick={handlePremium} disabled={isLoading}>
             {" "}
-            Sé Premium{" "}
+            {isLoading ? "Preparando pago…" : "Sé Premium"}{" "}
           </button>{" "}
           <h6> Un pago de $2000 ARS </h6>{" "}
         </div>{" "}
