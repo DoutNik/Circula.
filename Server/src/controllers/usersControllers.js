@@ -20,6 +20,7 @@ const jwtGenerator = require("../utils/jwtGenerator");
 const admin = require("../config/firebaseAdmin");
 const { randomUUID, randomBytes, createHash } = require("crypto");
 const { Op } = require("sequelize");
+const { buildUniqueSocialUsername } = require("../utils/socialUsername");
 
 const adminList = (process.env.ADMIN_USERS || "")
   .split(",")
@@ -80,26 +81,6 @@ const pickEditableFields = (updatedData = {}) => {
 const socialProviderNames = {
   "google.com": "google",
   "facebook.com": "facebook",
-};
-
-const buildUniqueSocialUsername = async (name, email, firebaseUid) => {
-  const preferredName = name || email.split("@")[0] || "usuario";
-  const normalizedBase = preferredName
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-zA-Z0-9_.-]/g, "")
-    .slice(0, 40) || "usuario";
-  const suffix = firebaseUid.replace(/[^a-zA-Z0-9]/g, "").slice(-8) || "social";
-  const baseUsername = `${normalizedBase}-${suffix}`;
-  let username = baseUsername;
-  let attempt = 1;
-
-  while (await User.findOne({ where: { username }, paranoid: false })) {
-    username = `${baseUsername}-${attempt}`;
-    attempt += 1;
-  }
-
-  return username;
 };
 
 exports.getAllUser = async () => {
@@ -260,7 +241,7 @@ exports.socialRegisterOrLogin = async (idToken) => {
       const username = await buildUniqueSocialUsername(
         decodedToken.name,
         email,
-        firebaseUid,
+        (username) => User.findOne({ where: { username }, paranoid: false }),
       );
 
       usuario = await User.create({
