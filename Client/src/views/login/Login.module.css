@@ -306,7 +306,6 @@
    GOOGLE
 ========================= */
 
-
 .googleButton {
   display: inline-flex;
   align-items: center;
@@ -449,4 +448,55 @@
   .register:hover {
     transform: none;
   }
+}
+.container {
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  box-shadow: 0 16px 50px #18251a0c;
+  background: var(--surface);
+  color: var(--text-primary);
+}
+.container h1 {
+  font-size: 26px;
+  color: var(--text-primary);
+  letter-spacing: -0.7px;
+}
+.field input {
+  min-height: 48px;
+  border-radius: 12px;
+  box-shadow: none;
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: 16px;
+}
+.field label {
+  color: var(--text-primary);
+}
+.loginButton,
+.googleButton {
+  min-height: 48px;
+  border-radius: 12px;
+  box-shadow: none;
+}
+.loginButton {
+  background: #d5eb87;
+  color: #253614;
+}
+.register {
+  background: transparent;
+  color: var(--text-primary);
+  box-shadow: none;
+  text-decoration: underline;
+}
+.recoverLink {
+  color: #52741d;
+}
+.error {
+  padding: 12px;
+  text-align: left;
+  line-height: 1.5;
+}
+.googleButton {
+  background: var(--surface);
+  color: var(--text-primary);
 }

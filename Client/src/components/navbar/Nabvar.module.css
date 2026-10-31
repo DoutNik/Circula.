@@ -1,545 +1,180 @@
-:root {
-  --navbar-bg: #9dbe0a;
-  --navbar-text: #222;
-  --navbar-hover: rgba(255, 255, 255, 0.18);
-  --navbar-active: rgba(255, 255, 255, 0.28);
-  --navbar-border: rgba(0, 0, 0, 0.14);
-  --navbar-shadow: rgba(128, 128, 128, 0.2);
-
-  --navbar-height: 68px;
-}
-
-/* =========================================================
-   NAVBAR BASE
-========================================================= */
-
-.navbar,
-.navbarOff {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-
-  z-index: 998;
-
-  box-sizing: border-box;
-
-  display: grid;
-  align-items: center;
-
-  width: 100%;
-  min-height: var(--navbar-height);
-
-  padding: 6px clamp(12px, 2vw, 28px);
-
-  background-color: var(--navbar-bg);
-
-  box-shadow:
-    0 4px 12px var(--navbar-shadow);
-
-  gap: 8px;
-}
-
-/* =========================================================
-   DESKTOP
-   Logo flexible + botones agrupados a la derecha
-========================================================= */
-
 .navbar {
-  grid-template-columns:
-    minmax(0, 1fr)
-    repeat(6, max-content);
-
-  justify-content: end;
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 998;
+  background: var(--surface, #fff);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 4px 24px #18251a0a;
+  color: var(--text-primary);
 }
-
-.navbarOff {
-  grid-template-columns:
-    minmax(0, 1fr)
-    repeat(5, max-content);
-
-  justify-content: end;
-
-  border-bottom: 1px solid var(--navbar-border);
-}
-
-/* =========================================================
-   LINKS
-========================================================= */
-
-.link,
-.linkLogo {
-  min-width: 0;
-  height: 100%;
-
-  color: inherit;
-  text-decoration: none;
-}
-
-/* =========================================================
-   LOGO
-========================================================= */
-
-.linkLogo {
+.inner {
+  max-width: 1244px;
+  margin: auto;
+  min-height: 68px;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-
-  padding-left: 4px;
+  gap: 8px;
+  padding: 8px 20px;
 }
-
-.logo {
-  display: block;
-
-  width: clamp(110px, 10vw, 170px);
-  max-width: 100%;
-  height: auto;
-
+.brand {
+  margin-right: auto;
+  display: flex;
+  align-items: center;
+}
+.brand img {
+  width: 136px;
+  max-height: 48px;
   object-fit: contain;
 }
-
-/* =========================================================
-   ITEMS DE NAVEGACIÓN
-========================================================= */
-
-.iconos,
-.iconosFalse,
-.logout {
-  box-sizing: border-box;
-
+.item {
   display: flex;
   align-items: center;
   justify-content: center;
-
-  width: auto;
-  min-width: 0;
-  min-height: 42px;
-
-  gap: 5px;
-
-  padding: 5px 8px;
-
-  border: none;
-  border-radius: 8px;
-
-  color: var(--navbar-text);
-
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1;
-
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 14px;
   background: transparent;
-
-  white-space: nowrap;
-
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
   cursor: pointer;
-
-  transition:
-    background-color 0.18s ease,
-    transform 0.18s ease;
-}
-
-/* =========================================================
-   ICONOS
-========================================================= */
-
-.iconos img,
-.iconosFalse img,
-.logout img {
-  width: 23px;
-  height: 23px;
-
-  flex-shrink: 0;
-
-  object-fit: contain;
-}
-
-/* =========================================================
-   AVATAR
-========================================================= */
-
-.avatar {
-  width: 27px !important;
-  height: 27px !important;
-
-  border-radius: 50%;
-
-  object-fit: cover;
-
-  flex-shrink: 0;
-}
-
-/* =========================================================
-   TEXTO
-========================================================= */
-
-.label {
-  min-width: 0;
-
-  overflow: hidden;
-
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
-
-/* =========================================================
-   USUARIO NO AUTENTICADO
-========================================================= */
-
-.iconosFalse {
-  background-color: transparent;
+.item:hover,
+.item[aria-expanded="true"],
+.item[aria-current="page"] {
+  background: #eaf2d4;
+  color: #34471d;
 }
-
-/* =========================================================
-   LOCK
-========================================================= */
-
-.lock {
-  font-size: 13px;
+.item:focus-visible,
+.panel a:focus-visible,
+.panel button:focus-visible {
+  outline: 3px solid #74942b;
+  outline-offset: 3px;
 }
-
-/* =========================================================
-   LOGOUT
-========================================================= */
-
-.logout {
+.dropdown {
+  position: relative;
+  min-width: 0;
+}
+.chevron {
+  font-size: 16px;
+}
+.username {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.avatar,
+.initial {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.initial {
+  display: grid;
+  place-items: center;
+  background: #eaf2d4;
+  color: #34471d;
+}
+.panel {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 260px;
+  padding: 10px;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: 0 16px 45px #15250c26;
+}
+.panel p {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  color: var(--text-secondary);
+  padding: 5px 12px;
   margin: 0;
+}
+.panel a,
+.panel button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-radius: 10px;
+  padding: 12px;
+  color: inherit;
   background: transparent;
+  font: inherit;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
 }
-
-/* =========================================================
-   ACTIVO
-========================================================= */
-
-.active .iconos {
-  background-color: var(--navbar-active);
+.panel a:hover,
+.panel button:hover {
+  background: var(--surface-secondary);
 }
-
-/* =========================================================
-   HOVER
-========================================================= */
-
-@media (hover: hover) and (pointer: fine) {
-  .link:hover .iconos,
-  .link:hover .iconosFalse,
-  .logout:hover {
-    background-color: var(--navbar-hover);
-  }
-
-  .link:hover .iconos,
-  .link:hover .iconosFalse,
-  .logout:hover {
-    transform: translateY(-1px);
-  }
+.panel span {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--text-secondary);
 }
-
-/* =========================================================
-   ACTIVE / CLICK
-========================================================= */
-
-.iconos:active,
-.iconosFalse:active,
-.logout:active {
-  transform: scale(0.97);
+.panel .signout {
+  color: #ac3434;
+  border-top: 1px solid var(--border);
+  margin-top: 6px;
+  border-radius: 0 0 10px 10px;
 }
-
-/* =========================================================
-   NOTEBOOKS
-   769px - 1100px
-========================================================= */
-
-@media (min-width: 769px) and (max-width: 1100px) {
-  .navbar,
-  .navbarOff {
-    gap: 4px;
-    padding-left: 10px;
-    padding-right: 10px;
-  }
-
-  .logo {
-    width: 125px;
-  }
-
-  .iconos,
-  .iconosFalse,
-  .logout {
-    min-height: 40px;
-
-    padding: 4px 6px;
-
-    font-size: 11px;
-
-    gap: 4px;
-  }
-
-  .iconos img,
-  .iconosFalse img,
-  .logout img {
-    width: 20px;
-    height: 20px;
-  }
-
-  .avatar {
-    width: 24px !important;
-    height: 24px !important;
-  }
-
-  .lock {
-    font-size: 11px;
-  }
-}
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
 @media (max-width: 768px) {
-  .navbar,
-  .navbarOff {
-    top: auto;
-    bottom: 0;
-
-    left: 0;
-    right: 0;
-
-    min-height: 60px;
-    height: auto;
-
-    padding:
-      5px
-      max(6px, env(safe-area-inset-left))
-      calc(5px + env(safe-area-inset-bottom))
-      max(6px, env(safe-area-inset-right));
-
-    gap: 3px;
-
-    border-top: 1px solid var(--navbar-border);
-
-    box-shadow:
-      0 -4px 12px var(--navbar-shadow);
-  }
-
-  /*
-   * En móvil sí queremos repartir los botones.
-   */
   .navbar {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    inset: auto 0 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 0;
   }
-
-  .navbarOff {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+  .inner {
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+    min-height: 64px;
+    justify-content: space-around;
+    gap: 0;
   }
-
-  .linkLogo {
+  .brand {
     display: none;
   }
-
-  .iconos,
-  .iconosFalse,
-  .logout {
-    width: 100%;
+  .item {
+    padding: 8px;
+    gap: 5px;
+    font-size: 12px;
     min-height: 48px;
-
-    flex-direction: column;
-
-    gap: 2px;
-
-    padding: 4px 2px;
-
-    border-radius: 8px;
-
-    font-size: clamp(8px, 2.5vw, 11px);
   }
-
-  .iconos img,
-  .iconosFalse img,
-  .logout img {
-    width: clamp(19px, 5vw, 23px);
-    height: clamp(19px, 5vw, 23px);
+  .username {
+    max-width: 78px;
   }
-
-  .avatar {
-    width: 23px !important;
-    height: 23px !important;
+  .chevron {
+    display: none;
   }
-
-  .label {
-    max-width: 100%;
-
-    text-align: center;
+  .panel {
+    top: auto;
+    bottom: calc(100% + 14px);
+    right: 0;
+    width: min(260px, calc(100vw - 24px));
   }
-
-  .lock {
-    font-size: 11px;
+  .dropdown:first-of-type .panel {
+    left: -48px;
+    right: auto;
   }
 }
-
-/* =========================================================
-   MOBILE PEQUEÑO
-========================================================= */
-
-@media (max-width: 480px) {
-  .navbar,
-  .navbarOff {
-    min-height: 58px;
-
-    padding-top: 4px;
-    padding-bottom: 4px;
-
-    gap: 1px;
-  }
-
-  .iconos,
-  .iconosFalse,
-  .logout {
-    min-height: 46px;
-
-    font-size: 8px;
-  }
-
-  .iconos img,
-  .iconosFalse img,
-  .logout img {
-    width: 19px;
-    height: 19px;
-  }
-
-  .avatar {
-    width: 21px !important;
-    height: 21px !important;
-  }
-}
-
-/* =========================================================
-   MOBILE MUY PEQUEÑO
-========================================================= */
-
 @media (max-width: 360px) {
-  .navbar,
-  .navbarOff {
-    padding-left: 3px;
-    padding-right: 3px;
+  .username {
+    max-width: 55px;
   }
-
-  .iconos,
-  .iconosFalse,
-  .logout {
-    min-height: 44px;
-
-    padding-left: 1px;
-    padding-right: 1px;
-
-    font-size: 7.5px;
-  }
-
-  .iconos img,
-  .iconosFalse img,
-  .logout img {
-    width: 18px;
-    height: 18px;
-  }
-
-  .avatar {
-    width: 20px !important;
-    height: 20px !important;
-  }
-}
-
-/* =========================================================
-   MONITORES GRANDES
-========================================================= */
-
-@media (min-width: 1600px) {
-  .navbar,
-  .navbarOff {
-    min-height: 72px;
-
-    padding-left: 24px;
-    padding-right: 24px;
-
-    gap: 6px;
-  }
-
-  .logo {
-    width: 175px;
-  }
-
-  .iconos,
-  .iconosFalse,
-  .logout {
-    min-height: 44px;
-
-    padding: 5px 9px;
-
-    font-size: 13px;
-  }
-
-  .iconos img,
-  .iconosFalse img,
-  .logout img {
-    width: 24px;
-    height: 24px;
-  }
-
-  .avatar {
-    width: 28px !important;
-    height: 28px !important;
-  }
-}
-
-/* =========================================================
-   2K / 4K
-========================================================= */
-
-@media (min-width: 2200px) {
-  .navbar,
-  .navbarOff {
-    min-height: 80px;
-
-    padding-left: 30px;
-    padding-right: 30px;
-
-    gap: 7px;
-  }
-
-  .logo {
-    width: 195px;
-  }
-
-  .iconos,
-  .iconosFalse,
-  .logout {
-    min-height: 48px;
-
-    padding: 6px 11px;
-
-    font-size: 14px;
-
-    border-radius: 9px;
-  }
-
-  .iconos img,
-  .iconosFalse img,
-  .logout img {
-    width: 26px;
-    height: 26px;
-  }
-
-  .avatar {
-    width: 30px !important;
-    height: 30px !important;
-  }
-}
-
-/* =========================================================
-   REDUCIR ANIMACIONES
-========================================================= */
-
-@media (prefers-reduced-motion: reduce) {
-  .iconos,
-  .iconosFalse,
-  .logout {
-    transition: none;
+  .item {
+    padding: 6px;
+    font-size: 11px;
   }
 }

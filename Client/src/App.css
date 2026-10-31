@@ -73,13 +73,13 @@
     /*
      * Reserva espacio para la navbar inferior.
      */
-    padding-bottom: 64px;
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
   }
 }
 
 @media (max-width: 480px) {
   .appContent {
-    padding-bottom: 60px;
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
   }
 }
 

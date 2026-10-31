@@ -67,10 +67,6 @@ useEffect(() => {
 }, [userData?.id]);
 
 
-const logout = async () => {
-  await logoutUser();
-  setAuth(false, null);
-};
 
   const handleDeleteAccount = async () => {
     const result = await Swal.fire({
@@ -185,9 +181,6 @@ const logout = async () => {
           </button>
         )}
 
-        <button type="button" className={style.logout} onClick={logout}>
-          Salir
-        </button>
 
         <button
           type="button"

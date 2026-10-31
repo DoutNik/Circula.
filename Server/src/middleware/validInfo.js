@@ -23,8 +23,11 @@ module.exports = function (req, res, next) {
         );
     }
   } else if (req.path === "/login") {
-    if (![username, password].every(Boolean)) {
-      return res.status(401).json("Missing Credentials");
+    if (typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      return res.status(400).json("Ingresá un correo electrónico válido.");
+    }
+    if (typeof password !== "string" || !password) {
+      return res.status(400).json("Ingresá tu contraseña.");
     }
   }
 

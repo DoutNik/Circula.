@@ -275,13 +275,13 @@ exports.socialRegisterOrLogin = async (idToken) => {
 };
 
 exports.loginUser = async (user) => {
-  const usuario = await User.findOne({ where: { username: user.username } });
-
-  if (usuario && !(await bcrypt.compare(user.password, usuario.password))) {
-    throw new Error("La contraseña es incorrecta");
-  }
-
-  if (!usuario) throw new Error("No existe ningún usuario con ese nombre");
+  const { authenticateEmail } = require("../utils/emailLogin");
+  const usuario = await authenticateEmail(user, {
+    findUser: (email) => User.findOne({
+      where: sequelize.where(sequelize.fn("lower", sequelize.col("email")), email),
+    }),
+    comparePassword: bcrypt.compare,
+  });
 
   // determinar rol
   const rolCalculado = adminList.includes(usuario.email.toLowerCase()) ? "admin" : "user";

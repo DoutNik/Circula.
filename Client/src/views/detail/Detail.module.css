@@ -14,7 +14,6 @@
   box-sizing: border-box;
 }
 
-
 /* =========================================================
    CAROUSEL
 ========================================================= */
@@ -42,7 +41,6 @@
   object-fit: cover;
 }
 
-
 /* Evita que react-slick genere overflow */
 
 .carousel :global(.slick-slider),
@@ -55,7 +53,6 @@
 .carousel :global(.slick-slide > div) {
   width: 100%;
 }
-
 
 /* =========================================================
    INFORMACIÓN
@@ -127,7 +124,6 @@
   overflow-wrap: anywhere;
 }
 
-
 /* =========================================================
    RATING
 ========================================================= */
@@ -162,7 +158,6 @@
 
   font-size: 16px;
 }
-
 
 /* =========================================================
    BOTONES
@@ -214,7 +209,6 @@
 
   text-decoration: none;
 }
-
 
 /* =========================================================
    ANIMACIÓN DEL BOTÓN
@@ -388,7 +382,6 @@
   }
 }
 
-
 /* =========================================================
    BOTÓN DESHABILITADO
 ========================================================= */
@@ -403,7 +396,6 @@
 .button:disabled:hover::before {
   animation: none;
 }
-
 
 /* =========================================================
    TOOLTIP
@@ -451,7 +443,6 @@
   visibility: visible;
   opacity: 1;
 }
-
 
 /* =========================================================
    NAVEGACIÓN
@@ -508,7 +499,6 @@
   height: 10px;
 }
 
-
 /* =========================================================
    MODAL
 ========================================================= */
@@ -562,7 +552,6 @@
 
   color: var(--text-primary);
 }
-
 
 /* =========================================================
    LISTA DE PUBLICACIONES
@@ -671,7 +660,6 @@
   overflow-wrap: anywhere;
 }
 
-
 /* =========================================================
    BOTONES DEL MODAL
 ========================================================= */
@@ -735,7 +723,6 @@
   transform: scale(0.96);
 }
 
-
 /* =========================================================
    TABLETS
 ========================================================= */
@@ -749,7 +736,6 @@
     height: 330px;
   }
 }
-
 
 /* =========================================================
    MOBILE
@@ -837,7 +823,6 @@
   }
 }
 
-
 /* =========================================================
    CELULARES PEQUEÑOS
 ========================================================= */
@@ -917,7 +902,6 @@
   }
 }
 
-
 /* =========================================================
    CELULARES MUY PEQUEÑOS
 ========================================================= */
@@ -955,7 +939,6 @@
   }
 }
 
-
 /* =========================================================
    ACCESIBILIDAD / DISPOSITIVOS SIN HOVER
 ========================================================= */
@@ -975,7 +958,6 @@
   }
 }
 
-
 /* =========================================================
    PANTALLAS GRANDES
 ========================================================= */
@@ -983,5 +965,165 @@
 @media (min-width: 1200px) {
   .detail {
     margin-top: 60px;
+  }
+}
+
+.exchangeAction {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: 440px;
+  text-align: center;
+}
+.emptyExchange {
+  padding: 20px;
+  border: 1px solid #cedeb3;
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--text-primary);
+}
+.emptyExchange strong {
+  font-size: 18px;
+}
+.emptyExchange p {
+  margin: 8px 0 0;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.exchangeHint {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+.exchangeAction button:focus-visible {
+  outline: 3px solid #74942b;
+  outline-offset: 3px;
+}
+
+.detail {
+  width: min(1244px, calc(100% - 32px));
+  padding: 24px;
+  gap: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  box-shadow: 0 12px 36px #18251a0a;
+}
+.carousel {
+  width: 100%;
+  max-width: 520px;
+}
+.carousel h3 {
+  color: var(--text-primary);
+  font-size: 24px;
+  letter-spacing: -0.5px;
+}
+.img {
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: contain;
+  background: var(--surface-secondary);
+  border-radius: 16px;
+}
+.info {
+  align-content: start;
+  gap: 2px;
+  margin-top: 24px;
+}
+.info h5,
+.info span,
+.info h4 {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 4px 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: var(--text-primary);
+  text-align: left;
+}
+.info h5,
+.info span {
+  margin-top: 16px;
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  color: var(--text-secondary);
+}
+.info h4 {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.6;
+}
+.buttons {
+  grid-column: 1/-1;
+  padding: 16px 0 0;
+  border-top: 1px solid var(--border);
+  gap: 12px;
+}
+.exchangeAction {
+  flex: 1;
+  max-width: none;
+}
+.exchangeAction .button {
+  width: auto;
+  min-width: 180px;
+  min-height: 48px;
+  height: auto;
+  padding: 12px 24px;
+  border-radius: 12px;
+  background: #d5eb87;
+  color: #253614;
+  font-weight: 700;
+  transition: background 0.2s;
+}
+.exchangeAction .button:disabled {
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+}
+.detail .back {
+  width: auto;
+  min-height: 44px;
+  padding: 10px 16px;
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+  border-radius: 12px;
+}
+.detail .exchangeHint {
+  width: auto;
+  background: none;
+  box-shadow: none;
+  color: var(--text-secondary);
+  margin: 0;
+  padding: 0;
+}
+.emptyExchange {
+  max-width: 520px;
+}
+.navigationButtons {
+  margin: 24px auto 60px;
+}
+@media (max-width: 768px) {
+  .detail {
+    padding: 18px;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .info {
+    margin-top: 0;
+  }
+  .buttons {
+    gap: 8px;
+  }
+  .exchangeAction {
+    flex-basis: 100%;
+    order: -1;
+  }
+  .emptyExchange {
+    padding: 16px;
+  }
+  .carousel h3 {
+    font-size: 21px;
   }
 }

@@ -1,254 +1,175 @@
-import { Link, useLocation } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Logo from "../../assets/locan.png";
 import style from "./Nabvar.module.css";
 import { logoutUser } from "../logButtons/LogoutButton";
-import { useNavigate } from "react-router-dom";
 
-const NavBar = ({ isAuthenticated, userData }) => {
+const Icon = ({ kind }) => (
+  <svg
+    width="22"
+    height="22"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.7"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    {kind === "home" ? (
+      <>
+        <path d="m3 10 9-7 9 7v10H3Z" />
+        <path d="M9 20v-7h6v7" />
+      </>
+    ) : kind === "box" ? (
+      <>
+        <path d="m3 7 9-4 9 4v10l-9 4-9-4Z" />
+        <path d="m3 7 9 5 9-5M12 12v9M7 5l10 5" />
+      </>
+    ) : (
+      <>
+        <path d="M21 11a8 8 0 0 1-8 8H6l-4 3 1-7a8 8 0 1 1 18-4Z" />
+        <path d="M7 11h10" />
+      </>
+    )}
+  </svg>
+);
+
+export default function NavBar({ isAuthenticated, userData }) {
   const location = useLocation();
   const navigate = useNavigate();
-
-  const imageUrl = userData?.image?.split("=")[0];
-
-
-
-const handleLogout = async () => {
-  try {
+  const [open, setOpen] = useState(null);
+  const root = useRef(null);
+  const productsButton = useRef(null);
+  const profileButton = useRef(null);
+  useEffect(() => setOpen(null), [location.pathname]);
+  useEffect(() => {
+    const outside = (event) => {
+      if (!root.current?.contains(event.target)) setOpen(null);
+    };
+    const escape = (event) => {
+      if (event.key === "Escape" && open) {
+        setOpen(null);
+        (open === "products" ? productsButton : profileButton).current?.focus();
+      }
+    };
+    document.addEventListener("pointerdown", outside);
+    document.addEventListener("keydown", escape);
+    return () => {
+      document.removeEventListener("pointerdown", outside);
+      document.removeEventListener("keydown", escape);
+    };
+  }, [open]);
+  const handleLogout = async () => {
     await logoutUser();
-  } finally {
     navigate("/login", { replace: true });
     window.location.reload();
-  }
-};
-
-
-
+  };
+  const toggle = (name) => setOpen(open === name ? null : name);
   return (
     <nav
-      className={
-        isAuthenticated
-          ? style.navbar
-          : style.navbarOff
-      }
+      className={style.navbar}
       aria-label="Navegación principal"
+      ref={root}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setOpen(null);
+      }}
     >
-      {/* LOGO */}
-      <Link
-        to="/"
-        className={style.linkLogo}
-        aria-label="Ir al inicio"
-      >
-        <img
-          src={Logo}
-          className={style.logo}
-          alt="Locan"
-        />
-      </Link>
-
-      {/* PRINCIPAL */}
-      <Link
-        to="/"
-        className={`${style.link} ${
-          location.pathname === "/"
-            ? style.active
-            : ""
-        }`}
-      >
-        <span className={style.iconos}>
-          <img
-            src="https://img.icons8.com/fluency-systems-regular/48/home--v1.png"
-            alt=""
-            aria-hidden="true"
-          />
-          <span className={style.label}>
-            Principal
-          </span>
-        </span>
-      </Link>
-
-      {/* AGREGAR */}
-      {isAuthenticated ? (
-        <Link
-          to="/addProduct"
-          className={`${style.link} ${
-            location.pathname === "/addProduct"
-              ? style.active
-              : ""
-          }`}
-        >
-          <span className={style.iconos}>
-            <img
-              src="https://img.icons8.com/sf-regular/48/add.png"
-              alt=""
-              aria-hidden="true"
-            />
-            <span className={style.label}>
-              Agregar
-            </span>
-          </span>
+      <div className={style.inner}>
+        <Link to="/" className={style.brand} aria-label="Circula, inicio">
+          <img src={Logo} alt="Circula" />
         </Link>
-      ) : (
         <Link
-          to="/addProduct"
-          className={style.link}
+          to="/"
+          className={style.item}
+          aria-current={location.pathname === "/" ? "page" : undefined}
         >
-          <span className={style.iconosFalse}>
-            <img
-              src="https://img.icons8.com/sf-regular/48/add.png"
-              alt=""
-              aria-hidden="true"
-            />
-            <span className={style.lock}>
-              🔐
-            </span>
-          </span>
+          <Icon kind="home" />
+          <span>Inicio</span>
         </Link>
-      )}
-
-      {/* CANJES */}
-      {isAuthenticated ? (
-        <Link
-          to="/exchanges"
-          className={`${style.link} ${
-            location.pathname === "/exchanges"
-              ? style.active
-              : ""
-          }`}
-        >
-          <span className={style.iconos}>
-            <img
-              src="https://img.icons8.com/material-rounded/48/available-updates.png"
-              alt=""
-              aria-hidden="true"
-            />
-            <span className={style.label}>
-              Canjes
-            </span>
-          </span>
-        </Link>
-      ) : (
-        <Link
-          to="/exchanges"
-          className={style.link}
-        >
-          <span className={style.iconosFalse}>
-            <img
-              src="https://img.icons8.com/material-rounded/48/available-updates.png"
-              alt=""
-              aria-hidden="true"
-            />
-            <span className={style.lock}>
-              🔐
-            </span>
-          </span>
-        </Link>
-      )}
-
-      {/* MENSAJES */}
-      {isAuthenticated ? (
+        <div className={style.dropdown}>
+          <button
+            ref={productsButton}
+            type="button"
+            className={style.item}
+            aria-expanded={open === "products"}
+            aria-controls="products-navigation"
+            onClick={() => toggle("products")}
+          >
+            <Icon kind="box" />
+            <span>Productos</span>
+            <span className={style.chevron}>⌄</span>
+          </button>
+          {open === "products" && (
+            <div id="products-navigation" className={style.panel}>
+              <p>DALE OTRA VIDA</p>
+              <Link to="/addProduct" onClick={() => setOpen(null)}>
+                Agregar un producto <span>Publicá lo que ya no usás</span>
+              </Link>
+              <Link to="/exchanges" onClick={() => setOpen(null)}>
+                Mis canjes <span>Propuestas y encuentros</span>
+              </Link>
+            </div>
+          )}
+        </div>
         <Link
           to="/messages"
-          className={`${style.link} ${
-            location.pathname === "/messages"
-              ? style.active
-              : ""
-          }`}
+          className={style.item}
+          aria-label="Mensajes"
+          title="Mensajes"
+          aria-current={location.pathname === "/messages" ? "page" : undefined}
         >
-          <span className={style.iconos}>
-            <img
-              src="https://img.icons8.com/fluency-systems-regular/48/chat--v1.png"
-              alt=""
-              aria-hidden="true"
-            />
-            <span className={style.label}>
-              Mensajes
-            </span>
-          </span>
+          <Icon kind="chat" />
         </Link>
-      ) : (
-        <Link
-          to="/messages"
-          className={style.link}
-        >
-          <span className={style.iconosFalse}>
-            <img
-              src="https://img.icons8.com/fluency-systems-regular/48/chat--v1.png"
-              alt=""
-              aria-hidden="true"
-            />
-            <span className={style.lock}>
-              🔐
-            </span>
-          </span>
-        </Link>
-      )}
-
-      {/* PERFIL / LOGIN */}
-      <Link
-        to={
-          isAuthenticated
-            ? "/profile"
-            : "/login"
-        }
-        className={`${style.link} ${
-          location.pathname ===
-          (isAuthenticated
-            ? "/profile"
-            : "/login")
-            ? style.active
-            : ""
-        }`}
-      >
         {isAuthenticated ? (
-          <span className={style.iconos}>
-            <img
-              src={
-                imageUrl ||
-                "/placeholder.png"
-              }
-              alt=""
-              className={style.avatar}
-              referrerPolicy="no-referrer"
-            />
-
-            <span className={style.label}>
-              {userData?.username || "Perfil"}
-            </span>
-          </span>
+          <div className={style.dropdown}>
+            <button
+              ref={profileButton}
+              type="button"
+              className={style.item}
+              aria-expanded={open === "profile"}
+              aria-controls="profile-navigation"
+              onClick={() => toggle("profile")}
+            >
+              {userData?.image ? (
+                <img
+                  className={style.avatar}
+                  src={userData.image}
+                  alt=""
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <span className={style.initial}>
+                  {(userData?.username || "P")[0].toUpperCase()}
+                </span>
+              )}
+              <span className={style.username}>
+                {userData?.username || "Mi perfil"}
+              </span>
+              <span className={style.chevron}>⌄</span>
+            </button>
+            {open === "profile" && (
+              <div id="profile-navigation" className={style.panel}>
+                <p>TU ESPACIO</p>
+                <Link to="/profile" onClick={() => setOpen(null)}>
+                  Mi perfil <span>Mis publicaciones y mi cuenta</span>
+                </Link>
+                <button
+                  type="button"
+                  className={style.signout}
+                  onClick={handleLogout}
+                >
+                  Cerrar sesión
+                </button>
+              </div>
+            )}
+          </div>
         ) : (
-          <span className={style.iconos}>
-            <img
-              src="https://img.icons8.com/?size=100&id=9ZgJRZwEc5Yj&format=png&color=000000"
-              alt=""
-              aria-hidden="true"
-            />
-            <span className={style.label}>
-              Iniciar sesión
-            </span>
-          </span>
+          <Link to="/login" className={style.item}>
+            Ingresar
+          </Link>
         )}
-      </Link>
-
-      {/* LOGOUT */}
-      {isAuthenticated && (
-        <button
-          type="button"
-          className={style.logout}
-          onClick={handleLogout}
-          aria-label="Cerrar sesión"
-        >
-          <img
-            src="https://img.icons8.com/fluency-systems-filled/48/exit.png"
-            alt=""
-            aria-hidden="true"
-          />
-          <span className={style.label}>
-            Salir
-          </span>
-        </button>
-      )}
+      </div>
     </nav>
   );
-};
-
-export default NavBar;
+}

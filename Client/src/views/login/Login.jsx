@@ -15,15 +15,15 @@ import Swal from "sweetalert2";
 
 import Logo from "../../assets/locan.png";
 
-const validateLogin = (username, password) => {
+const validateLogin = (email, password) => {
   const errors = {};
 
-  if (!username.trim()) {
-    errors.username = "Por favor, ingrese un usuario válido";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+    errors.email = "Ingresá un correo electrónico válido.";
   }
 
   if (!password) {
-    errors.password = "La contraseña es incorrecta";
+    errors.password = "Ingresá tu contraseña.";
   }
 
   return errors;
@@ -31,7 +31,7 @@ const validateLogin = (username, password) => {
 
 const Login = ({ setAuth }) => {
   const [input, setInput] = useState({
-    username: "",
+    email: "",
     password: "",
   });
 
@@ -58,7 +58,7 @@ const Login = ({ setAuth }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const validationErrors = validateLogin(input.username, input.password);
+    const validationErrors = validateLogin(input.email, input.password);
 
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -69,16 +69,20 @@ const Login = ({ setAuth }) => {
       setIsLoading(true);
       setErrors({});
 
-      const response = await retryLogin(() => api.post("/users/login", {
-        username: input.username.trim(),
-        password: input.password,
-      }), { onWaiting: () => setWaitingForServer(true) });
+      const response = await retryLogin(
+        () =>
+          api.post("/users/login", {
+            email: input.email.trim().toLowerCase(),
+            password: input.password,
+          }),
+        { onWaiting: () => setWaitingForServer(true) },
+      );
 
       const { token, firebaseToken, usuario } = response.data;
 
       if (!token || !firebaseToken) {
         setErrors({
-          general: "Usuario o contraseña incorrectos",
+          general: "No pudimos completar el acceso. Intentá nuevamente.",
         });
         return;
       }
@@ -105,9 +109,13 @@ const Login = ({ setAuth }) => {
       console.error("Error al iniciar sesión:", error);
 
       setErrors({
-        general: error.response?.status === 503
-          ? serverUnavailableMessage
-          : "No se pudo iniciar sesión. Revisá tus datos e intentá nuevamente.",
+        general:
+          error.response?.status === 503
+            ? serverUnavailableMessage
+            : typeof error.response?.data === "string" &&
+                [400, 401].includes(error.response?.status)
+              ? error.response.data
+              : "No se pudo iniciar sesión. Intentá nuevamente en unos minutos.",
       });
     } finally {
       setIsLoading(false);
@@ -126,9 +134,13 @@ const Login = ({ setAuth }) => {
       const user = result.user;
       const idToken = await user.getIdToken();
 
-      const response = await retryLogin(() => api.post("/users/social-login", {
-        idToken,
-      }), { onWaiting: () => setWaitingForServer(true) });
+      const response = await retryLogin(
+        () =>
+          api.post("/users/social-login", {
+            idToken,
+          }),
+        { onWaiting: () => setWaitingForServer(true) },
+      );
 
       localStorage.setItem("token", response.data.token);
 
@@ -161,9 +173,10 @@ const Login = ({ setAuth }) => {
       Swal.fire({
         icon: "error",
         title: "Error al iniciar sesión",
-        text: error.response?.status === 503
-          ? serverUnavailableMessage
-          : "No se pudo autenticar con Google.",
+        text:
+          error.response?.status === 503
+            ? serverUnavailableMessage
+            : "No se pudo autenticar con Google.",
       });
     } finally {
       setSocialLoading("");
@@ -180,29 +193,35 @@ const Login = ({ setAuth }) => {
       <h1>Iniciar sesión</h1>
 
       {waitingForServer && (
-        <p role="status">El servidor está despertando. Esperá un momento; estamos reintentando el acceso.</p>
+        <p role="status">
+          El servidor está despertando. Esperá un momento; estamos reintentando
+          el acceso.
+        </p>
       )}
 
       <form className={style.form} onSubmit={handleSubmit} noValidate>
         <div className={style.field}>
-          <label htmlFor="username">Usuario</label>
+          <label htmlFor="email">Correo electrónico</label>
 
           <input
-            id="username"
-            type="text"
-            name="username"
-            placeholder="Usuario"
-            value={input.username}
+            id="email"
+            type="email"
+            name="email"
+            placeholder="vos@ejemplo.com"
+            inputMode="email"
+            autoCapitalize="none"
+            spellCheck={false}
+            value={input.email}
             onChange={handleInputChange}
             autoComplete="username"
             disabled={isAnyLoading}
-            aria-invalid={Boolean(errors.username)}
-            aria-describedby={errors.username ? "username-error" : undefined}
+            aria-invalid={Boolean(errors.email)}
+            aria-describedby={errors.email ? "email-error" : undefined}
           />
 
-          {errors.username && (
-            <span id="username-error" className={style.fieldError}>
-              {errors.username}
+          {errors.email && (
+            <span id="email-error" className={style.fieldError}>
+              {errors.email}
             </span>
           )}
         </div>

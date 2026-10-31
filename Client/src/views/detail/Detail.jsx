@@ -20,7 +20,7 @@ import api from "../../api/api";
 import style from "./Detail.module.css";
 
 const Detail = ({ userData }) => {
-  const myUserId = userData.id;
+  const myUserId = userData?.id;
   const { id } = useParams();
   const likedPostId = Number(id);
   const dispatch = useDispatch();
@@ -28,7 +28,6 @@ const Detail = ({ userData }) => {
   const anotherUserId = post?.User?.id;
   const userName = post?.User?.username;
   const myPostId = useSelector((state) => state.selectedPostToInteract);
-  const allPosts2 = useSelector((state) => state.allPostsCopy);
 
   const allLikes = useSelector((state) => state.myLikes || []);
   const matches = useSelector((state) => state.matches) || [];
@@ -38,15 +37,26 @@ const Detail = ({ userData }) => {
 
   const navigate = useNavigate();
 
+  const [productsStatus, setProductsStatus] = useState("loading");
+  const [productsAttempt, setProductsAttempt] = useState(0);
   useEffect(() => {
-    // Filter user posts when userData or allPosts changes
-    if (userData) {
-      const filteredUserPosts = allPosts2.filter(
-        (post) => post.UserId === userData.id,
-      );
-      setUserPosts(filteredUserPosts);
-    }
-  }, [userData, allPosts2]);
+    let active = true;
+    setProductsStatus("loading");
+    api
+      .get(`/posts/userPosts/${myUserId}`)
+      .then(({ data }) => {
+        if (active) {
+          setUserPosts(data);
+          setProductsStatus("ready");
+        }
+      })
+      .catch(() => {
+        if (active) setProductsStatus("error");
+      });
+    return () => {
+      active = false;
+    };
+  }, [myUserId, productsAttempt]);
 
   useEffect(() => {
     if (myUserId) {
@@ -89,11 +99,14 @@ const Detail = ({ userData }) => {
   }, [dispatch]);
 
   const handleLikeClick = async () => {
-    if (myPostId) {
+    if (productsStatus !== "ready") return;
+    if (!userPosts.length) {
+      navigate("/addProduct");
+      return;
+    }
+    if (myPostId && userPosts.some((product) => product.id === myPostId)) {
       if (!isPostLiked && !isMatched) {
-        await dispatch(
-          likePost(likedPostId, myPostId),
-        );
+        await dispatch(likePost(likedPostId, myPostId));
 
         await dispatch(getMyLikes());
 
@@ -164,14 +177,27 @@ const Detail = ({ userData }) => {
   };
 
   const handleReport = async () => {
-    const reason = window.prompt("Contanos brevemente por qué querés denunciar esta publicación:");
+    const reason = window.prompt(
+      "Contanos brevemente por qué querés denunciar esta publicación:",
+    );
     if (!reason?.trim()) return;
 
     try {
-      await api.post("/reports", { targetPostId: likedPostId, reason: reason.trim() });
-      await Swal.fire("Denuncia enviada", "Moderación revisará el contenido.", "success");
+      await api.post("/reports", {
+        targetPostId: likedPostId,
+        reason: reason.trim(),
+      });
+      await Swal.fire(
+        "Denuncia enviada",
+        "Moderación revisará el contenido.",
+        "success",
+      );
     } catch (error) {
-      await Swal.fire("No se pudo enviar", error.response?.data?.error || "Intentá nuevamente.", "error");
+      await Swal.fire(
+        "No se pudo enviar",
+        error.response?.data?.error || "Intentá nuevamente.",
+        "error",
+      );
     }
   };
 
@@ -191,6 +217,8 @@ const Detail = ({ userData }) => {
     disabledReason = "No puedes canjear tu propia publicación";
   } else if (isMatched) {
     disabledReason = "Este canje ya fue realizado";
+  } else if (productsStatus === "ready" && userPosts.length === 0) {
+    disabledReason = "";
   } else if (!hasAvailableProduct) {
     disabledReason = "Intentaste este canje con todos tus productos";
   }
@@ -232,7 +260,8 @@ const Detail = ({ userData }) => {
 
                     {requested ? (
                       <div className={style.requestedLabel}>
-                        Ya enviaste una solicitud con este producto para este artículo.
+                        Ya enviaste una solicitud con este producto para este
+                        artículo.
                       </div>
                     ) : (
                       <div className={style.rowSelect}>
@@ -256,12 +285,7 @@ const Detail = ({ userData }) => {
                 onClick={() => {
                   if (!selectedPostId) return;
 
-                  dispatch(
-                    likePost(
-                      likedPostId,
-                      selectedPostId,
-                    ),
-                  );
+                  dispatch(likePost(likedPostId, selectedPostId));
 
                   dispatch(getMyLikes());
 
@@ -334,21 +358,53 @@ const Detail = ({ userData }) => {
           <Link to="/">
             <button className={style.back}>Principal</button>
           </Link>
-          <button type="button" className={style.back} onClick={handleReport}>Denunciar</button>
+          <button type="button" className={style.back} onClick={handleReport}>
+            Denunciar
+          </button>
 
-          <div className={style.tooltipWrapper}>
+          <div className={style.exchangeAction}>
+            {productsStatus === "ready" &&
+              userPosts.length === 0 &&
+              myUserId !== anotherUserId &&
+              !isMatched && (
+                <div className={style.emptyExchange}>
+                  <strong>Tu primer canje empieza con un producto</strong>
+                  <p>
+                    Agregá un producto para ofrecer a cambio de este. ¡Dale una
+                    nueva vida a eso que ya no usás!
+                  </p>
+                </div>
+              )}
+            {productsStatus === "error" && (
+              <p role="alert">
+                No pudimos cargar tus productos.{" "}
+                <button
+                  type="button"
+                  onClick={() => setProductsAttempt((value) => value + 1)}
+                >
+                  Reintentar
+                </button>
+              </p>
+            )}
             <button
               className={style.button}
               onClick={handleLikeClick}
               disabled={
-                myUserId === anotherUserId || isMatched || !hasAvailableProduct
+                myUserId === anotherUserId ||
+                isMatched ||
+                productsStatus !== "ready" ||
+                (userPosts.length > 0 && !hasAvailableProduct)
               }
             >
-              Canjear
+              {productsStatus === "loading"
+                ? "Cargando tus productos…"
+                : userPosts.length === 0
+                  ? "Agregar un producto"
+                  : "Canjear"}
             </button>
 
-            {disabledReason && (
-              <span className={style.tooltip}>{disabledReason}</span>
+            {disabledReason && productsStatus === "ready" && (
+              <span className={style.exchangeHint}>{disabledReason}</span>
             )}
           </div>
         </div>
