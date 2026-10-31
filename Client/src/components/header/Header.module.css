@@ -2,20 +2,20 @@
   box-sizing: border-box;
   width: calc(100% - 32px);
   max-width: 1244px;
-  margin: 24px auto 32px;
+  margin: 16px auto 24px;
   background: var(--surface-secondary);
   border-radius: 20px;
   overflow: hidden;
 }
 .slide {
   width: 100%;
-  aspect-ratio: 16/9;
+  height: clamp(140px, 22vw, 260px);
+  max-height: 32svh;
 }
 .image {
   display: block;
   width: 100%;
   height: 100%;
-  aspect-ratio: 16/9;
   object-fit: contain;
 }
 .header :global(.slick-list) {
@@ -28,7 +28,7 @@
 @media (max-width: 768px) {
   .header {
     width: calc(100% - 24px);
-    margin: 12px auto 24px;
+    margin: 12px auto 20px;
     border-radius: 14px;
   }
 }
