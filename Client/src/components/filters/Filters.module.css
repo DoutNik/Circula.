@@ -3,8 +3,8 @@
   grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
   align-items: center;
   gap: clamp(0.6rem, 2vw, 1.25rem);
-  width: min(calc(100% - 2rem), 75rem);
-  margin: clamp(1.25rem, 4vw, 3rem) auto 1.25rem;
+  width: 100%;
+  margin: 0;
   padding: clamp(0.6rem, 2vw, 0.9rem);
   border-radius: 0.65rem;
   background-color: #9dbe0a;
@@ -63,7 +63,7 @@
 @media (max-width: 900px) {
   .filters {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    width: min(calc(100% - 1.5rem), 42rem);
+    width: 100%;
   }
 
   .filters button {
@@ -76,9 +76,9 @@
 @media (max-width: 540px) {
   .filters {
     grid-template-columns: 1fr;
-    width: min(calc(100% - 1rem), 26rem);
+    width: 100%;
     gap: 0.6rem;
-    margin-top: 1rem;
+    margin-top: 0;
   }
 
   .filters select,
@@ -95,7 +95,7 @@
 /* Celulares pequeños */
 @media (max-width: 360px) {
   .filters {
-    width: calc(100% - 0.75rem);
+    width: 100%;
     padding: 0.5rem;
   }
 

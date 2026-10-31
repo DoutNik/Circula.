@@ -2,7 +2,7 @@
   box-sizing: border-box;
   width: calc(100% - 32px);
   max-width: 1244px;
-  margin: 16px auto 24px;
+  margin: 0 auto 8px;
   background: var(--surface-secondary);
   border-radius: 20px;
   overflow: hidden;
@@ -28,7 +28,7 @@
 @media (max-width: 768px) {
   .header {
     width: calc(100% - 24px);
-    margin: 12px auto 20px;
+    margin: 0 auto 8px;
     border-radius: 14px;
   }
 }

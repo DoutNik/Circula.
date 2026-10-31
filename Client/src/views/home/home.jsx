@@ -118,12 +118,12 @@ const Home = () => {
           </button>
         )}
 
-        <section className={style.cardsSection}>
-          <Cards allPosts={posts} />
+        <section className={style.filtersSection} aria-label="Filtrar productos">
+          <Filters />
         </section>
 
-        <section className={style.filtersSection}>
-          <Filters />
+        <section className={style.cardsSection}>
+          <Cards allPosts={posts} />
         </section>
 
         <section className={style.allCardsSection}>
