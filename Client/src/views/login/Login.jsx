@@ -36,6 +36,8 @@ const Login = ({ setAuth }) => {
   });
 
   const [errors, setErrors] = useState({});
+  const [verificationNeeded, setVerificationNeeded] = useState(false);
+  const [verificationMessage, setVerificationMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState("");
   const [waitingForServer, setWaitingForServer] = useState(false);
@@ -43,6 +45,7 @@ const Login = ({ setAuth }) => {
   const handleInputChange = (event) => {
     const { name, value } = event.target;
 
+    setVerificationMessage("");
     setInput((prev) => ({
       ...prev,
       [name]: value,
@@ -107,6 +110,11 @@ const Login = ({ setAuth }) => {
       });
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
+      if (error.response?.data?.code === "EMAIL_NOT_VERIFIED") {
+        setVerificationNeeded(true);
+        setErrors({ general: error.response.data.error });
+        return;
+      }
 
       setErrors({
         general:
@@ -121,6 +129,20 @@ const Login = ({ setAuth }) => {
       setIsLoading(false);
       setWaitingForServer(false);
     }
+  };
+
+  const resendVerification = async () => {
+    const invalid = validateLogin(input.email, input.password);
+    if (Object.keys(invalid).length) { setErrors(invalid); return; }
+    setIsLoading(true);
+    setVerificationMessage("");
+    try {
+      const { data } = await api.post("/users/resend-verification", { email: input.email.trim(), password: input.password });
+      setVerificationMessage(data.message);
+      setErrors({});
+    } catch (error) {
+      setErrors({ general: error.response?.data?.error || "No pudimos enviar el enlace. Intentá nuevamente más tarde." });
+    } finally { setIsLoading(false); }
   };
 
   const handleGoogleLogin = async () => {
@@ -264,6 +286,12 @@ const Login = ({ setAuth }) => {
         </button>
       </form>
 
+      <div className={style.verification}>
+        <p>{verificationNeeded ? "¿No encontrás el correo de verificación?" : "¿Te registraste y todavía no verificaste tu correo?"}</p>
+        <button type="button" className={style.recoverLink} onClick={resendVerification} disabled={isAnyLoading}>Enviar enlace de verificación</button>
+        <small>Completá arriba tu correo y contraseña. Después de confirmar el enlace, volvé a iniciar sesión.</small>
+        {verificationMessage && <p role="status">{verificationMessage}</p>}
+      </div>
       <div className={style.registerSection}>
         <span>¿No tienes una cuenta?</span>
 

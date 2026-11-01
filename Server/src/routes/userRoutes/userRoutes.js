@@ -51,8 +51,15 @@ router.post("/login", authLimiter, validInfo, async (req, res) => {
     const response = await userController.loginUser(user);
     return res.status(200).json(response);
   } catch (error) {
-    return res.status(400).json(error.message);
+    return error.code === "EMAIL_NOT_VERIFIED"
+      ? res.status(403).json({ code: error.code, error: error.message })
+      : res.status(400).json(error.message);
   }
+});
+
+router.post("/resend-verification", authLimiter, async (req, res) => {
+  try { return res.json(await userController.resendVerification(req.body)); }
+  catch (error) { return res.status(400).json({ error: error.message }); }
 });
 
 router.get("/verify", authorization, async (req, res) => {

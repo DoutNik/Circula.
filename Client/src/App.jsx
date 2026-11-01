@@ -311,9 +311,7 @@ const App = () => {
           <Route
             path="/detail/:id"
             element={
-              <ProtectedRoute userData={userData}>
-                <Detail userData={userData} />
-              </ProtectedRoute>
+              <Detail userData={userData} />
             }
           />
 

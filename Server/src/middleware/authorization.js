@@ -13,6 +13,10 @@ module.exports = (req, res, next) => {
 
     const payload = jwt.verify(jwtToken, process.env.JWTSECRET);
 
+    if (payload.emailVerified !== true) {
+      return res.status(401).json({ error: "Volvé a iniciar sesión para verificar tu correo." });
+    }
+
     // Soporta payload.user como número o como objeto { id }.
     const rawUserId = payload.user?.id ?? payload.user;
     const userId = Number(rawUserId);

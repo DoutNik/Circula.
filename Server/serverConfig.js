@@ -47,6 +47,7 @@ io.use((socket, next) => {
       return next(new Error("No token"));
     }
     const payload = jwt.verify(token, process.env.JWTSECRET);
+    if (payload.emailVerified !== true) return next(new Error("Volvé a iniciar sesión para verificar tu correo."));
     socket.userId = String(payload.user);
     next();
   } catch (error) {

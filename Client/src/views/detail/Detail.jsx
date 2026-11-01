@@ -40,6 +40,7 @@ const Detail = ({ userData }) => {
   const [productsStatus, setProductsStatus] = useState("loading");
   const [productsAttempt, setProductsAttempt] = useState(0);
   useEffect(() => {
+    if (!myUserId) { setUserPosts([]); setProductsStatus("guest"); return; }
     let active = true;
     setProductsStatus("loading");
     api
@@ -94,11 +95,12 @@ const Detail = ({ userData }) => {
   }, [dispatch, id]);
 
   useEffect(() => {
-    dispatch(getMyLikes());
+    if (myUserId) dispatch(getMyLikes());
     dispatch(getAllPosts());
-  }, [dispatch]);
+  }, [dispatch, myUserId]);
 
   const handleLikeClick = async () => {
+    if (!myUserId) { navigate("/login"); return; }
     if (productsStatus !== "ready") return;
     if (!userPosts.length) {
       navigate("/addProduct");
@@ -177,6 +179,7 @@ const Detail = ({ userData }) => {
   };
 
   const handleReport = async () => {
+    if (!myUserId) { navigate("/login"); return; }
     const reason = window.prompt(
       "Contanos brevemente por qué querés denunciar esta publicación:",
     );
@@ -389,14 +392,14 @@ const Detail = ({ userData }) => {
             <button
               className={style.button}
               onClick={handleLikeClick}
-              disabled={
+              disabled={Boolean(myUserId) && (
                 myUserId === anotherUserId ||
                 isMatched ||
                 productsStatus !== "ready" ||
-                (userPosts.length > 0 && !hasAvailableProduct)
+                (userPosts.length > 0 && !hasAvailableProduct))
               }
             >
-              {productsStatus === "loading"
+              {!myUserId ? "Ingresar para canjear" : productsStatus === "loading"
                 ? "Cargando tus productos…"
                 : userPosts.length === 0
                   ? "Agregar un producto"

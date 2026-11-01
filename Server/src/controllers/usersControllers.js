@@ -15,7 +15,7 @@ const {
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const { transporter } = require("../config/mailer");
-const { registerMail, passwordForgot, accountDeletionMail } = require("../utils/mailObjects");
+const { passwordForgot, accountDeletionMail } = require("../utils/mailObjects");
 const jwtGenerator = require("../utils/jwtGenerator");
 const admin = require("../config/firebaseAdmin");
 const { randomUUID, randomBytes, createHash } = require("crypto");
@@ -128,6 +128,7 @@ exports.getAllExisting = async () => {
 };
 
 exports.createUser = async (user) => {
+  user.email = user.email?.trim().toLowerCase();
   if (
     !user.username ||
     !user.email ||
@@ -149,6 +150,7 @@ exports.createUser = async (user) => {
   }
 
   let firebaseUid;
+  let persisted = false;
 
   try {
     const salt = await bcrypt.genSalt(10);
@@ -176,17 +178,18 @@ exports.createUser = async (user) => {
       firebaseUid,
     });
 
-    const token = jwtGenerator(newUser.id);
-    const firebaseToken = await admin.auth().createCustomToken(firebaseUid);
-
-    transporter
-      .sendMail(registerMail(user))
-      .catch((err) => console.error("Email error:", err));
-
-    return { newUser: sanitizeUser(newUser), token, firebaseToken };
+    persisted = true;
+    let verificationSent = false;
+    try {
+      await emailVerification.send(newUser);
+      verificationSent = true;
+    } catch {
+      // Keep the account so the user can retry delivery from login.
+    }
+    return { verificationRequired: true, verificationSent, email: newUser.email };
   } catch (error) {
     // Evita dejar una cuenta Firebase huérfana si luego falla la DB.
-    if (firebaseUid) {
+    if (firebaseUid && !persisted) {
       await admin
         .auth()
         .deleteUser(firebaseUid)
@@ -274,6 +277,18 @@ exports.socialRegisterOrLogin = async (idToken) => {
   }
 };
 
+const emailVerification = require("../utils/emailVerification").createEmailVerification({ auth: admin.auth() });
+
+exports.resendVerification = async (credentials) => {
+  const { authenticateEmail } = require("../utils/emailLogin");
+  const user = await authenticateEmail(credentials, {
+    findUser: (email) => User.findOne({ where: sequelize.where(sequelize.fn("lower", sequelize.col("email")), email) }),
+    comparePassword: bcrypt.compare,
+  });
+  const result = await emailVerification.send(user);
+  return { message: result.verified ? "Tu correo ya está verificado. Ya podés ingresar." : "Te enviamos un enlace. Revisá tu correo y la carpeta de spam." };
+};
+
 exports.loginUser = async (user) => {
   const { authenticateEmail } = require("../utils/emailLogin");
   const usuario = await authenticateEmail(user, {
@@ -282,6 +297,8 @@ exports.loginUser = async (user) => {
     }),
     comparePassword: bcrypt.compare,
   });
+
+  await emailVerification.requireVerified(usuario);
 
   // determinar rol
   const rolCalculado = adminList.includes(usuario.email.toLowerCase()) ? "admin" : "user";

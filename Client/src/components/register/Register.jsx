@@ -12,10 +12,10 @@ import {
   validatePasswordRepeat,
 } from "./validations";
 import Swal from "sweetalert2";
-import { auth } from "../../firebase.js"; // tu config de Firebase
-import { signInWithCustomToken } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
-const Register = ({ setAuth }) => {
+const Register = () => {
+  const navigate = useNavigate();
   const [provinces, setProvinces] = useState([]);
   const [localities, setLocalities] = useState([]);
   const [selectedProvince, setSelectedProvince] = useState("");
@@ -238,23 +238,18 @@ const Register = ({ setAuth }) => {
 
       const response = await api.post("/users/register", newUser);
 
-      if (response) {
-        // Guardar JWT local
-        await localStorage.setItem("token", response.data.token);
-
-        // 🔥 Loguear usuario en Firebase con el token personalizado
-        await signInWithCustomToken(auth, response.data.firebaseToken);
-
-        setAuth(true); // Actualizar estado de autenticación
-
-        Swal.fire({
-          icon: "success",
-          title: "Registro exitoso",
-          text: "¡Te has registrado exitosamente!",
+      if (response.data.verificationRequired) {
+        await Swal.fire({
+          icon: response.data.verificationSent ? "success" : "warning",
+          title: "Confirmá tu correo",
+          text: response.data.verificationSent
+            ? "Te enviamos un enlace de verificación. Abrilo desde tu correo (revisá también spam) y después iniciá sesión."
+            : "Tu cuenta fue creada, pero no pudimos enviar el correo. En el inicio de sesión podés pedir un nuevo enlace con tu correo y contraseña.",
+          confirmButtonText: "Ir a iniciar sesión",
         });
-      } else {
-        console.log("Hubo un error al crear el usuario.");
+        navigate("/login");
       }
+
     } catch (error) {
       console.error("Error al enviar los datos al servidor:", error);
       console.log("Hubo un error al crear el usuario.");
