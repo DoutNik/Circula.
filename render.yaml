@@ -38,8 +38,8 @@ services:
       - key: ADMIN_USERS
         sync: false
       - key: MAIL_PROVIDER
-        value: resend
-      - key: RESEND_API_KEY
+        value: brevo
+      - key: BREVO_API_KEY
         sync: false
       - key: MAIL_FROM
         sync: false
