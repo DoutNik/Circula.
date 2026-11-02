@@ -1,6 +1,7 @@
 const {
   User,
   PasswordResetToken,
+  EmailVerificationCode,
   AccountDeletionToken,
   Post,
   Like,
@@ -21,6 +22,7 @@ const admin = require("../config/firebaseAdmin");
 const { randomUUID, randomBytes, createHash } = require("crypto");
 const { Op } = require("sequelize");
 const { buildUniqueSocialUsername } = require("../utils/socialUsername");
+const { profileFields } = require("../utils/profileFields");
 
 const adminList = (process.env.ADMIN_USERS || "")
   .split(",")
@@ -55,7 +57,6 @@ const sanitizePublicUser = (userInstance) => {
 // Campos que un usuario puede modificar de sí mismo.
 // "rol" y "plan" quedan afuera a propósito: rol solo se calcula en el
 // backend (ver adminList) y plan solo lo cambia el webhook de pagos.
-const EDITABLE_USER_FIELDS = ["username", "image", "ubication"];
 const RESET_TOKEN_TTL_MS = 30 * 60 * 1000;
 const RESET_SUCCESS_MESSAGE =
   "Si existe una cuenta con ese correo, enviaremos un enlace para restablecer la contraseña.";
@@ -68,15 +69,7 @@ const isValidResetPassword = (password) =>
   Buffer.byteLength(password, "utf8") <= 72 &&
   /^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(password);
 
-const pickEditableFields = (updatedData = {}) => {
-  const result = {};
-  for (const field of EDITABLE_USER_FIELDS) {
-    if (updatedData[field] !== undefined) {
-      result[field] = updatedData[field];
-    }
-  }
-  return result;
-};
+const pickEditableFields = profileFields;
 
 const socialProviderNames = {
   "google.com": "google",
@@ -181,7 +174,7 @@ exports.createUser = async (user) => {
     persisted = true;
     let verificationSent = false;
     try {
-      await emailVerification.send(newUser);
+      await verificationCode.send(newUser);
       verificationSent = true;
     } catch {
       // Keep the account so the user can retry delivery from login.
@@ -279,14 +272,27 @@ exports.socialRegisterOrLogin = async (idToken) => {
 
 const emailVerification = require("../utils/emailVerification").createEmailVerification({ auth: admin.auth() });
 
-exports.resendVerification = async (credentials) => {
+const verificationCode = require("../utils/verificationCode").createVerificationCode({
+  secret: process.env.JWTSECRET,
+  sendMail: (mail) => transporter.sendMail(mail),
+  markVerified: (user) => emailVerification.markVerified(user),
+  withLock: require("../utils/verificationCodeStore").verificationCodeStore({ sequelize, User, EmailVerificationCode }),
+});
+
+async function verificationUser(credentials) {
   const { authenticateEmail } = require("../utils/emailLogin");
-  const user = await authenticateEmail(credentials, {
+  return authenticateEmail(credentials, {
     findUser: (email) => User.findOne({ where: sequelize.where(sequelize.fn("lower", sequelize.col("email")), email) }),
     comparePassword: bcrypt.compare,
   });
-  const result = await emailVerification.send(user);
-  return { message: result.verified ? "Tu correo ya está verificado. Ya podés ingresar." : "Te enviamos un enlace. Revisá tu correo y la carpeta de spam." };
+}
+exports.resendVerification = async (credentials) => {
+  const user = await verificationUser(credentials);
+  return verificationCode.send(user);
+};
+exports.confirmVerification = async (credentials) => {
+  const user = await verificationUser(credentials);
+  return verificationCode.verify(user, credentials.code);
 };
 
 exports.loginUser = async (user) => {

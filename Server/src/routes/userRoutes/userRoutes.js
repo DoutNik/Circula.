@@ -59,7 +59,12 @@ router.post("/login", authLimiter, validInfo, async (req, res) => {
 
 router.post("/resend-verification", authLimiter, async (req, res) => {
   try { return res.json(await userController.resendVerification(req.body)); }
-  catch (error) { return res.status(400).json({ error: error.message }); }
+  catch (error) { return res.status(error.status || 400).json({ error: error.message, retryAfter: error.retryAfter }); }
+});
+
+router.post("/confirm-verification", authLimiter, async (req, res) => {
+  try { return res.json(await userController.confirmVerification(req.body)); }
+  catch (error) { return res.status(error.status || 400).json({ error: error.message }); }
 });
 
 router.get("/verify", authorization, async (req, res) => {
@@ -117,10 +122,13 @@ router.put("/:id", authorization, isSelfOrAdmin("id"), async (req, res) => {
     // El solicitante sale del JWT verificado, no del body controlado por el
     // navegador. Solo un admin autenticado puede modificar el plan.
     const requester = await userController.getUserId(req.authUserId);
-    await userController.updateUser(id, updatedData, requester);
-    return res.status(200).json({ message: "Resource updated successfully" });
+    const user = await userController.updateUser(id, updatedData, requester);
+    return res.status(200).json({ message: "Resource updated successfully", user });
   } catch (error) {
-    return res.status(404).json({ error: error.message });
+    if (error.name === "SequelizeUniqueConstraintError") {
+      return res.status(409).json({ error: "Ese nombre de usuario ya está en uso." });
+    }
+    return res.status(error.status || 400).json({ error: error.message });
   }
 });
 

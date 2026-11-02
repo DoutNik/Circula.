@@ -14,7 +14,10 @@ import {
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 
+import VerifyEmail from "../verifyEmail/VerifyEmail";
+
 const Register = () => {
+  const [verification, setVerification] = useState(null);
   const navigate = useNavigate();
   const [provinces, setProvinces] = useState([]);
   const [localities, setLocalities] = useState([]);
@@ -239,15 +242,7 @@ const Register = () => {
       const response = await api.post("/users/register", newUser);
 
       if (response.data.verificationRequired) {
-        await Swal.fire({
-          icon: response.data.verificationSent ? "success" : "warning",
-          title: "Confirmá tu correo",
-          text: response.data.verificationSent
-            ? "Te enviamos un enlace de verificación. Abrilo desde tu correo (revisá también spam) y después iniciá sesión."
-            : "Tu cuenta fue creada, pero no pudimos enviar el correo. En el inicio de sesión podés pedir un nuevo enlace con tu correo y contraseña.",
-          confirmButtonText: "Ir a iniciar sesión",
-        });
-        navigate("/login");
+        setVerification({ credentials: { email: response.data.email, password: input.password }, sent: response.data.verificationSent });
       }
 
     } catch (error) {
@@ -295,6 +290,7 @@ const Register = () => {
 
   return (
     <div className={style.container}>
+      {verification && <VerifyEmail {...verification} onClose={() => { setVerification(null); navigate("/login"); }} onVerified={() => { setVerification(null); navigate("/login"); }} />}
       <img src={Logo} className={style.logo} />
       <div className={style.title}>
         <h2>Regístrate</h2>

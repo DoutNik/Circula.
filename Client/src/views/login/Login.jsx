@@ -1,3 +1,4 @@
+import VerifyEmail from "../../components/verifyEmail/VerifyEmail";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import style from "./Login.module.css";
@@ -131,18 +132,10 @@ const Login = ({ setAuth }) => {
     }
   };
 
-  const resendVerification = async () => {
+  const resendVerification = () => {
     const invalid = validateLogin(input.email, input.password);
     if (Object.keys(invalid).length) { setErrors(invalid); return; }
-    setIsLoading(true);
-    setVerificationMessage("");
-    try {
-      const { data } = await api.post("/users/resend-verification", { email: input.email.trim(), password: input.password });
-      setVerificationMessage(data.message);
-      setErrors({});
-    } catch (error) {
-      setErrors({ general: error.response?.data?.error || "No pudimos enviar el enlace. Intentá nuevamente más tarde." });
-    } finally { setIsLoading(false); }
+    setVerificationNeeded(true);
   };
 
   const handleGoogleLogin = async () => {
@@ -210,6 +203,7 @@ const Login = ({ setAuth }) => {
 
   return (
     <main className={style.container}>
+      {verificationNeeded && <VerifyEmail credentials={{ email: input.email.trim(), password: input.password }} onClose={() => setVerificationNeeded(false)} onVerified={() => { setVerificationNeeded(false); setErrors({}); setVerificationMessage("Correo confirmado. Ya podés iniciar sesión."); }} />}
       <img className={style.logo} src={Logo} alt="Circula" />
 
       <h1>Iniciar sesión</h1>
@@ -288,8 +282,8 @@ const Login = ({ setAuth }) => {
 
       <div className={style.verification}>
         <p>{verificationNeeded ? "¿No encontrás el correo de verificación?" : "¿Te registraste y todavía no verificaste tu correo?"}</p>
-        <button type="button" className={style.recoverLink} onClick={resendVerification} disabled={isAnyLoading}>Enviar enlace de verificación</button>
-        <small>Completá arriba tu correo y contraseña. Después de confirmar el enlace, volvé a iniciar sesión.</small>
+        <button type="button" className={style.recoverLink} onClick={resendVerification} disabled={isAnyLoading}>Verificar con un código</button>
+        <small>Completá arriba tu correo y contraseña. Te enviaremos un código para ingresarlo acá.</small>
         {verificationMessage && <p role="status">{verificationMessage}</p>}
       </div>
       <div className={style.registerSection}>

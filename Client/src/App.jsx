@@ -197,6 +197,7 @@ const App = () => {
           id: userResponse.data.id,
           username: userResponse.data.username,
           image: userResponse.data.image,
+          ubication: userResponse.data.ubication,
           rol: userResponse.data.rol,
           averageRating: userResponse.data.averageRating,
           plan: userResponse.data.plan,

@@ -118,6 +118,7 @@
 }
 
 .dark,
+.editProfile,
 .light,
 .premium,
 .logout,
@@ -136,6 +137,8 @@
   background-color: black;
   color: whitesmoke;
 }
+
+.editProfile { background: #9dbe0a; color: #182600; font-weight: 600; }
 
 .light {
   min-width: 5.6rem;

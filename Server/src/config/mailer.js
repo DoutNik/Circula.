@@ -1,12 +1,15 @@
 const nodemailer = require("nodemailer");
 require("./dotenv");
 const { createResendTransport } = require("./resendTransport");
+const { createBrevoTransport } = require("./brevoTransport");
 const provider = process.env.MAIL_PROVIDER || (process.env.RENDER ? "resend" : "smtp");
-if (!["smtp", "resend"].includes(provider)) throw new Error("MAIL_PROVIDER debe ser smtp o resend");
+if (!["smtp", "resend", "brevo"].includes(provider)) throw new Error("MAIL_PROVIDER debe ser smtp, resend o brevo");
 
 // ⚠️ Las credenciales SIEMPRE salen de variables de entorno.
 // Nunca vuelvas a escribir un usuario/contraseña real acá.
-const transporter = provider === "resend"
+const transporter = provider === "brevo"
+  ? createBrevoTransport({ apiKey: process.env.BREVO_API_KEY, from: process.env.MAIL_FROM })
+  : provider === "resend"
   ? createResendTransport({ apiKey: process.env.RESEND_API_KEY, from: process.env.MAIL_FROM })
   : nodemailer.createTransport(
   {

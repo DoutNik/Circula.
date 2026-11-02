@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { logoutUser } from "../logButtons/LogoutButton";
 import PayModal from "../payModal/PayModal";
+import EditProfile from "../editProfile/EditProfile";
 import api from "../../api/api";
 import Swal from "sweetalert2";
 import style from "./Avatar.module.css";
@@ -13,6 +14,8 @@ const Avatar = ({ userData, setAuth, toggleDarkMode }) => {
   const navigate = useNavigate();
   const [isPremium, setPremium] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [profileMessage, setProfileMessage] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(
     localStorage.getItem("darkMode") === "true",
@@ -148,6 +151,8 @@ useEffect(() => {
 
       <h3>{userData?.username}</h3>
       <p>{userData?.email}</p>
+      {userData?.ubication && <p>{userData.ubication}</p>}
+      {profileMessage && <p role="status">{profileMessage}</p>}
 
       {rating > 0 ? (
         <div
@@ -163,6 +168,9 @@ useEffect(() => {
       )}
 
       <div className={style.actions}>
+        <button type="button" className={style.editProfile} onClick={() => { setProfileMessage(""); setEditing(true); }}>
+          Editar mis datos
+        </button>
         <button
           type="button"
           className={isDarkMode ? style.dark : style.light}
@@ -196,6 +204,11 @@ useEffect(() => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />
+      {editing && <EditProfile onClose={() => setEditing(false)} onSaved={(user) => {
+        setAuth(true, user);
+        setEditing(false);
+        setProfileMessage("Tus datos se guardaron correctamente.");
+      }} />}
     </div>
   );
 };
