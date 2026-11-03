@@ -5,6 +5,7 @@
   "type": "module",
   "packageManager": "pnpm@12.15.0",
   "scripts": {
+    "test": "node --experimental-test-module-mocks --test test/*.test.js",
     "dev": "vite --host",
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",

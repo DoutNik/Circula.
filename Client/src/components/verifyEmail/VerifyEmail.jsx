@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import api from "../../api/api";
+import { loginWithEmail } from "../../api/emailLogin.js";
 import styles from "./VerifyEmail.module.css";
 
 export default function VerifyEmail({ credentials, sent = false, onClose, onVerified }) {
@@ -9,6 +10,7 @@ export default function VerifyEmail({ credentials, sent = false, onClose, onVeri
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [verified, setVerified] = useState(false);
+  const [accessError, setAccessError] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState(sent ? "Te enviamos un código. Revisá también la carpeta de spam." : "Pedí un código para confirmar tu correo sin salir de Circula.");
   const [remaining, setRemaining] = useState(sent ? 60 : 0);
@@ -30,8 +32,19 @@ export default function VerifyEmail({ credentials, sent = false, onClose, onVeri
     try {
       await api.post("/users/confirm-verification", { ...credentials, code });
       setVerified(true);
+      await enterAccount();
     } catch (err) { setError(err.response?.data?.error || "No pudimos verificar el código. Intentá nuevamente."); }
     finally { setBusy(false); }
+  }
+  async function enterAccount() {
+    setBusy(true); setAccessError("");
+    try {
+      const usuario = await loginWithEmail(credentials);
+      onVerified(usuario);
+    } catch {
+      // The code has already been consumed. Retry only sign-in, never the OTP.
+      setAccessError("Tu correo ya está confirmado, pero no pudimos iniciar sesión. Reintentá el acceso; no necesitás otro código.");
+    } finally { setBusy(false); }
   }
   async function resend() {
     setBusy(true); setError("");
@@ -49,7 +62,10 @@ export default function VerifyEmail({ credentials, sent = false, onClose, onVeri
     <button type="button" className={styles.close} aria-label="Cerrar verificación" disabled={busy} onClick={onClose}>×</button>
     <div className={styles.symbol} aria-hidden="true">{verified ? "✓" : "@"}</div>
     <h2 id="verify-title">{verified ? "¡Correo confirmado!" : "Confirmá tu correo"}</h2>
-    {verified ? <><p>Tu cuenta está lista. Ya podés ingresar y empezar a canjear.</p><button className={styles.primary} onClick={onVerified}>Ir a iniciar sesión</button></> : <>
+    {verified ? <>
+      <p role="status">{busy ? "Estamos iniciando tu sesión…" : "Tu cuenta está lista para empezar a canjear."}</p>
+      {accessError && <><p role="alert" className={styles.error}>{accessError}</p><button type="button" className={styles.primary} disabled={busy} onClick={enterAccount}>Reintentar acceso</button></>}
+    </> : <>
       <p>{hasSent ? "Ingresá el código de 6 dígitos enviado a" : "Vamos a enviar un código de 6 dígitos a"}<br /><strong className={styles.email}>{credentials.email}</strong></p>
       <p className={styles.notice} role="status">{message}</p>
       <form onSubmit={confirm}>

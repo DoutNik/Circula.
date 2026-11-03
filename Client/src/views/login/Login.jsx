@@ -1,16 +1,16 @@
 import VerifyEmail from "../../components/verifyEmail/VerifyEmail";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import style from "./Login.module.css";
 
 import {
   GoogleAuthProvider,
-  signInWithCustomToken,
   signInWithPopup,
 } from "firebase/auth";
 
 import { auth } from "../../firebase.js";
 import api from "../../api/api.js";
+import { loginWithEmail } from "../../api/emailLogin.js";
 import { retryLogin, serverUnavailableMessage } from "../../api/retryLogin.js";
 import Swal from "sweetalert2";
 
@@ -31,6 +31,7 @@ const validateLogin = (email, password) => {
 };
 
 const Login = ({ setAuth }) => {
+  const navigate = useNavigate();
   const [input, setInput] = useState({
     email: "",
     password: "",
@@ -38,7 +39,6 @@ const Login = ({ setAuth }) => {
 
   const [errors, setErrors] = useState({});
   const [verificationNeeded, setVerificationNeeded] = useState(false);
-  const [verificationMessage, setVerificationMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState("");
   const [waitingForServer, setWaitingForServer] = useState(false);
@@ -46,7 +46,6 @@ const Login = ({ setAuth }) => {
   const handleInputChange = (event) => {
     const { name, value } = event.target;
 
-    setVerificationMessage("");
     setInput((prev) => ({
       ...prev,
       [name]: value,
@@ -73,29 +72,9 @@ const Login = ({ setAuth }) => {
       setIsLoading(true);
       setErrors({});
 
-      const response = await retryLogin(
-        () =>
-          api.post("/users/login", {
-            email: input.email.trim().toLowerCase(),
-            password: input.password,
-          }),
-        { onWaiting: () => setWaitingForServer(true) },
-      );
-
-      const { token, firebaseToken, usuario } = response.data;
-
-      if (!token || !firebaseToken) {
-        setErrors({
-          general: "No pudimos completar el acceso. Intentá nuevamente.",
-        });
-        return;
-      }
-
-      // JWT propio de la aplicación
-      localStorage.setItem("token", token);
-
-      // Firebase mediante Custom Token
-      await signInWithCustomToken(auth, firebaseToken);
+      const usuario = await loginWithEmail(input, {
+        onWaiting: () => setWaitingForServer(true),
+      });
 
       // Actualizamos autenticación global
       setAuth(true, usuario);
@@ -203,7 +182,18 @@ const Login = ({ setAuth }) => {
 
   return (
     <main className={style.container}>
-      {verificationNeeded && <VerifyEmail credentials={{ email: input.email.trim(), password: input.password }} onClose={() => setVerificationNeeded(false)} onVerified={() => { setVerificationNeeded(false); setErrors({}); setVerificationMessage("Correo confirmado. Ya podés iniciar sesión."); }} />}
+      {verificationNeeded && (
+        <VerifyEmail
+          credentials={{ email: input.email.trim(), password: input.password }}
+          onClose={() => setVerificationNeeded(false)}
+          onVerified={(usuario) => {
+            setVerificationNeeded(false);
+            setInput({ email: "", password: "" });
+            setAuth(true, usuario);
+            navigate("/profile", { replace: true });
+          }}
+        />
+      )}
       <img className={style.logo} src={Logo} alt="Circula" />
 
       <h1>Iniciar sesión</h1>
@@ -284,7 +274,6 @@ const Login = ({ setAuth }) => {
         <p>{verificationNeeded ? "¿No encontrás el correo de verificación?" : "¿Te registraste y todavía no verificaste tu correo?"}</p>
         <button type="button" className={style.recoverLink} onClick={resendVerification} disabled={isAnyLoading}>Verificar con un código</button>
         <small>Completá arriba tu correo y contraseña. Te enviaremos un código para ingresarlo acá.</small>
-        {verificationMessage && <p role="status">{verificationMessage}</p>}
       </div>
       <div className={style.registerSection}>
         <span>¿No tienes una cuenta?</span>

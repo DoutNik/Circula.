@@ -16,7 +16,7 @@ import { useNavigate } from "react-router-dom";
 
 import VerifyEmail from "../verifyEmail/VerifyEmail";
 
-const Register = () => {
+const Register = ({ setAuth }) => {
   const [verification, setVerification] = useState(null);
   const navigate = useNavigate();
   const [provinces, setProvinces] = useState([]);
@@ -290,7 +290,17 @@ const Register = () => {
 
   return (
     <div className={style.container}>
-      {verification && <VerifyEmail {...verification} onClose={() => { setVerification(null); navigate("/login"); }} onVerified={() => { setVerification(null); navigate("/login"); }} />}
+      {verification && (
+        <VerifyEmail
+          {...verification}
+          onClose={() => { setVerification(null); navigate("/login"); }}
+          onVerified={(usuario) => {
+            setVerification(null);
+            setAuth(true, usuario);
+            navigate("/profile", { replace: true });
+          }}
+        />
+      )}
       <img src={Logo} className={style.logo} />
       <div className={style.title}>
         <h2>Regístrate</h2>
