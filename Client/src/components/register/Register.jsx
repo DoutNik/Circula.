@@ -1,441 +1,210 @@
-import Logo from "../../assets/locan.png";
-import { useState, useEffect } from "react";
-import style from "./Register.module.css";
+import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../../api/api.js";
-import {
-  validateUsername,
-  validateEmail,
-  validatePassword,
-  validateImageFile,
-  validateProvince,
-  validateLocalidad,
-  validatePasswordRepeat,
-} from "./validations";
-import Swal from "sweetalert2";
-import { useNavigate } from "react-router-dom";
-
 import VerifyEmail from "../verifyEmail/VerifyEmail";
+import { FormPage, Field, PasswordInput, PasswordChecklist, FormStatus } from "../forms/FormUI.jsx";
+import styles from "../forms/FormUI.module.css";
+import local from "./Register.module.css";
+import { validateImageFile, validateUsername } from "./validations";
+import { fieldProps, focusFirstError, emailError, passwordError, confirmPasswordError, errorMessage } from "../../utils/formValidation.js";
 
-const Register = ({ setAuth }) => {
-  const [verification, setVerification] = useState(null);
+const empty = { username: "", email: "", password: "", repeatPassword: "", province: "", locality: "" };
+const validate = (values, image) => ({
+  username: validateUsername(values.username), email: emailError(values.email), password: passwordError(values.password),
+  repeatPassword: confirmPasswordError(values.repeatPassword, values.password),
+  image: image ? "" : "Agregá una foto para que otras personas puedan reconocerte.",
+  province: values.province ? "" : "Elegí tu provincia.", locality: values.locality ? "" : "Elegí tu localidad.",
+});
+
+export default function Register({ setAuth }) {
   const navigate = useNavigate();
+  const form = useRef(null);
+  const fileInput = useRef(null);
+  const fileVersion = useRef(0);
+  const uploaded = useRef(null);
+  const [values, setValues] = useState(empty);
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [checkingImage, setCheckingImage] = useState(false);
+  const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState("");
+  const [status, setStatus] = useState("");
+  const [verification, setVerification] = useState(null);
   const [provinces, setProvinces] = useState([]);
   const [localities, setLocalities] = useState([]);
-  const [selectedProvince, setSelectedProvince] = useState("");
-  const [localidad, setSelectedLocalidad] = useState("");
-
-  // Constantes para Cloudinary.
-
-  const preset_key = "userProfilePictures";
-  const cloud_name = "dsc4kqz3g";
-
-  const [imageError, setImageError] = useState(null);
-  const [provinceError, setProvinceError] = useState(null);
-  const [localidadError, setLocalidadError] = useState(null);
-  const [errors, setErrors] = useState({
-    username: null,
-    password: null,
-    email: null,
-    image: null,
-    province: null,
-    localidad: null,
-  });
+  const [provinceLoading, setProvinceLoading] = useState(true);
+  const [localityLoading, setLocalityLoading] = useState(false);
+  const [provinceFailure, setProvinceFailure] = useState(false);
+  const [localityFailure, setLocalityFailure] = useState(false);
+  const [provinceRetry, setProvinceRetry] = useState(0);
+  const [localityRetry, setLocalityRetry] = useState(0);
 
   useEffect(() => {
-    fetch("https://apis.datos.gob.ar/georef/api/provincias")
-      .then((res) => (res.ok ? res.json() : Promise.reject(res)))
-      .then((json) => {
-        setProvinces(json.provincias);
-      })
-      .catch((error) => {
-        console.error(
-          `Error: ${error.status}: ${error.statusText || "Ocurrió un error"}`,
-        );
-      });
-  }, []);
+    const controller = new AbortController();
+    setProvinceLoading(true); setProvinceFailure(false);
+    fetch("https://apis.datos.gob.ar/georef/api/provincias", { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(15000)]) })
+      .then((res) => { if (!res.ok) throw new Error(); return res.json(); })
+      .then((data) => { if (!Array.isArray(data.provincias) || !data.provincias.length) throw new Error(); setProvinces(data.provincias); })
+      .catch(() => { if (!controller.signal.aborted) setProvinceFailure(true); })
+      .finally(() => { if (!controller.signal.aborted) setProvinceLoading(false); });
+    return () => controller.abort();
+  }, [provinceRetry]);
+  useEffect(() => {
+    if (!values.province) { setLocalities([]); setLocalityLoading(false); setLocalityFailure(false); return; }
+    const controller = new AbortController();
+    setLocalityLoading(true); setLocalityFailure(false); setLocalities([]);
+    fetch(`https://apis.datos.gob.ar/georef/api/localidades?provincia=${encodeURIComponent(values.province)}&max=5000`, { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(15000)]) })
+      .then((res) => { if (!res.ok) throw new Error(); return res.json(); })
+      .then((data) => { if (!Array.isArray(data.localidades) || !data.localidades.length) throw new Error(); setLocalities(data.localidades); })
+      .catch(() => { if (!controller.signal.aborted) setLocalityFailure(true); })
+      .finally(() => { if (!controller.signal.aborted) setLocalityLoading(false); });
+    return () => controller.abort();
+  }, [values.province, localityRetry]);
+  useEffect(() => {
+    if (!image) { setPreview(""); return; }
+    const url = URL.createObjectURL(image); setPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [image]);
 
-  const handleProvinceChange = (e) => {
-    const selectedProvince = e.target.value;
-    setSelectedProvince(selectedProvince);
-
-    const provinceError = validateProvince(selectedProvince);
-    setErrors({ ...errors, province: provinceError });
-    setProvinceError(provinceError);
-
-    fetch(
-      `https://apis.datos.gob.ar/georef/api/localidades?provincia=${selectedProvince}&max=500`,
-    )
-      .then((res) => (res.ok ? res.json() : Promise.reject(res)))
-      .then((json) => {
-        setLocalities(json.localidades);
-      })
-      .catch((error) => {
-        console.error(
-          `Error al obtener las localidades: ${error.status}: ${
-            error.statusText || "Ocurrió un error"
-          }`,
-        );
-      });
-  };
-  const handleLocalidadChange = (e) => {
-    const selectedLocalidad = e.target.value;
-    setSelectedLocalidad(selectedLocalidad);
-
-    const localidadError = validateLocalidad(selectedLocalidad);
-    setErrors({ ...errors, localidad: localidadError });
-    setLocalidadError(localidadError);
-  };
-  const sortedProvinces = provinces.sort((a, b) => {
-    return a.nombre.localeCompare(b.nombre);
-  });
-
-  const sortedLocalities = localities.sort((a, b) => {
-    return a.nombre.localeCompare(b.nombre);
-  });
-
-  const [input, setInput] = useState({
-    username: "",
-    password: "",
-    repeatPassword: "",
-    email: "",
-    image: "",
-    imageFile: null,
-    disabled: false,
-  });
-
-  const [imageFile, setImageFile] = useState(null);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setInput({
-      ...input,
-      [name]: value,
-    });
-
-    if (name === "username") {
-      setErrors({ ...errors, username: validateUsername(value) });
-    } else if (name === "email") {
-      setErrors({ ...errors, email: validateEmail(value) });
-    } else if (name === "password") {
-      setErrors({ ...errors, password: validatePassword(value) });
-    } else if (name === "repeatPassword") {
-      setErrors({
-        ...errors,
-        repeatPassword: validatePasswordRepeat(value, input.password),
-      });
-    }
-  };
-
-  const handleFile = async (event) => {
-    const file = event.target.files?.[0];
-    // Limpiar estado anterior
-    setImageError(null);
-    if (!file) {
-      setInput((prev) => ({ ...prev, image: "" }));
-      setImageFile(null);
-      return;
-    }
-    try {
-      // Validar archivo real
-      const validationError = await validateImageFile(file);
-      if (validationError) {
-        setImageError(validationError);
-        setInput((prev) => ({ ...prev, image: "" }));
-        setImageFile(null);
-        // Limpiar input file para poder volver a seleccionar el mismo archivo
-        event.target.value = "";
-        return;
-      }
-      // Archivo válido → generar preview
-      const imageUrl = URL.createObjectURL(file);
-      setInput((prev) => ({ ...prev, image: imageUrl }));
-      setImageFile(file);
-      setImageError(null);
-    } catch (error) {
-      console.error("Error validando imagen:", error);
-      setImageError("No se pudo validar la imagen seleccionada");
-      setImageFile(null);
-      setInput((prev) => ({ ...prev, image: "" }));
-      event.target.value = "";
-    }
-  };
-
-  const handleImageClear = () => {
-    setInput({
-      ...input,
-      image: "",
-    });
-    setImageFile(null);
-  };
-
-  const handleSumbit = async (e) => {
-    e.preventDefault();
-    setInput({
-      ...input,
-      disabled: true,
-    });
-
-    if (
-      !input.username ||
-      !input.email ||
-      !input.password ||
-      !input.repeatPassword ||
-      !input.image ||
-      !selectedProvince ||
-      !localidad
-    ) {
-      if (!input.image) {
-        setImageError("Es necesario completar con una imagen.");
-      } else {
-        setImageError(null);
-      }
-
-      if (!selectedProvince) {
-        setProvinceError("Es necesario seleccionar una provincia.");
-      } else {
-        setProvinceError(null);
-      }
-
-      if (!localidad) {
-        setLocalidadError("Es necesario seleccionar una localidad.");
-      } else {
-        setLocalidadError(null);
-      }
-      Swal.fire({
-        icon: "info",
-        title: "Campos incompletos",
-        html: "Todos los campos son obligatorios para completar el registro",
-      });
-
-      setInput({
-        ...input,
-        disabled: false,
-      });
-      return;
-    }
-
-    try {
-      let secureUrl = "";
-
-      if (imageFile) {
-        const formData = new FormData();
-        formData.append("file", imageFile);
-        formData.append("upload_preset", preset_key);
-
-        const responseImage = await api.post(
-          `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload/`,
-          formData,
-        );
-
-        secureUrl = responseImage.data.secure_url;
-      }
-
-      let newUser = {
-        username: input.username,
-        password: input.password,
-        email: input.email,
-        image: secureUrl,
-        ubication: `${selectedProvince}, ${localidad}`,
-        origin: "DB",
-      };
-
-      const response = await api.post("/users/register", newUser);
-
-      if (response.data.verificationRequired) {
-        setVerification({ credentials: { email: response.data.email, password: input.password }, sent: response.data.verificationSent });
-      }
-
-    } catch (error) {
-      console.error("Error al enviar los datos al servidor:", error);
-      console.log("Hubo un error al crear el usuario.");
-
-      // El backend manda el motivo real como texto plano en error.response.data
-      // (por ejemplo: credenciales faltantes, email inválido, contraseña débil,
-      // email/usuario ya registrado). Lo mostramos siempre en vez de un mensaje
-      // genérico, para no tener que abrir la consola para enterarse.
-      const backendMessage =
-        typeof error.response?.data === "string"
-          ? error.response.data
-          : error.response?.data?.message || error.response?.data?.error;
-
-      Swal.fire({
-        icon: "error",
-        title: "No se pudo completar el registro",
-        text:
-          backendMessage ||
-          "Hubo un error al registrar el usuario. Por favor, inténtalo de nuevo.",
-      });
-
-      setInput({
-        ...input,
-        disabled: false,
-      });
-      return;
-    }
-
-    setInput({
-      username: "",
-      password: "",
-      repeatPassword: "",
-      email: "",
-      image: "",
-      imageFile: null,
-      disabled: false,
-    });
-  };
-
-  function isSubmitDisabled() {
-    return Object.values(errors).some((error) => error !== null);
+  function change(event) {
+    const { name, value } = event.target;
+    const next = { ...values, [name]: value, ...(name === "province" ? { locality: "" } : {}) };
+    setValues(next); setStatus("");
+    const validation = validate(next, image);
+    setErrors((previous) => ({ ...previous,
+      [name]: touched[name] || submitted ? validation[name] : "",
+      ...(name === "password" && (touched.repeatPassword || submitted) ? { repeatPassword: validation.repeatPassword } : {}),
+      ...(name === "province" ? { locality: "" } : {}),
+    }));
   }
-
-  return (
-    <div className={style.container}>
-      {verification && (
-        <VerifyEmail
-          {...verification}
-          onClose={() => { setVerification(null); navigate("/login"); }}
-          onVerified={(usuario) => {
-            setVerification(null);
-            setAuth(true, usuario);
-            navigate("/profile", { replace: true });
-          }}
-        />
-      )}
-      <img src={Logo} className={style.logo} />
-      <div className={style.title}>
-        <h2>Regístrate</h2>
-      </div>
-
-      <div className={style.form}>
-        <form onSubmit={handleSumbit}>
+  function blur(event) {
+    const { name } = event.target;
+    setTouched((previous) => ({ ...previous, [name]: true }));
+    setErrors((previous) => ({ ...previous, [name]: validate(values, image)[name] }));
+  }
+  async function chooseImage(event) {
+    const selected = event.target.files?.[0];
+    if (!selected) return;
+    const version = ++fileVersion.current;
+    setCheckingImage(true); setStatus(""); uploaded.current = null;
+    try {
+      const issue = await validateImageFile(selected);
+      if (version !== fileVersion.current) return;
+      setImage(issue ? null : selected);
+      setErrors((previous) => ({ ...previous, image: issue || "" }));
+      if (issue && fileInput.current) fileInput.current.value = "";
+    } catch {
+      if (version !== fileVersion.current) return;
+      setImage(null); setErrors((previous) => ({ ...previous, image: "No pudimos abrir esa imagen. Probá con otra foto JPG o PNG." }));
+    } finally { if (version === fileVersion.current) setCheckingImage(false); }
+  }
+  function removeImage() {
+    fileVersion.current++; setCheckingImage(false); setImage(null); uploaded.current = null;
+    if (fileInput.current) fileInput.current.value = "";
+    setErrors((previous) => ({ ...previous, image: submitted ? validate(values, null).image : "" }));
+  }
+  async function submit(event) {
+    event.preventDefault();
+    if (busy || checkingImage) return;
+    setSubmitted(true); setStatus("");
+    const invalid = validate(values, image); setErrors(invalid);
+    if (Object.values(invalid).some(Boolean)) { focusFirstError(form.current, invalid); return; }
+    setBusy(true);
+    let stage = "image";
+    try {
+      let photo = uploaded.current?.file === image ? uploaded.current.url : "";
+      if (!photo) {
+        const data = new FormData(); data.append("file", image); data.append("upload_preset", "userProfilePictures");
+        const response = await fetch("https://api.cloudinary.com/v1_1/dsc4kqz3g/image/upload/", { method: "POST", body: data, signal: AbortSignal.timeout(45000) });
+        if (!response.ok) throw new Error();
+        photo = (await response.json()).secure_url;
+        if (!photo) throw new Error();
+        uploaded.current = { file: image, url: photo };
+      }
+      stage = "account";
+      const { data } = await api.post("/users/register", {
+        username: values.username.trim(), email: values.email.trim().toLowerCase(), password: values.password,
+        image: photo, ubication: `${values.province}, ${values.locality}`, origin: "DB",
+      });
+      if (!data.verificationRequired) throw new Error();
+      setVerification({ credentials: { email: data.email, password: values.password }, sent: data.verificationSent });
+      setValues(empty); setImage(null); setErrors({}); setTouched({}); setSubmitted(false); uploaded.current = null;
+      if (fileInput.current) fileInput.current.value = "";
+    } catch (error) {
+      const serverErrors = error.response?.data?.fieldErrors;
+      if (stage === "account" && serverErrors && typeof serverErrors === "object") {
+        const mapped = Object.fromEntries(Object.entries(serverErrors).filter(([field, message]) => ["username", "email", "password", "province", "locality", "image"].includes(field) && typeof message === "string" && message));
+        if (Object.keys(mapped).length) {
+          setErrors((previous) => ({ ...previous, ...mapped }));
+          focusFirstError(form.current, mapped);
+          return;
+        }
+      }
+      const message = stage === "image" ? "No pudimos subir la foto. Revisá tu conexión y volvé a intentarlo; tus datos siguen acá." : errorMessage(error, "No pudimos crear tu cuenta. Revisá tu conexión e intentá nuevamente.");
+      const field = stage === "image" ? "image" : /usuario|username/i.test(message) ? "username" : /correo|email|e-mail/i.test(message) ? "email" : /contraseña|password/i.test(message) ? "password" : null;
+      if (field) { setErrors((previous) => ({ ...previous, [field]: message })); focusFirstError(form.current, { [field]: message }); }
+      else setStatus(message);
+    } finally { setBusy(false); }
+  }
+  const locked = busy || checkingImage;
+  return <FormPage eyebrow="EMPEZÁ A CIRCULAR" title="Creá tu cuenta" description="Dale una nueva vida a lo que ya no usás. Completá tus datos y confirmá tu correo con un código de 6 dígitos." wide>
+    {verification && <VerifyEmail {...verification} onClose={() => { setVerification(null); navigate("/login"); }} onVerified={(usuario) => { setVerification(null); setAuth(true, usuario); navigate("/profile", { replace: true }); }} />}
+    <form ref={form} onSubmit={submit} noValidate aria-busy={busy}>
+      <section className={styles.section} aria-labelledby="register-account-title">
+        <h2 id="register-account-title" className={styles.sectionTitle}>Tu acceso a Circula</h2>
+        <p className={styles.sectionDescription}>Los campos marcados como obligatorios son necesarios para crear tu cuenta.</p>
+        <div className={styles.grid}>
+          <Field id="register-username" label="Nombre de usuario" required hint="Entre 3 y 30 caracteres. Así te verá la comunidad." error={errors.username}>
+            <input {...fieldProps("register-username", errors.username, true)} className={styles.control} name="username" placeholder="Por ejemplo, charlyklema" autoComplete="nickname" value={values.username} onChange={change} onBlur={blur} disabled={locked} required />
+          </Field>
+          <Field id="register-email" label="Correo electrónico" required hint="Usaremos este correo para verificar tu cuenta e iniciar sesión." error={errors.email}>
+            <input {...fieldProps("register-email", errors.email, true)} className={styles.control} name="email" type="email" inputMode="email" placeholder="vos@ejemplo.com" autoComplete="email" autoCapitalize="none" spellCheck={false} value={values.email} onChange={change} onBlur={blur} disabled={locked} required />
+          </Field>
           <div>
-            <input
-              type="text"
-              name="username"
-              placeholder="Usuario"
-              onChange={handleInputChange}
-              value={input.username}
-              disabled={input.disabled}
-            />
-            {errors.username && (
-              <span className={style.error}>{errors.username}</span>
-            )}
+            <Field id="register-password" label="Contraseña" required error={errors.password}>
+              <PasswordInput {...fieldProps("register-password", errors.password)} className={styles.control} name="password" placeholder="Creá una contraseña segura" autoComplete="new-password" value={values.password} onChange={change} onBlur={blur} disabled={locked} required />
+            </Field>
+            <PasswordChecklist value={values.password} />
           </div>
-
-          <div>
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              onChange={handleInputChange}
-              value={input.email}
-              disabled={input.disabled}
-            />
-            {errors.email && (
-              <span className={style.error}>{errors.email}</span>
-            )}
-          </div>
-
-          <div>
-            <input
-              type="password"
-              name="password"
-              placeholder="Contraseña"
-              onChange={handleInputChange}
-              value={input.password}
-              disabled={input.disabled}
-            />
-            {errors.password && (
-              <span className={style.error}>{errors.password}</span>
-            )}
-          </div>
-          <div>
-            <input
-              type="password"
-              name="repeatPassword"
-              placeholder="Repetir contraseña"
-              onChange={handleInputChange}
-              value={input.repeatPassword} // Asegúrate de tener un valor inicial en el estado
-              disabled={input.disabled}
-            />
-            {errors.repeatPassword && (
-              <span className={style.error}>{errors.repeatPassword}</span>
-            )}
-          </div>
-          <div className={style.fileInput}>
-            <input
-              type="file"
-              accept="image/*"
-              name="image"
-              onChange={handleFile}
-              disabled={input.disabled}
-            />
-            {input.image && (
-              <div className={style.imagePreview}>
-                <img
-                  src={input.image}
-                  alt="Preview"
-                  className={style.imgUser}
-                />
-                <button type="button" onClick={handleImageClear}>
-                  {" "}
-                  ✖️{" "}
-                </button>{" "}
-              </div>
-            )}
-            {/* {errors.image && <span className={style.error}>{errors.image}</span>} */}
-            {imageError && <div className={style.error}>{imageError}</div>}
-          </div>
-
-          <select onChange={handleProvinceChange} disabled={input.disabled}>
-            <option value="Elige una provincia">Provincia</option>
-            {sortedProvinces.map((province) => (
-              <option key={province.id} value={province.nombre}>
-                {province.nombre}
-              </option>
-            ))}
-          </select>
-          {/* {errors.province && <span className={style.error}>{errors.province}</span>} */}
-          {provinceError && <div className={style.error}>{provinceError}</div>}
-
-          <select
-            id="selectLocalidades"
-            onChange={handleLocalidadChange}
-            disabled={input.disabled}
-          >
-            <option value="Elige una localidad">Localidad</option>
-            {sortedLocalities.map((locality) => (
-              <option key={locality.id} value={locality.nombre}>
-                {locality.nombre}
-              </option>
-            ))}
-          </select>
-          {/* {errors.localidad && <span className={style.error}>{errors.localidad}</span>} */}
-          {localidadError && (
-            <div className={style.error}>{localidadError}</div>
-          )}
-
-          <button
-            className={
-              isSubmitDisabled()
-                ? `${style.register} ${style.buttonDisabled}`
-                : style.register
-            }
-            disabled={isSubmitDisabled()}
-            type="submit"
-          >
-            Enviar
-          </button>
-          {input.disabled && (
-            <div className={style.loaderContainer}>
-              <span>Creando usuario...</span>
-              <div className={style.loader}></div>
+          <Field id="register-repeatPassword" label="Repetí tu contraseña" required hint="Ingresá la misma contraseña para confirmar." error={errors.repeatPassword}>
+            <PasswordInput {...fieldProps("register-repeatPassword", errors.repeatPassword, true)} className={styles.control} name="repeatPassword" placeholder="Volvé a escribir tu contraseña" autoComplete="new-password" value={values.repeatPassword} onChange={change} onBlur={blur} disabled={locked} required />
+          </Field>
+        </div>
+      </section>
+      <section className={styles.section} aria-labelledby="register-profile-title">
+        <h2 id="register-profile-title" className={styles.sectionTitle}>Presentate a la comunidad</h2>
+        <p className={styles.sectionDescription}>Tu foto y tu localidad ayudan a conectar con personas cerca tuyo.</p>
+        <Field id="register-image" label="Foto de perfil" required hint="Elegí una foto JPG o PNG de hasta 5 MB." error={errors.image}>
+          <div className={local.photoArea}>
+            {preview && <img className={local.avatar} src={preview} alt="Vista previa de tu foto de perfil" />}
+            <div className={local.photoControls}>
+              <input {...fieldProps("register-image", errors.image, true)} ref={fileInput} className={styles.control} type="file" name="image" accept="image/jpeg,image/png" onChange={chooseImage} disabled={locked} required={!image} />
+              {image && <div className={styles.inline}><span className={local.fileName}>{image.name}</span><button className={styles.subtle} type="button" onClick={removeImage} disabled={locked}>Quitar foto</button></div>}
+              {checkingImage && <p role="status" className={styles.help}>Comprobando la imagen…</p>}
             </div>
-          )}
-        </form>
-      </div>
-    </div>
-  );
-};
-
-export default Register;
+          </div>
+        </Field>
+        <div className={styles.grid}>
+          <Field id="register-province" label="Provincia" required error={errors.province}>
+            <select {...fieldProps("register-province", errors.province)} className={styles.control} name="province" value={values.province} onChange={change} onBlur={blur} disabled={locked || provinceLoading} required>
+              <option value="">{provinceLoading ? "Cargando provincias…" : "Elegí tu provincia"}</option>
+              {[...provinces].sort((a, b) => a.nombre.localeCompare(b.nombre)).map((province) => <option key={province.id} value={province.nombre}>{province.nombre}</option>)}
+            </select>
+            {provinceFailure && <div className={local.loadError} role="alert">No pudimos cargar las provincias. <button type="button" className={styles.subtle} onClick={() => setProvinceRetry((n) => n + 1)}>Reintentar</button></div>}
+          </Field>
+          <Field id="register-locality" label="Localidad" required hint="Mostramos tu localidad, nunca tu dirección exacta." error={errors.locality}>
+            <select {...fieldProps("register-locality", errors.locality, true)} className={styles.control} name="locality" value={values.locality} onChange={change} onBlur={blur} disabled={locked || !values.province || localityLoading} required>
+              <option value="">{localityLoading ? "Cargando localidades…" : !values.province ? "Primero elegí una provincia" : "Elegí tu localidad"}</option>
+              {[...localities].sort((a, b) => a.nombre.localeCompare(b.nombre)).map((locality) => <option key={locality.id} value={locality.nombre}>{locality.nombre}</option>)}
+            </select>
+            {localityFailure && <div className={local.loadError} role="alert">No pudimos cargar las localidades. <button type="button" className={styles.subtle} onClick={() => setLocalityRetry((n) => n + 1)}>Reintentar</button></div>}
+          </Field>
+        </div>
+      </section>
+      {status && <FormStatus kind="error">{status}</FormStatus>}
+      <div className={styles.actions}><button className={styles.primary} type="submit" disabled={locked}>{busy ? "Creando tu cuenta…" : checkingImage ? "Comprobando foto…" : "Crear cuenta y verificar correo"}</button><p className={styles.help}>¿Ya tenés una cuenta? <Link className={styles.subtle} to="/login">Iniciá sesión</Link></p></div>
+    </form>
+  </FormPage>;
+}

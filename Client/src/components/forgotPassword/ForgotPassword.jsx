@@ -1,112 +1,39 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
-
-import style from "./ForgotPassword.module.css";
+import { useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import api from "../../api/api";
+import { FormPage, Field, FormStatus } from "../forms/FormUI.jsx";
+import styles from "../forms/FormUI.module.css";
+import { emailError, fieldProps, focusFirstError, errorMessage } from "../../utils/formValidation.js";
 
-const validateEmail = (email) => {
-  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return regex.test(email);
-};
-
-const ForgotPassword = () => {
-  const navigate = useNavigate();
-
+export default function ForgotPassword() {
+  const form = useRef(null);
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleSubmit = async (event) => {
+  const [touched, setTouched] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [status, setStatus] = useState("");
+  async function submit(event) {
     event.preventDefault();
-
-    if (!email.trim()) {
-      setError("El email es obligatorio.");
-      return;
-    }
-
-    if (!validateEmail(email.trim())) {
-      setError("Ingrese un email válido.");
-      return;
-    }
-
-    setError("");
-    setIsSubmitting(true);
-
-    try {
-      await api.post("/users/forgot-password", {
-        email: email.trim(),
-      });
-
-      await Swal.fire({
-        icon: "success",
-        title: "Solicitud enviada",
-        text: "Si el email está registrado, recibirá un link.",
-      });
-
-      navigate("/login");
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Ocurrió un problema. Intente nuevamente.",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  return (
-    <main className={style.container}>
-      <form className={style.form} onSubmit={handleSubmit}>
-        <div className={style.textContainer}>
-          <h1 className={style.title}>Recuperar contraseña</h1>
-          <p>Te enviaremos un enlace para restablecerla.</p>
-        </div>
-
-        <div className={style.inputContainer}>
-          <label className={style.label} htmlFor="email">
-            Ingrese su email
-          </label>
-
-          <input
-            id="email"
-            type="email"
-            name="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            className={style.input}
-            autoComplete="email"
-            disabled={isSubmitting}
-            aria-invalid={Boolean(error)}
-            aria-describedby={error ? "email-error" : undefined}
-          />
-
-          {error && (
-            <span id="email-error" className={style.error}>
-              {error}
-            </span>
-          )}
-        </div>
-
-        <div className={style.buttonContainer}>
-          <button
-            type="submit"
-            className={style.button}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Enviando..." : "Enviar"}
-          </button>
-
-          <p className={style.registerLink}>¿No tiene una cuenta?</p>
-
-          <Link to="/register" className={style.btnAqui}>
-            Regístrate
-          </Link>
-        </div>
-      </form>
-    </main>
-  );
-};
-
-export default ForgotPassword;
+    if (busy) return;
+    setTouched(true); setStatus("");
+    const issue = emailError(email); setError(issue);
+    if (issue) { focusFirstError(form.current, { email: issue }); return; }
+    setBusy(true);
+    try { await api.post("/users/forgot-password", { email: email.trim().toLowerCase() }); setSent(true); }
+    catch (err) { setStatus(errorMessage(err, "No pudimos procesar la solicitud. Revisá tu conexión e intentá otra vez.")); }
+    finally { setBusy(false); }
+  }
+  return <FormPage eyebrow="RECUPERÁ TU ACCESO" title={sent ? "Revisá tu correo" : "¿Olvidaste tu contraseña?"} description={sent ? "Si hay una cuenta asociada a ese correo, vas a recibir un enlace para elegir una nueva contraseña." : "Ingresá el correo de tu cuenta y te enviaremos un enlace para elegir una nueva contraseña."}>
+    {sent ? <>
+      <FormStatus kind="success">Solicitud recibida. Revisá tu bandeja de entrada y la carpeta de spam. El enlace vence en 30 minutos.</FormStatus>
+      <div className={styles.actions}><Link className={styles.primary} to="/login">Volver al inicio de sesión</Link><button className={styles.subtle} type="button" onClick={() => { setSent(false); setStatus(""); }}>Usar otro correo o volver a solicitarlo</button></div>
+    </> : <form ref={form} onSubmit={submit} noValidate aria-busy={busy}>
+      <Field id="forgot-email" label="Correo electrónico" required hint="Usá el mismo correo con el que creaste tu cuenta." error={error}>
+        <input {...fieldProps("forgot-email", error, true)} className={styles.control} name="email" type="email" inputMode="email" placeholder="vos@ejemplo.com" autoComplete="email" autoCapitalize="none" spellCheck={false} value={email} onChange={(event) => { const value = event.target.value; setEmail(value); setStatus(""); if (touched) setError(emailError(value)); }} onBlur={() => { setTouched(true); setError(emailError(email)); }} disabled={busy} required />
+      </Field>
+      {status && <FormStatus kind="error">{status}</FormStatus>}
+      <div className={styles.actions}><button className={styles.primary} type="submit" disabled={busy}>{busy ? "Enviando solicitud…" : "Enviar enlace de recuperación"}</button><Link className={styles.subtle} to="/login">Volver al inicio de sesión</Link></div>
+    </form>}
+  </FormPage>;
+}

@@ -1,3 +1,5 @@
+import { emailError, passwordError, confirmPasswordError } from "../../utils/formValidation.js";
+
 /** * Valida un archivo de imagen real. * * Reglas: * - Debe ser File * - JPG/JPEG o PNG * - Máximo 5 MB * - Se verifica MIME * - Se verifica la firma binaria del archivo * - Se intenta decodificar como imagen */
 export async function validateImageFile(file) {
   if (!file) {
@@ -85,7 +87,7 @@ async function validateImageSignature(file) {
 
 export function validateUsername(username) {
   if (!username || username.trim() === "") {
-    return "Debes completar el campo";
+    return "Elegí un nombre de usuario.";
   }
   const value = username.trim();
   if (value.length < 3) {
@@ -97,30 +99,10 @@ export function validateUsername(username) {
   return null;
 }
 export function validateEmail(email) {
-  if (!email || email.trim() === "") {
-    return "Debes completar el campo";
-  }
-  const value = email.trim();
-  /* Formato: usuario@dominio.ext */ const emailRegex =
-    /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-  if (!emailRegex.test(value)) {
-    return "Ingrese una dirección de correo electrónico válida";
-  }
-  return null;
+  return emailError(email) || null;
 }
 export function validatePassword(password) {
-  if (!password || password === "") {
-    return "Debes completar el campo";
-  }
-  if (password.length < 8 || password.length > 20) {
-    return "La contraseña debe tener entre 8 y 20 caracteres";
-  }
-  /* Debe contener: - al menos una letra - al menos un número */ const passwordRegex =
-    /^(?=.*[A-Za-z])(?=.*\d).+$/;
-  if (!passwordRegex.test(password)) {
-    return "La contraseña debe incluir al menos una letra y un número";
-  }
-  return null;
+  return passwordError(password) || null;
 }
 export function validateImagen(image) {
   if (!image || image.trim() === "") {
@@ -149,11 +131,5 @@ export function validateLocalidad(locality) {
   return null;
 }
 export const validatePasswordRepeat = (passwordRepeat, password) => {
-  if (!passwordRepeat || passwordRepeat === "") {
-    return "Debes completar el campo";
-  }
-  if (passwordRepeat !== password) {
-    return "Las contraseñas no coinciden";
-  }
-  return null;
+  return confirmPasswordError(passwordRepeat, password) || null;
 };

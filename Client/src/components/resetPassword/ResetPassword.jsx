@@ -1,203 +1,55 @@
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { useNavigate, useSearchParams, Link } from "react-router-dom";
-import style from "./ResetPassword.module.css";
+import { useRef, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import api from "../../api/api";
-import { validatePassw, validateRepeat } from "./validate";
-import Swal from "sweetalert2";
-const ResetPassword = () => {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get("token");
-  const [input, setInput] = useState({ password: "", passwordRepeat: "" });
-  const [error, setError] = useState({ password: null, passwordRepeat: null });
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setInput((prev) => ({ ...prev, [name]: value }));
-    if (name === "password") {
-      setError((prev) => ({
-        ...prev,
-        password: validatePassw(value),
-        /* También actualizamos la confirmación porque puede dejar de coincidir cuando cambia la contraseña. */ passwordRepeat:
-          input.passwordRepeat !== ""
-            ? validateRepeat(input.passwordRepeat, value)
-            : null,
-      }));
-    }
-    if (name === "passwordRepeat") {
-      setError((prev) => ({
-        ...prev,
-        passwordRepeat: validateRepeat(value, input.password),
-      }));
-    }
-  };
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+import { FormPage, Field, PasswordInput, PasswordChecklist, FormStatus } from "../forms/FormUI.jsx";
+import styles from "../forms/FormUI.module.css";
+import { fieldProps, focusFirstError, passwordError, confirmPasswordError, errorMessage } from "../../utils/formValidation.js";
 
-    if (!token) {
-      await Swal.fire({
-        icon: "error",
-        title: "Enlace inválido",
-        text: "Solicitá un nuevo enlace para restablecer tu contraseña.",
-      });
-      return;
-    }
+const validate = (values) => ({ password: passwordError(values.password), passwordRepeat: confirmPasswordError(values.passwordRepeat, values.password) });
 
-    const passwordError = validatePassw(input.password);
-    const passwordRepeatError = validateRepeat(
-      input.passwordRepeat,
-      input.password,
-    );
-    setError({ password: passwordError, passwordRepeat: passwordRepeatError });
-    if (passwordError || passwordRepeatError) {
-      return;
-    }
-    try {
-      setLoading(true);
-      const response = await api.post("/users/reset-password", {
-        password: input.password,
-        token,
-      });
-      if (response?.data) {
-        await Swal.fire({
-          icon: "success",
-          title: "Contraseña actualizada",
-          text: "¡Iniciá sesión con tu nueva contraseña!",
-          confirmButtonText: "Continuar",
-        });
-        navigate("/login");
-      }
-    } catch (err) {
-      console.error("Error al restablecer la contraseña:", err);
-      const backendMessage =
-        typeof err.response?.data === "string"
-          ? err.response.data
-          : err.response?.data?.message || err.response?.data?.error;
-      Swal.fire({
-        icon: "error",
-        title: "No se pudo cambiar la contraseña",
-        text: backendMessage || "Ocurrió un error. Intentá nuevamente.",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-  const handleShowPassword = () => {
-    setShowPassword((prev) => !prev);
-  };
-  const isSubmitDisabled =
-    loading ||
-    !input.password ||
-    !input.passwordRepeat ||
-    Boolean(error.password) ||
-    Boolean(error.passwordRepeat);
-  return (
-    <div className={style.page}>
-      {" "}
-      <motion.div
-        className={`${style.container} ${style.bgColor}`}
-        initial={{ opacity: 0, y: 25 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        {" "}
-        <form onSubmit={handleSubmit} className={style.form}>
-          {" "}
-          {/* TÍTULO */}{" "}
-          <div className={style.textContainer}>
-            {" "}
-            <h1 className={style.title}> Cambiar contraseña </h1>{" "}
-            <p className={style.description}>
-              {" "}
-              Ingresá tu nueva contraseña y repetila para confirmar.{" "}
-            </p>{" "}
-          </div>{" "}
-          {/* CAMPOS */}{" "}
-          <div className={style.inputContainer}>
-            {" "}
-            {/* NUEVA CONTRASEÑA */}{" "}
-            <div className={style.field}>
-              {" "}
-              <label htmlFor="password" className={style.label}>
-                {" "}
-                Nueva contraseña:{" "}
-              </label>{" "}
-              <input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                name="password"
-                placeholder="Contraseña"
-                value={input.password}
-                onChange={handleChange}
-                className={style.input}
-                disabled={loading}
-                autoComplete="new-password"
-              />{" "}
-              {error.password && (
-                <span className={style.error}> {error.password} </span>
-              )}{" "}
-            </div>{" "}
-            {/* REPETIR CONTRASEÑA */}{" "}
-            <div className={style.field}>
-              {" "}
-              <label htmlFor="passwordRepeat" className={style.label}>
-                {" "}
-                Repetir contraseña:{" "}
-              </label>{" "}
-              <input
-                id="passwordRepeat"
-                type={showPassword ? "text" : "password"}
-                name="passwordRepeat"
-                placeholder="Repetir contraseña"
-                value={input.passwordRepeat}
-                onChange={handleChange}
-                className={style.segundoInput}
-                disabled={loading}
-                autoComplete="new-password"
-              />{" "}
-              {error.passwordRepeat && (
-                <span className={style.error}> {error.passwordRepeat} </span>
-              )}{" "}
-            </div>{" "}
-            {/* MOSTRAR CONTRASEÑA */}{" "}
-            <label
-              htmlFor="showPassword"
-              className={style.showPasswordContainer}
-            >
-              {" "}
-              <input
-                type="checkbox"
-                id="showPassword"
-                onChange={handleShowPassword}
-                checked={showPassword}
-                disabled={loading}
-                className={style.checkbox}
-              />{" "}
-              <span>Ver contraseñas</span>{" "}
-            </label>{" "}
-          </div>{" "}
-          {/* BOTONES */}{" "}
-          <div className={style.buttonContainer}>
-            {" "}
-            <button
-              type="submit"
-              className={`${style.button} ${isSubmitDisabled ? style.buttonDisabled : ""}`}
-              disabled={isSubmitDisabled}
-            >
-              {" "}
-              {loading ? "Enviando..." : "Enviar"}{" "}
-            </button>{" "}
-            <div className={style.registerLink}> ¿No tenés una cuenta? </div>{" "}
-            <Link to="/register" className={style.registerLinkButton}>
-              {" "}
-              Registrate{" "}
-            </Link>{" "}
-          </div>{" "}
-        </form>{" "}
-      </motion.div>{" "}
-    </div>
-  );
-};
-export default ResetPassword;
+export default function ResetPassword() {
+  const [params] = useSearchParams();
+  const token = params.get("token");
+  const form = useRef(null);
+  const [values, setValues] = useState({ password: "", passwordRepeat: "" });
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState(false);
+  const [status, setStatus] = useState("");
+  function change(event) {
+    const { name, value } = event.target; const next = { ...values, [name]: value };
+    setValues(next); setStatus("");
+    const invalid = validate(next);
+    setErrors((previous) => ({ ...previous, [name]: touched[name] || submitted ? invalid[name] : "", ...(name === "password" && (touched.passwordRepeat || submitted) ? { passwordRepeat: invalid.passwordRepeat } : {}) }));
+  }
+  function blur(event) {
+    const { name } = event.target;
+    setTouched((previous) => ({ ...previous, [name]: true }));
+    setErrors((previous) => ({ ...previous, [name]: validate(values)[name] }));
+  }
+  async function submit(event) {
+    event.preventDefault(); if (busy || !token) return;
+    setSubmitted(true); setStatus("");
+    const invalid = validate(values); setErrors(invalid);
+    if (Object.values(invalid).some(Boolean)) { focusFirstError(form.current, invalid); return; }
+    setBusy(true);
+    try { await api.post("/users/reset-password", { password: values.password, token }); setValues({ password: "", passwordRepeat: "" }); setDone(true); }
+    catch (err) { setStatus(errorMessage(err, "No pudimos guardar la contraseña. Revisá tu conexión e intentá nuevamente.")); }
+    finally { setBusy(false); }
+  }
+  return <FormPage eyebrow="TU CUENTA, PROTEGIDA" title={done ? "Contraseña actualizada" : "Elegí una nueva contraseña"} description={done ? "Ya podés volver a Circula con tu nueva contraseña." : "Creá una contraseña que no uses en otros sitios y repetila para confirmar."}>
+    {!token ? <><FormStatus kind="error">Este enlace está incompleto. Solicitá uno nuevo para recuperar tu cuenta.</FormStatus><Link className={styles.primary} to="/forgotpassword">Solicitar un nuevo enlace</Link></> : done ? <><FormStatus kind="success">Guardamos tu nueva contraseña.</FormStatus><div className={styles.actions}><Link className={styles.primary} to="/login">Iniciar sesión</Link></div></> : <form ref={form} onSubmit={submit} noValidate aria-busy={busy}>
+      <Field id="reset-password" label="Nueva contraseña" required error={errors.password}>
+        <PasswordInput {...fieldProps("reset-password", errors.password)} className={styles.control} name="password" placeholder="Creá una contraseña segura" autoComplete="new-password" value={values.password} onChange={change} onBlur={blur} disabled={busy} required />
+      </Field>
+      <PasswordChecklist value={values.password} />
+      <Field id="reset-passwordRepeat" label="Repetí la nueva contraseña" required error={errors.passwordRepeat}>
+        <PasswordInput {...fieldProps("reset-passwordRepeat", errors.passwordRepeat)} className={styles.control} name="passwordRepeat" placeholder="Volvé a escribir tu contraseña" autoComplete="new-password" value={values.passwordRepeat} onChange={change} onBlur={blur} disabled={busy} required />
+      </Field>
+      {status && <FormStatus kind="error">{status}</FormStatus>}
+      <div className={styles.actions}><button className={styles.primary} type="submit" disabled={busy}>{busy ? "Guardando contraseña…" : "Guardar nueva contraseña"}</button><Link className={styles.subtle} to="/forgotpassword">¿El enlace venció? Pedí uno nuevo</Link></div>
+    </form>}
+  </FormPage>;
+}

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import style from "./UserProfile.module.css";
 import api from "../../api/api";
+import ReportDialog from "../../components/forms/ReportDialog.jsx";
 
 const UserProfile = () => {
   const { userId } = useParams();
@@ -9,6 +10,7 @@ const UserProfile = () => {
   const [userData, setUserData] = useState(null);
   const [isBlocked, setIsBlocked] = useState(false);
   const [isUpdatingBlock, setIsUpdatingBlock] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -40,17 +42,6 @@ const UserProfile = () => {
     }
   };
 
-  const handleReport = async () => {
-    const reason = window.prompt("Contanos brevemente por qué querés denunciar este perfil:");
-    if (!reason?.trim()) return;
-    try {
-      await api.post("/reports", { targetUserId: Number(userId), reason: reason.trim() });
-      window.alert("Gracias. Tu denuncia fue enviada a moderación.");
-    } catch (error) {
-      window.alert(error.response?.data?.error || "No se pudo enviar la denuncia.");
-    }
-  };
-
   if (!userData) return <main className={style.loading}><p>Cargando perfil...</p></main>;
 
   const averageRating = Number(userData.averageRating) || 0;
@@ -58,6 +49,7 @@ const UserProfile = () => {
 
   return (
     <main className={style.container}>
+      {reportOpen && <ReportDialog targetUserId={Number(userId)} onClose={() => setReportOpen(false)} />}
       <section className={style.avatar}>
         <div className={style.profileTop}>
           <div className={style.photoWrapper}>
@@ -79,7 +71,7 @@ const UserProfile = () => {
           <button type="button" onClick={handleBlockToggle} className={style.bRating} disabled={isUpdatingBlock}>
             {isBlocked ? "Desbloquear" : "Bloquear"}
           </button>
-          <button type="button" onClick={handleReport} className={style.bRating}>Denunciar</button>
+          <button type="button" onClick={() => setReportOpen(true)} className={style.bRating}>Denunciar</button>
         </div>
       </section>
     </main>

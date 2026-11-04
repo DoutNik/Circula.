@@ -6,6 +6,7 @@ const postsController = require("../../controllers/postsControllers.js");
 const authorization = require("../../middleware/authorization");
 const isAdmin = require("../../middleware/isAdmin");
 const isPostOwnerOrAdmin = require("../../middleware/isPostOwnerOrAdmin");
+const { validatePostFields } = require("../../utils/postFields");
 
 // Listado público (navegar publicaciones no requiere estar logueado)
 router.get("/", async (req, res) => {
@@ -112,15 +113,12 @@ router.get("/:id", async (req, res) => {
 // Crear una publicación requiere estar logueado; el post queda asociado
 // al usuario del token, nunca a un UserId que mande el cliente.
 router.post("/", authorization, async (req, res) => {
-  const postData = {
-    ...req.body,
-    UserId: req.authUserId,
-  };
   try {
+    const postData = { ...validatePostFields(req.body), UserId: req.authUserId };
     const newPost = await postsController.createPost(postData);
     return res.status(201).json(newPost);
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return res.status(400).json({ error: error.message, fieldErrors: error.fieldErrors });
   }
 });
 

@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { createMessage, getMyChats } from "../../redux/actions";
 
 import style from "./ChatsMessages.module.css";
+import { errorMessage, focusFirstError } from "../../utils/formValidation.js";
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:3001";
 
@@ -13,6 +14,9 @@ const ChatsMessages = ({ chatId, userData }) => {
   const dispatch = useDispatch();
   const messagesEndRef = useRef(null);
   const socketRef = useRef(null);
+  const composer = useRef(null);
+  const requestInFlight = useRef(false);
+  const currentChatId = useRef(chatId);
   const senderId = Number(userData?.id);
 
   const chats = useSelector((state) => state.chats);
@@ -22,19 +26,30 @@ const ChatsMessages = ({ chatId, userData }) => {
 
   const [newMessage, setNewMessage] = useState("");
   const [messageHistory, setMessageHistory] = useState([]);
+  const [messageError, setMessageError] = useState("");
+  const [sending, setSending] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyError, setHistoryError] = useState("");
+  const [historyAttempt, setHistoryAttempt] = useState(0);
 
   //Traer historial de mensajes de la base de datos y cargarla en el estado local
   useEffect(() => {
+    let cancelled = false;
+    currentChatId.current = chatId;
+    setMessageHistory([]);
+    setHistoryError("");
+    setHistoryLoading(true);
     const fetchMessageHistory = async () => {
       try {
         const response = await api.get(`/messages/${chatId}`);
-        setMessageHistory(response.data);
+        if (!cancelled) setMessageHistory(response.data);
       } catch (error) {
-        console.error("Error fetching message history:", error);
-      }
+        if (!cancelled) setHistoryError(errorMessage(error, "No pudimos cargar los mensajes. Volvé a intentar."));
+      } finally { if (!cancelled) setHistoryLoading(false); }
     };
     fetchMessageHistory();
-  }, [chatId]);
+    return () => { cancelled = true; };
+  }, [chatId, historyAttempt]);
 
 useEffect(() => {
   const list = messagesEndRef.current;
@@ -49,25 +64,40 @@ useEffect(() => {
 
   const handleInputChange = (event) => {
     setNewMessage(event.target.value);
+    if (messageError) setMessageError(event.target.value.trim() ? "" : "Escribí un mensaje antes de enviarlo.");
   };
 
   //Mandar info al servidor y guardar mensaje en base de datos
-  const sendMessage = async () => {
+  const sendMessage = async (event) => {
+    event?.preventDefault();
+    if (requestInFlight.current) return;
     const content = newMessage.trim();
-
-    if (!content) return;
-
-    try {
-      await dispatch(createMessage(chatId, content));
-
-      setNewMessage("");
-    } catch (error) {
-      console.error("Error al enviar mensaje:", error);
+    if (!content || content.length > 2000) {
+      const validation = !content ? "Escribí un mensaje antes de enviarlo." : "Tu mensaje puede tener hasta 2000 caracteres.";
+      setMessageError(validation);
+      focusFirstError(composer.current, { message: validation });
+      return;
     }
+    requestInFlight.current = true;
+    setSending(true);
+    setMessageError("");
+    try {
+      const message = await dispatch(createMessage(chatId, content));
+      if (currentChatId.current === chatId) {
+        // The response confirms delivery even if the socket is reconnecting.
+        setMessageHistory((history) => history.some((item) => Number(item.id) === Number(message.id)) ? history : [...history, message]);
+        setNewMessage("");
+      }
+    } catch (error) {
+      if (currentChatId.current === chatId) {
+        setMessageError(errorMessage(error, "No pudimos enviar el mensaje. El texto sigue acá para que puedas reintentarlo."));
+        focusFirstError(composer.current, { message: true });
+      }
+    } finally { requestInFlight.current = false; setSending(false); }
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
       e.preventDefault();
       sendMessage();
     }
@@ -138,6 +168,9 @@ useEffect(() => {
       </div>
 
       <ul className={style.listMsg} ref={messagesEndRef}>
+        {historyLoading && <li className={style.historyStatus} role="status">Cargando mensajes…</li>}
+        {historyError && <li className={style.historyStatus}><p role="alert">{historyError}</p><button type="button" onClick={() => setHistoryAttempt((attempt) => attempt + 1)}>Volver a cargar</button></li>}
+        {!historyLoading && !historyError && !messageHistory.length && <li className={style.historyStatus}>Todavía no hay mensajes. ¡Saludá para empezar el canje!</li>}
         {messageHistory.map((msg, index) => {
   const isMine = Number(msg.userId) === Number(senderId);
 
@@ -180,23 +213,35 @@ useEffect(() => {
 })}
       </ul>
 
-      <div className={style.input}>
-        <input
-          type="text"
+      <form ref={composer} className={style.input} onSubmit={sendMessage} noValidate aria-busy={sending}>
+        <label htmlFor="chat-message" className={style.composerLabel}>Tu mensaje</label>
+        <div className={style.composerRow}>
+        <textarea
+          id="chat-message"
+          name="message"
+          rows={2}
+          maxLength={2000}
           value={newMessage}
           onKeyDown={handleKeyDown}
           onChange={handleInputChange}
-          placeholder="Escribe tu mensaje..."
+          placeholder="Por ejemplo: ¡Hola! ¿Cuándo te viene bien hacer el canje?"
+          disabled={sending}
+          aria-invalid={Boolean(messageError)}
+          aria-describedby={`chat-message-hint${messageError ? " chat-message-error" : ""}`}
         />
-        <button onClick={sendMessage} className={style.sendMessage}>
+        <button type="submit" className={style.sendMessage} disabled={sending} aria-label={sending ? "Enviando mensaje" : "Enviar mensaje"}>
+          {sending ? <span className={style.sendProgress} aria-hidden="true">…</span> :
           <img
             width="24"
             height="24"
             src="https://img.icons8.com/fluency-systems-regular/48/sent--v1.png"
-            alt="sent--v1"
-          />
+            alt=""
+          />}
         </button>
-      </div>
+        </div>
+        <div className={style.composerHelp} id="chat-message-hint"><span>Enter para enviar · Shift + Enter para otra línea</span><span>{newMessage.length}/2000</span></div>
+        {messageError && <p className={style.composerError} id="chat-message-error" role="alert">{messageError}</p>}
+      </form>
     </div>
   );
 };

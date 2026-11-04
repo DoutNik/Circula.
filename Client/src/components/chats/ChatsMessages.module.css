@@ -106,6 +106,7 @@
   margin: 0.15rem 0;
   padding: 0.6rem 0.8rem;
   word-break: break-word;
+  white-space: pre-wrap;
 }
 
 .myMessage h5 {
@@ -119,38 +120,52 @@
 }
 
 .input {
-  display: flex;
-  align-items: center;
+  display: grid;
   gap: 0.6rem;
   width: 100%;
   padding: 0.75rem clamp(0.75rem, 3vw, 1.25rem);
-  background-color: #ffe66d;
+  background-color: var(--surface-secondary, #f6f8f2);
+  border-top: 1px solid var(--border-strong, #dce3dc);
   border-radius: 0.9rem 0.9rem 0 0;
 }
 
-.chat input {
+.composerRow { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.composerLabel { font-weight: 700; color: var(--text-primary,#243127); font-size: 14px; }
+.chat textarea {
   flex: 1;
   min-width: 0;
-  height: 2.5rem;
-  padding: 0 0.75rem;
-  border: none;
-  border-radius: 0.35rem;
-  outline: none;
+  min-height: 52px;
+  max-height: 160px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-strong,#cbd6cb);
+  border-radius: 14px;
+  resize: vertical;
+  color: var(--text-primary,#243127);
+  background: var(--surface,#fff);
   font-size: 1rem;
 }
+.chat textarea[aria-invalid="true"] { border-color: #c5423f; box-shadow: 0 0 0 1px #c5423f; }
+.chat textarea:focus-visible { outline: 3px solid #426b48; outline-offset: 2px; }
+.composerHelp { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 3px 12px; font-size: 11px; color: var(--text-secondary,#63705e); }
+.composerError { margin: 0; font-size: 13px; color: #b32e2a; }
+.historyStatus { text-align: center; padding: 24px 12px; color: #63705e; font-size: 14px; }
+.historyStatus button { min-height: 44px; padding: 8px 14px; background: #fff1ae; color: #243127; border-radius: 10px; font-weight: 700; }
+.historyStatus p { margin: 0 0 12px; }
+.sendProgress { font-size: 22px; color: #243127; }
 
 .sendMessage {
   display: grid;
   flex: 0 0 auto;
-  width: 2.5rem;
+  width: 3rem;
   aspect-ratio: 1;
   place-items: center;
   padding: 0;
   border: none;
   border-radius: 50%;
-  background-color: #4ecdc4;
+  background-color: #ffe16b;
   cursor: pointer;
 }
+.sendMessage:disabled { opacity: .55; }
 
 .sendMessage:hover {
   filter: brightness(0.95);

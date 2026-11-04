@@ -18,6 +18,7 @@ import "slick-carousel/slick/slick-theme.css";
 import Swal from "sweetalert2";
 import api from "../../api/api";
 import style from "./Detail.module.css";
+import ReportDialog from "../../components/forms/ReportDialog.jsx";
 
 const Detail = ({ userData }) => {
   const myUserId = userData?.id;
@@ -34,6 +35,7 @@ const Detail = ({ userData }) => {
   const [userPosts, setUserPosts] = useState([]);
   const [showPostSelector, setShowPostSelector] = useState(false);
   const [selectedPostId, setSelectedPostId] = useState(null);
+  const [reportOpen, setReportOpen] = useState(false);
 
   const navigate = useNavigate();
 
@@ -178,30 +180,9 @@ const Detail = ({ userData }) => {
     }
   };
 
-  const handleReport = async () => {
+  const handleReport = () => {
     if (!myUserId) { navigate("/login"); return; }
-    const reason = window.prompt(
-      "Contanos brevemente por qué querés denunciar esta publicación:",
-    );
-    if (!reason?.trim()) return;
-
-    try {
-      await api.post("/reports", {
-        targetPostId: likedPostId,
-        reason: reason.trim(),
-      });
-      await Swal.fire(
-        "Denuncia enviada",
-        "Moderación revisará el contenido.",
-        "success",
-      );
-    } catch (error) {
-      await Swal.fire(
-        "No se pudo enviar",
-        error.response?.data?.error || "Intentá nuevamente.",
-        "error",
-      );
-    }
+    setReportOpen(true);
   };
 
   const isPostAlreadyRequested = (myPostId, likedPostId) => {
@@ -228,6 +209,7 @@ const Detail = ({ userData }) => {
 
   return (
     <>
+      {reportOpen && <ReportDialog targetPostId={likedPostId} onClose={() => setReportOpen(false)} />}
       {showPostSelector && (
         <div className={style.modalOverlay}>
           <div className={style.modal}>

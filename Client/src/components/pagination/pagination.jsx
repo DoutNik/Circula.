@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "./Pagination.module.css";
 export default function Paginado({
   allCard,
@@ -9,6 +9,7 @@ export default function Paginado({
   const [displayPages, setDisplayPages] = useState([]);
   const [inputPage, setInputPage] = useState("");
   const [errorInput, setErrorInput] = useState("");
+  const pageInput = useRef(null);
   const totalPages = Math.max(1, Math.ceil(allCard / cardPerPage));
   useEffect(() => {
     /* Cantidad de páginas visibles según el ancho de pantalla. No dependemos únicamente del CSS porque también queremos evitar generar demasiados botones. */ const getMaxDisplayPages =
@@ -64,6 +65,7 @@ export default function Paginado({
       setErrorInput("");
     } else {
       setErrorInput(`Ingresá un número entre 1 y ${totalPages}`);
+      pageInput.current?.focus();
     }
   };
   const handleKeyDown = (event) => {
@@ -149,15 +151,18 @@ export default function Paginado({
           </label>{" "}
           <input
             id="pagination-page-input"
+            ref={pageInput}
             type="text"
             inputMode="numeric"
             pattern="[0-9]*"
             value={inputPage}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            placeholder="#"
+            placeholder="N.º"
             className={styles.paginationInput}
             aria-label="Número de página"
+            aria-invalid={Boolean(errorInput)}
+            aria-describedby={errorInput ? "pagination-error" : undefined}
           />{" "}
           <button
             type="button"
@@ -170,7 +175,7 @@ export default function Paginado({
         </div>{" "}
         {/* ERROR */}{" "}
         {errorInput && (
-          <p className={styles.paginationError}> {errorInput} </p>
+          <p id="pagination-error" className={styles.paginationError} role="alert"> {errorInput} </p>
         )}{" "}
       </div>{" "}
     </nav>

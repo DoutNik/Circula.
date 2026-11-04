@@ -123,9 +123,11 @@ const Filters = () => {
         }}
         className={style.filters}
       >
-        <select value={selectedProvince} onChange={handleProvinceChange}>
+        <div className={style.field}>
+        <label htmlFor="filter-province">Provincia</label>
+        <select id="filter-province" value={selectedProvince} onChange={handleProvinceChange}>
           <option value="" disabled>
-            Provincia
+            Todas las provincias
           </option>
           {uniqueProvinces().map((province) => (
             <option key={province} value={province}>
@@ -133,14 +135,17 @@ const Filters = () => {
             </option>
           ))}
         </select>
-
+        </div>
+        <div className={style.field}>
+        <label htmlFor="filter-locality">Localidad</label>
         <select
+          id="filter-locality"
           value={selectedLocality}
           onChange={handleLocalityChange}
           disabled={!selectedProvince}
         >
           <option value="" disabled>
-            Localidad
+            {selectedProvince ? "Todas las localidades" : "Primero elegí una provincia"}
           </option>
           {uniqueLocalities().map((locality) => (
             <option key={locality} value={locality}>
@@ -148,10 +153,12 @@ const Filters = () => {
             </option>
           ))}
         </select>
-
-        <select value={selectedCategory} onChange={handleCategoryChange}>
+        </div>
+        <div className={style.field}>
+        <label htmlFor="filter-category">Categoría</label>
+        <select id="filter-category" value={selectedCategory} onChange={handleCategoryChange}>
           <option value="" disabled>
-            Categoría
+            Todas las categorías
           </option>
           {uniqueCategories().map((category) => (
             <option key={category} value={category}>
@@ -159,13 +166,14 @@ const Filters = () => {
             </option>
           ))}
         </select>
-        <button onClick={handleResetFilters}>
-          Reiniciar filtros
+        </div>
+        <button type="button" onClick={handleResetFilters}>
+          Limpiar filtros
           <img
             width="24"
             height="24"
             src="https://img.icons8.com/color/48/broom.png"
-            alt="broom"
+            alt=""
           />
         </button>
       </motion.div>

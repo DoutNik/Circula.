@@ -1,544 +1,261 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useDropzone } from "react-dropzone";
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import Swal from "sweetalert2";
-import Header from "../../components/header/Header";
-import style from "./AddProduct.module.css";
 import api from "../../api/api";
-import {
-  validateDescription,
-  validateTitle,
-  validateImageFile,
-} from "./validation";
+import { Field, FormPage, FormStatus } from "../../components/forms/FormUI";
+import forms from "../../components/forms/FormUI.module.css";
+import { errorMessage, fieldProps, focusFirstError } from "../../utils/formValidation";
+import { validateDescription, validateTitle, validateImageFile } from "./validation";
+import style from "./AddProduct.module.css";
+
 const MAX_IMAGES = 3;
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
-const categories = [
-  "🧁 Alimentos",
-  "🍹 Bebidas",
-  "⚱️ Antiguedades",
-  "🎨 Arte y artesanías",
-  "⚽️ Articulos deportivos",
-  "📺 Audio y video",
-  "📷 Cámaras y accesorios",
-  "📱 Celulares",
-  "💻 Computadoras",
-  "🔌 Electrodomésticos",
-  "🛠️ Herramientas",
-  "🎸 Instrumentos musicales",
-  "💍 Joyas y relojes",
-  "🪑 Muebles y hogar",
-  "🚗 Rodados con motor",
-  "🚲 Rodados sin motor",
-  "👕 Ropa e indumentaria",
-  "🎮 Videojuegos",
-  "🛒 Varios",
-];
-const getErrorMessage = (error) => {
-  const data = error.response?.data;
-  if (typeof data === "string") {
-    return data;
-  }
-  return (
-    data?.error ||
-    data?.message ||
-    error.message ||
-    "Ocurrió un error inesperado."
-  );
-};
-export default function AddProduct() {
-  const navigate = useNavigate();
-  const [files, setFiles] = useState([]);
-  const filesRef = useRef([]);
+const categories = ["🧁 Alimentos", "🍹 Bebidas", "⚱️ Antiguedades", "🎨 Arte y artesanías", "⚽️ Articulos deportivos", "📺 Audio y video", "📷 Cámaras y accesorios", "📱 Celulares", "💻 Computadoras", "🔌 Electrodomésticos", "🛠️ Herramientas", "🎸 Instrumentos musicales", "💍 Joyas y relojes", "🪑 Muebles y hogar", "🚗 Rodados con motor", "🚲 Rodados sin motor", "👕 Ropa e indumentaria", "🎮 Videojuegos", "🛒 Varios"];
+const initialValues = { title: "", description: "", category: "", province: "", locality: "" };
+
+// Abort stale requests when the province changes and expose recoverable errors.
+function useLocationOptions(province) {
   const [provinces, setProvinces] = useState([]);
   const [localities, setLocalities] = useState([]);
-  const [selectedProvince, setSelectedProvince] = useState("");
-  const [localidad, setSelectedLocalidad] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [errors, setErrors] = useState({ title: null, description: null });
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    disabled: false,
-  });
-  const provinceAbortRef = useRef(null);
-  const localityAbortRef = useRef(null);
-  /* ===================================================== MANTENER REF DE ARCHIVOS ACTUALIZADA ===================================================== */ useEffect(() => {
-    filesRef.current = files;
-  }, [files]);
-  /* ===================================================== LIMPIAR OBJECT URLS AL DESMONTAR ===================================================== */ useEffect(() => {
-    return () => {
-      filesRef.current.forEach((file) => {
-        if (file.preview) {
-          URL.revokeObjectURL(file.preview);
-        }
-      });
-      // Se leen los controladores más recientes a propósito al desmontar.
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      provinceAbortRef.current?.abort();
-      localityAbortRef.current?.abort();
-    };
-  }, []);
-  /* ===================================================== PROVINCIAS ===================================================== */ useEffect(() => {
+  const [provinceLoading, setProvinceLoading] = useState(true);
+  const [localityLoading, setLocalityLoading] = useState(false);
+  const [provinceError, setProvinceError] = useState("");
+  const [localityError, setLocalityError] = useState("");
+  const [provinceAttempt, setProvinceAttempt] = useState(0);
+  const [localityAttempt, setLocalityAttempt] = useState(0);
+  useEffect(() => {
+    let active = true;
     const controller = new AbortController();
-    fetch("https://apis.datos.gob.ar/georef/api/provincias", {
-      signal: controller.signal,
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("No se pudieron obtener las provincias.");
-        }
-        return res.json();
-      })
+    const timeout = setTimeout(() => controller.abort(), 20000);
+    setProvinceLoading(true); setProvinceError("");
+    fetch("https://apis.datos.gob.ar/georef/api/provincias", { signal: controller.signal })
+      .then((response) => { if (!response.ok) throw new Error(); return response.json(); })
       .then((data) => {
-        setProvinces(data.provincias || []);
+        if (!data.provincias?.length) throw new Error();
+        if (active) setProvinces([...data.provincias].sort((a, b) => a.nombre.localeCompare(b.nombre)));
       })
-      .catch((error) => {
-        if (error.name !== "AbortError") {
-          console.error(error);
-        }
-      });
-    return () => controller.abort();
+      .catch(() => { if (active) setProvinceError("No pudimos cargar las provincias. Volvé a intentarlo."); })
+      .finally(() => { clearTimeout(timeout); if (active) setProvinceLoading(false); });
+    return () => { active = false; clearTimeout(timeout); controller.abort(); };
+  }, [provinceAttempt]);
+  useEffect(() => {
+    if (!province) { setLocalities([]); setLocalityLoading(false); setLocalityError(""); return; }
+    let active = true;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 20000);
+    setLocalities([]); setLocalityLoading(true); setLocalityError("");
+    fetch(`https://apis.datos.gob.ar/georef/api/localidades?provincia=${encodeURIComponent(province)}&max=5000`, { signal: controller.signal })
+      .then((response) => { if (!response.ok) throw new Error(); return response.json(); })
+      .then((data) => {
+        if (!data.localidades?.length) throw new Error();
+        if (active) setLocalities([...data.localidades].sort((a, b) => a.nombre.localeCompare(b.nombre)));
+      })
+      .catch(() => { if (active) setLocalityError("No pudimos cargar las localidades de esa provincia. Intentá nuevamente."); })
+      .finally(() => { clearTimeout(timeout); if (active) setLocalityLoading(false); });
+    return () => { active = false; clearTimeout(timeout); controller.abort(); };
+  }, [province, localityAttempt]);
+  return { provinces, localities, provinceLoading, localityLoading, provinceError, localityError,
+    retryProvinces: () => setProvinceAttempt((value) => value + 1), retryLocalities: () => setLocalityAttempt((value) => value + 1) };
+}
+
+export default function AddProduct() {
+  const navigate = useNavigate();
+  const form = useRef(null);
+  const fileInput = useRef(null);
+  const filesRef = useRef([]);
+  const uploadCache = useRef(new Map());
+  const busyRef = useRef(false);
+  const validatingRef = useRef(false);
+  const mounted = useRef(true);
+  const [values, setValues] = useState(initialValues);
+  const [files, setFiles] = useState([]);
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
+  const [busy, setBusy] = useState(false);
+  const [checkingImages, setCheckingImages] = useState(false);
+  const [imageIssue, setImageIssue] = useState("");
+  const [dragging, setDragging] = useState(false);
+  const [status, setStatus] = useState("");
+  const [progress, setProgress] = useState(0);
+  const [submitError, setSubmitError] = useState("");
+  const [premium, setPremium] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const locations = useLocationOptions(values.province);
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; filesRef.current.forEach((item) => URL.revokeObjectURL(item.preview)); };
   }, []);
-  /* ===================================================== DRAG / DROP ===================================================== */ const onDrop =
-    useCallback(async (acceptedFiles) => {
-      const currentFiles = filesRef.current;
-      if (currentFiles.length + acceptedFiles.length > MAX_IMAGES) {
-        await Swal.fire({
-          title: "¡Límite de imágenes alcanzado!",
-          text: `No puedes cargar más de ${MAX_IMAGES} imágenes.`,
-          icon: "warning",
-        });
-        return;
-      }
-      const validatedFiles = [];
-      for (const file of acceptedFiles) {
-        const validationError = await validateImageFile(file);
-        if (validationError) {
-          await Swal.fire({
-            title: "Imagen no válida",
-            text: validationError,
-            icon: "warning",
-          });
-          continue;
-        }
-        const preview = URL.createObjectURL(file);
-        validatedFiles.push(Object.assign(file, { preview }));
-      }
-      if (!validatedFiles.length) {
-        return;
-      }
-      setFiles((currentFiles) => [...currentFiles, ...validatedFiles]);
-    }, []);
-  const onDropRejected = useCallback(async () => {
-    await Swal.fire({
-      title: "Archivo no válido",
-      text: "Solo se aceptan imágenes JPG o PNG de hasta 5 MB.",
-      icon: "warning",
-    });
-  }, []);
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    onDropRejected,
-    accept: { "image/jpeg": [".jpg", ".jpeg"], "image/png": [".png"] },
-    maxSize: MAX_IMAGE_SIZE,
-    multiple: true,
-    disabled: formData.disabled,
+
+  const validate = (current = values) => ({
+    title: validateTitle(current.title),
+    category: categories.includes(current.category) ? "" : "Elegí la categoría que mejor describe tu producto.",
+    description: validateDescription(current.description),
+    images: filesRef.current.length ? imageIssue : "Agregá al menos una foto de tu producto.",
+    province: current.province ? "" : "Elegí la provincia donde se encuentra el producto.",
+    locality: current.locality ? "" : "Elegí una localidad para coordinar los canjes.",
   });
-  /* ===================================================== LIMPIAR ARCHIVOS ===================================================== */ const clearFiles =
-    useCallback(() => {
-      filesRef.current.forEach((file) => {
-        if (file.preview) {
-          URL.revokeObjectURL(file.preview);
+  const change = (name, value) => {
+    const next = { ...values, [name]: value, ...(name === "province" ? { locality: "" } : {}) };
+    setValues(next); setSubmitError("");
+    if (touched[name] || errors[name]) setErrors((current) => ({ ...current, [name]: validate(next)[name] }));
+    if (name === "province") {
+      setErrors((current) => ({ ...current, locality: "" }));
+      setTouched((current) => ({ ...current, locality: false }));
+    }
+  };
+  const blur = (name) => {
+    setTouched((current) => ({ ...current, [name]: true }));
+    setErrors((current) => ({ ...current, [name]: validate()[name] }));
+  };
+  const chooseFiles = async (selected) => {
+    if (busyRef.current || validatingRef.current || !selected.length) return;
+    if (filesRef.current.length + selected.length > MAX_IMAGES) {
+      const issue = `Podés subir hasta ${MAX_IMAGES} fotos. Quitá una antes de agregar más.`;
+      setImageIssue(issue);
+      setErrors((current) => ({ ...current, images: issue }));
+      focusFirstError(form.current, { images: true }); return;
+    }
+    validatingRef.current = true; setCheckingImages(true);
+    let issue = "";
+    const additions = [];
+    try {
+      for (const file of selected) {
+        const invalid = await validateImageFile(file);
+        if (invalid) { issue = `${file.name}: ${invalid}.`; continue; }
+        if ([...filesRef.current, ...additions].some((item) => item.file.name === file.name && item.file.size === file.size && item.file.lastModified === file.lastModified)) {
+          issue = "Esa foto ya está agregada. Elegí una diferente."; continue;
         }
-      });
-      setFiles([]);
-    }, []);
-  /* ===================================================== ELIMINAR UNA IMAGEN ===================================================== */ const handleDeleteImage =
-    useCallback((index) => {
-      setFiles((currentFiles) => {
-        const fileToRemove = currentFiles[index];
-        if (fileToRemove?.preview) {
-          URL.revokeObjectURL(fileToRemove.preview);
+        additions.push({ id: crypto.randomUUID(), file, preview: URL.createObjectURL(file) });
+      }
+      if (!mounted.current) { additions.forEach((item) => URL.revokeObjectURL(item.preview)); return; }
+      const next = [...filesRef.current, ...additions];
+      filesRef.current = next; setFiles(next);
+      setImageIssue(issue);
+      setErrors((current) => ({ ...current, images: issue }));
+      setSubmitError("");
+    } catch { if (mounted.current) { const issue = "No pudimos leer esa imagen. Probá con otra foto."; setImageIssue(issue); setErrors((current) => ({ ...current, images: issue })); } }
+    finally { validatingRef.current = false; if (mounted.current) setCheckingImages(false); }
+  };
+  const removeFile = (id) => {
+    const removed = filesRef.current.find((item) => item.id === id);
+    if (removed) { URL.revokeObjectURL(removed.preview); uploadCache.current.delete(removed.file); }
+    const next = filesRef.current.filter((item) => item.id !== id);
+    filesRef.current = next; setFiles(next);
+    setImageIssue("");
+    setErrors((current) => ({ ...current, images: next.length ? "" : "Agregá al menos una foto de tu producto." }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (busyRef.current || validatingRef.current) return;
+    const invalid = validate();
+    setErrors(invalid); setTouched(Object.fromEntries(Object.keys(invalid).map((key) => [key, true])));
+    if (Object.values(invalid).some(Boolean)) { focusFirstError(form.current, invalid); return; }
+    busyRef.current = true; setBusy(true); setSubmitError(""); setPremium(false); setProgress(0);
+    let uploading = true;
+    try {
+      setStatus("Preparando tus fotos…");
+      const { data: signatureData } = await api.get("/posts/cloudinary/signature");
+      const { apiKey, timestamp, signature, cloudName } = signatureData;
+      if (!apiKey || !timestamp || !signature || !cloudName) throw new Error();
+      const image = [];
+      for (const [index, item] of files.entries()) {
+        setStatus(`Subiendo foto ${index + 1} de ${files.length}…`);
+        let uploadedUrl = uploadCache.current.get(item.file);
+        if (!uploadedUrl) {
+          const data = new FormData();
+          data.append("file", item.file); data.append("api_key", apiKey); data.append("timestamp", timestamp);
+          data.append("signature", signature); data.append("folder", "postimages");
+          // Do not forward the Circula session token to the image provider.
+          const uploaded = await axios.post(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, data, { timeout: 45000 });
+          if (!uploaded.data.secure_url?.startsWith("https://")) throw new Error();
+          uploadedUrl = uploaded.data.secure_url.replace("/upload/", "/upload/q_auto,f_auto/");
+          uploadCache.current.set(item.file, uploadedUrl);
         }
-        return currentFiles.filter((_, fileIndex) => fileIndex !== index);
-      });
-    }, []);
-  /* ===================================================== INPUTS ===================================================== */ const handleChange =
-    (event) => {
-      const { name, value } = event.target;
-      setFormData((current) => ({ ...current, [name]: value }));
-      let error = null;
-      if (name === "title") {
-        error = validateTitle(value);
+        image.push(uploadedUrl); setProgress(index + 1);
       }
-      if (name === "description") {
-        error = validateDescription(value);
+      uploading = false; setStatus("Publicando tu producto…");
+      const { data } = await api.post("/posts/", { title: values.title.trim(), description: values.description.trim(), category: values.category, image, ubication: `${values.province}, ${values.locality}` });
+      await Swal.fire({ toast: true, position: "top-end", icon: "success", title: "¡Tu producto ya está publicado!", timer: 1600, showConfirmButton: false });
+      navigate(data?.id ? `/detail/${data.id}` : "/");
+    } catch (failure) {
+      const serverFields = failure.response?.data?.fieldErrors;
+      if (serverFields && typeof serverFields === "object") {
+        const mapped = Object.fromEntries(Object.entries(serverFields).map(([key, value]) => [key === "ubication" ? "locality" : key === "image" ? "images" : key, value]));
+        setErrors(mapped); focusFirstError(form.current, mapped);
+      } else if (uploading) {
+        const imageError = { images: "No pudimos subir las fotos. Revisá tu conexión y volvé a publicar; las fotos que se subieron ya están guardadas." };
+        setErrors((current) => ({ ...current, ...imageError })); focusFirstError(form.current, imageError);
+      } else {
+        const message = errorMessage(failure, "No pudimos publicar el producto. Conservamos tus datos para que puedas reintentar.");
+        setSubmitError(message); setPremium(/premium/i.test(message));
       }
-      setErrors((current) => ({ ...current, [name]: error }));
-    };
-  /* ===================================================== PROVINCIA ===================================================== */ const handleProvinceChange =
-    async (event) => {
-      const province = event.target.value;
-      provinceAbortRef.current?.abort();
-      localityAbortRef.current?.abort();
-      setSelectedProvince(province);
-      setSelectedLocalidad("");
-      setLocalities([]);
-      if (!province) {
-        return;
-      }
-      const controller = new AbortController();
-      localityAbortRef.current = controller;
-      try {
-        const response = await fetch(
-          `https://apis.datos.gob.ar/georef/api/localidades?provincia=${encodeURIComponent(province)}&max=500`,
-          { signal: controller.signal },
-        );
-        if (!response.ok) {
-          throw new Error("No se pudieron obtener las localidades.");
-        }
-        const data = await response.json();
-        setLocalities(data.localidades || []);
-      } catch (error) {
-        if (error.name !== "AbortError") {
-          console.error(error);
-        }
-      }
-    };
-  /* ===================================================== VALIDAR FORMULARIO ===================================================== */ const validateForm =
-    () => {
-      const titleError = validateTitle(formData.title);
-      const descriptionError = validateDescription(formData.description);
-      setErrors({ title: titleError, description: descriptionError });
-      return !titleError && !descriptionError;
-    };
-  /* ===================================================== PREMIUM ===================================================== */ const handlePremium =
-    async () => {
-      try {
-        const response = await api.post("/plans/create-order", {
-          title: "Premium",
-        });
-        const initPoint = response.data?.init_point;
-        if (!initPoint || !initPoint.startsWith("https://")) {
-          throw new Error("No se recibió un enlace de pago válido.");
-        }
-        window.location.assign(initPoint);
-      } catch (error) {
-        Swal.fire({
-          icon: "error",
-          title: "No se pudo iniciar el pago",
-          text: getErrorMessage(error),
-        });
-      }
-    };
-  /* ===================================================== SUBMIT ===================================================== */ const handleSubmit =
-    async (event) => {
-      event.preventDefault();
-      const hasRequiredFields =
-        formData.title.trim() &&
-        files.length > 0 &&
-        selectedProvince &&
-        localidad &&
-        selectedCategory;
-      if (!hasRequiredFields) {
-        await Swal.fire({
-          title: "Campos obligatorios",
-          text: "Todos los campos marcados con * son obligatorios.",
-          icon: "warning",
-        });
-        return;
-      }
-      if (!validateForm()) {
-        await Swal.fire({
-          title: "Errores en el formulario",
-          text: "Revisa el título y la descripción.",
-          icon: "error",
-        });
-        return;
-      }
-      setFormData((current) => ({ ...current, disabled: true }));
-      try {
-        /* Firma desde TU backend. */ const signRes = await api.get(
-          "posts/cloudinary/signature",
-        );
-        const { apiKey, timestamp, signature, cloudName } = signRes.data;
-        if (!apiKey || !timestamp || !signature || !cloudName) {
-          throw new Error("La firma de Cloudinary es inválida.");
-        }
-        /* Subida paralela a Cloudinary. */ const uploadPromises = files.map(
-          async (file) => {
-            const uploadFormData = new FormData();
-            uploadFormData.append("file", file);
-            uploadFormData.append("api_key", apiKey);
-            uploadFormData.append("timestamp", timestamp);
-            uploadFormData.append("signature", signature);
-            uploadFormData.append("folder", "postimages");
-            const uploadResponse = await fetch(
-              `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-              { method: "POST", body: uploadFormData },
-            );
-            const uploadData = await uploadResponse.json();
-            if (!uploadResponse.ok) {
-              throw new Error(
-                uploadData.error?.message ||
-                  "No se pudo subir una imagen a Cloudinary.",
-              );
-            }
-            if (!uploadData.secure_url) {
-              throw new Error("Cloudinary no devolvió una URL segura.");
-            }
-            return uploadData.secure_url.replace(
-              "/upload/",
-              "/upload/q_auto,f_auto/",
-            );
-          },
-        );
-        const imageUrls = await Promise.all(uploadPromises);
-        if (!imageUrls.length) {
-          throw new Error("No se pudo subir ninguna imagen.");
-        }
-        const newPost = {
-          title: formData.title.trim(),
-          description: formData.description.trim(),
-          image: imageUrls,
-          ubication: `${selectedProvince}, ${localidad}`,
-          category: selectedCategory,
-        };
-        await api.post("/posts/", newPost);
-        clearFiles();
-        setSelectedCategory("");
-        setSelectedProvince("");
-        setSelectedLocalidad("");
-        setLocalities([]);
-        setFormData({ title: "", description: "", disabled: false });
-        setErrors({ title: null, description: null });
-        await Swal.fire({
-          icon: "success",
-          title: "🎉 ¡Hecho!",
-          text: "Tu publicación fue creada correctamente.",
-          allowOutsideClick: false,
-        });
-        /* Si el usuario ya está autenticado, normalmente tendría más sentido ir al perfil o al inicio. */ navigate(
-          "/",
-        );
-      } catch (error) {
-        const errorMessage = getErrorMessage(error);
-        if (errorMessage.toLowerCase().includes("premium")) {
-          const result = await Swal.fire({
-            title: "Límite de publicaciones alcanzado",
-            text: errorMessage,
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Hacerse Premium",
-            cancelButtonText: "Cancelar",
-            reverseButtons: true,
-          });
-          if (result.isConfirmed) {
-            await handlePremium();
-          }
-        } else {
-          await Swal.fire({
-            icon: "error",
-            title: "No se pudo crear la publicación",
-            text: errorMessage,
-          });
-        }
-      } finally {
-        setFormData((current) => ({ ...current, disabled: false }));
-      }
-    };
-  const sortedProvinces = [...provinces].sort((a, b) =>
-    a.nombre.localeCompare(b.nombre),
-  );
-  const sortedLocalities = [...localities].sort((a, b) =>
-    a.nombre.localeCompare(b.nombre),
-  );
-  const Banner =
-    "https://res.cloudinary.com/dlahgnpwp/image/upload/v1699885578/emailAssets/er00zffd102eyze13aug.jpg";
-  const Banner2 =
-    "https://res.cloudinary.com/dlahgnpwp/image/upload/v1699885578/emailAssets/cyzzxxg8vkfxaqzolq9m.jpg";
-  return (
-    <>
-      {" "}
-      <Header banner1={Banner} banner2={Banner2} />{" "}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.25 }}
-        className={style.container}
-      >
-        {" "}
-        <h3>Crear publicación</h3>{" "}
-        <form className={style.create} onSubmit={handleSubmit}>
-          {" "}
-          <div className={style.part1}>
-            {" "}
-            <label className={style.fieldLabel}>
-              {" "}
-              Título*{" "}
-              <input
-                className={style.input}
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                placeholder="Inserte título"
-                disabled={formData.disabled}
-                maxLength={30}
-                autoComplete="off"
-              />{" "}
-              {errors.title && (
-                <span className={style.errorMessage}> {errors.title} </span>
-              )}{" "}
-            </label>{" "}
-            <label className={style.fieldLabel}>
-              {" "}
-              Descripción{" "}
-              <textarea
-                className={style.input}
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                placeholder="Inserte descripción"
-                disabled={formData.disabled}
-                maxLength={250}
-              />{" "}
-              <div className={style.characterCount}>
-                {" "}
-                {formData.description.length}/250{" "}
-              </div>{" "}
-              {errors.description && (
-                <span className={style.errorMessage}>
-                  {" "}
-                  {errors.description}{" "}
-                </span>
-              )}{" "}
-            </label>{" "}
-            <label className={style.fieldLabel}>
-              {" "}
-              Imagen*{" "}
-              <section className={style.files}>
-                {" "}
-                <div className={style.dropzone} {...getRootProps()}>
-                  {" "}
-                  <input {...getInputProps()} />{" "}
-                  {isDragActive
-                    ? "Suelta tus archivos aquí"
-                    : "Selecciona o arrastra tus archivos aquí"}{" "}
-                </div>{" "}
-                {files.length > 0 && (
-                  <div className={style.previewGrid}>
-                    {" "}
-                    {files.map((file, index) => (
-                      <div
-                        key={`${file.name}-${file.lastModified}-${index}`}
-                        className={style.previewItem}
-                      >
-                        {" "}
-                        <img
-                          src={file.preview}
-                          alt={`Vista previa ${index + 1}`}
-                          className={style.previewImage}
-                        />{" "}
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteImage(index)}
-                          disabled={formData.disabled}
-                          className={style.removeImageButton}
-                          aria-label={`Eliminar imagen ${index + 1}`}
-                        >
-                          {" "}
-                          ✖️{" "}
-                        </button>{" "}
-                      </div>
-                    ))}{" "}
-                  </div>
-                )}{" "}
-              </section>{" "}
-            </label>{" "}
-          </div>{" "}
-          <div className={style.part2}>
-            {" "}
-            <label htmlFor="province" className={style.fieldLabel}>
-              {" "}
-              Provincia*{" "}
-            </label>{" "}
-            <select
-              id="province"
-              value={selectedProvince}
-              onChange={handleProvinceChange}
-              disabled={formData.disabled}
-            >
-              {" "}
-              <option value=""> Provincia </option>{" "}
-              {sortedProvinces.map((province) => (
-                <option key={province.id} value={province.nombre}>
-                  {" "}
-                  {province.nombre}{" "}
-                </option>
-              ))}{" "}
-            </select>{" "}
-            <label htmlFor="localidad" className={style.fieldLabel}>
-              {" "}
-              Localidad*{" "}
-            </label>{" "}
-            <select
-              id="localidad"
-              value={localidad}
-              onChange={(event) => setSelectedLocalidad(event.target.value)}
-              disabled={formData.disabled || !selectedProvince}
-            >
-              {" "}
-              <option value=""> Localidad </option>{" "}
-              {sortedLocalities.map((locality) => (
-                <option key={locality.id} value={locality.nombre}>
-                  {" "}
-                  {locality.nombre}{" "}
-                </option>
-              ))}{" "}
-            </select>{" "}
-            <label htmlFor="category" className={style.fieldLabel}>
-              {" "}
-              Categoría*{" "}
-            </label>{" "}
-            <select
-              id="category"
-              value={selectedCategory}
-              onChange={(event) => setSelectedCategory(event.target.value)}
-              disabled={formData.disabled}
-            >
-              {" "}
-              <option value=""> Categoría </option>{" "}
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {" "}
-                  {category}{" "}
-                </option>
-              ))}{" "}
-            </select>{" "}
-          </div>{" "}
-          <button
-            type="submit"
-            className={style.button}
-            disabled={formData.disabled}
-          >
-            {" "}
-            Crear{" "}
-          </button>{" "}
-          {formData.disabled && (
-            <div className={style.loaderContainer}>
-              {" "}
-              <span> Cargando publicación... </span>{" "}
-              <div className={style.loader} />{" "}
+    } finally { busyRef.current = false; setBusy(false); setStatus(""); }
+  };
+  const handlePremium = async () => {
+    if (paymentLoading) return;
+    setPaymentLoading(true);
+    try {
+      const { data } = await api.post("/plans/create-order", { title: "Premium" });
+      if (!data.init_point?.startsWith("https://")) throw new Error();
+      window.location.assign(data.init_point);
+    } catch (failure) { setSubmitError(errorMessage(failure, "No pudimos abrir el pago. Intentá nuevamente más tarde.")); }
+    finally { setPaymentLoading(false); }
+  };
+
+  return <FormPage wide eyebrow="DALE OTRA VIDA" title="Publicá tu producto" description="Contá qué tenés para canjear. Las fotos claras y una buena descripción ayudan a encontrar el intercambio ideal.">
+    <form ref={form} onSubmit={handleSubmit} noValidate aria-busy={busy}>
+      <p className={style.requiredNote}>Los campos con <span aria-hidden="true">*</span> son obligatorios.</p>
+      <fieldset disabled={busy} className={style.fieldset}>
+        <section className={forms.section} aria-labelledby="product-info-title">
+          <h2 id="product-info-title" className={forms.sectionTitle}>1. Contanos qué ofrecés</h2>
+          <p className={forms.sectionDescription}>Usá un nombre concreto para que sea fácil de encontrar.</p>
+          <div className={forms.grid}>
+            <Field id="product-title" label="Nombre del producto" required hint="Entre 3 y 30 caracteres." error={errors.title}>
+              <input {...fieldProps("product-title", errors.title, true)} className={forms.control} name="title" required maxLength={30} placeholder="Ej.: Bicicleta rodado 26" value={values.title} onChange={(event) => change("title", event.target.value)} onBlur={() => blur("title")} />
+            </Field>
+            <Field id="product-category" label="Categoría" required error={errors.category}>
+              <select {...fieldProps("product-category", errors.category)} className={forms.control} name="category" required value={values.category} onChange={(event) => change("category", event.target.value)} onBlur={() => blur("category")}><option value="">Elegí una categoría</option>{categories.map((category) => <option key={category} value={category}>{category}</option>)}</select>
+            </Field>
+          </div>
+          <Field id="product-description" label="Descripción (opcional)" hint="Contá el estado, las medidas y qué incluye. Hasta 250 caracteres." error={errors.description}>
+            <textarea {...fieldProps("product-description", errors.description, true)} className={forms.control} name="description" maxLength={250} rows={4} placeholder="Ej.: En muy buen estado, con poco uso. Incluye casco y luces. Tiene una pequeña marca en el cuadro." value={values.description} onChange={(event) => change("description", event.target.value)} onBlur={() => blur("description")} />
+            <p className={style.counter}>{values.description.length}/250</p>
+          </Field>
+        </section>
+        <section className={forms.section} aria-labelledby="product-photos-title">
+          <h2 id="product-photos-title" className={forms.sectionTitle}>2. Mostralo con fotos</h2>
+          <p className={forms.sectionDescription}>La primera imagen será la portada. Usá fotos propias, con buena luz y sin datos personales.</p>
+          <Field id="product-images" label="Fotos del producto" required hint="De 1 a 3 imágenes JPG o PNG. Hasta 5 MB por foto." error={errors.images}>
+            <div className={`${forms.upload} ${style.uploadArea} ${dragging ? style.dragging : ""}`} onDragOver={(event) => { event.preventDefault(); if (!busy && !checkingImages) setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); setDragging(false); void chooseFiles([...event.dataTransfer.files]); }}>
+              <span className={style.uploadIcon} aria-hidden="true">＋</span>
+              <strong>{checkingImages ? "Revisando las imágenes…" : dragging ? "Soltá tus fotos acá" : "Elegí tus fotos o arrastralas acá"}</strong>
+              <span className={forms.help}>{files.length}/{MAX_IMAGES} fotos agregadas</span>
+              <input {...fieldProps("product-images", errors.images, true)} ref={fileInput} className={style.fileInput} name="images" type="file" accept="image/jpeg,image/png" multiple disabled={busy || checkingImages} onChange={(event) => { const selected = [...(event.target.files || [])]; event.target.value = ""; void chooseFiles(selected); }} />
             </div>
-          )}{" "}
-        </form>{" "}
-        <h5 className={style.message}>
-          {" "}
-          Los campos con * son obligatorios{" "}
-        </h5>{" "}
-      </motion.div>{" "}
-    </>
-  );
+          </Field>
+          {imageIssue && files.length > 0 && <button type="button" className={forms.subtle} onClick={() => { setImageIssue(""); setErrors((current) => ({ ...current, images: "" })); }}>Conservar solo las fotos ya agregadas</button>}
+          {files.length > 0 && <div className={style.previews}>{files.map((item, index) => <figure className={style.previewItem} key={item.id}><img src={item.preview} alt={`Foto ${index + 1} del producto`} /><figcaption><span>{index === 0 ? "Portada" : `Foto ${index + 1}`}</span><button type="button" className={style.remove} disabled={busy} onClick={() => removeFile(item.id)} aria-label={`Quitar foto ${index + 1}`}>Quitar</button></figcaption></figure>)}</div>}
+        </section>
+        <section className={forms.section} aria-labelledby="product-location-title">
+          <h2 id="product-location-title" className={forms.sectionTitle}>3. ¿Dónde se puede canjear?</h2>
+          <p className={forms.sectionDescription}>Mostramos tu localidad para conectar con personas cerca. No publiques tu dirección exacta.</p>
+          <div className={forms.grid}>
+            <Field id="product-province" label="Provincia" required error={locations.provinceError || errors.province}>
+              <select {...fieldProps("product-province", locations.provinceError || errors.province)} className={forms.control} name="province" required disabled={busy || locations.provinceLoading} value={values.province} onChange={(event) => change("province", event.target.value)} onBlur={() => blur("province")}><option value="">{locations.provinceLoading ? "Cargando provincias…" : "Elegí tu provincia"}</option>{locations.provinces.map((province) => <option key={province.id} value={province.nombre}>{province.nombre}</option>)}</select>
+              {locations.provinceError && <button type="button" className={forms.subtle} onClick={locations.retryProvinces}>Reintentar carga de provincias</button>}
+            </Field>
+            <Field id="product-locality" label="Localidad" required hint={!values.province ? "Primero elegí una provincia." : undefined} error={locations.localityError || errors.locality}>
+              <select {...fieldProps("product-locality", locations.localityError || errors.locality, !values.province)} className={forms.control} name="locality" required disabled={busy || !values.province || locations.localityLoading} value={values.locality} onChange={(event) => change("locality", event.target.value)} onBlur={() => blur("locality")}><option value="">{locations.localityLoading ? "Cargando localidades…" : "Elegí tu localidad"}</option>{locations.localities.map((locality) => <option key={locality.id} value={locality.nombre}>{locality.nombre}</option>)}</select>
+              {locations.localityError && <button type="button" className={forms.subtle} onClick={locations.retryLocalities}>Reintentar carga de localidades</button>}
+            </Field>
+          </div>
+        </section>
+      </fieldset>
+      {submitError && <FormStatus kind="error">{submitError}</FormStatus>}
+      {premium && <button className={forms.secondary} type="button" disabled={paymentLoading || busy} onClick={handlePremium}>{paymentLoading ? "Abriendo el pago…" : "Ver opción Premium"}</button>}
+      {busy && <FormStatus><p className={style.progressText}>{status}</p><progress className={style.progress} max={files.length} value={progress} aria-label="Fotos subidas" /></FormStatus>}
+      <div className={forms.actions}><button type="submit" className={forms.primary} disabled={busy || checkingImages || paymentLoading}>{busy ? "Publicando…" : checkingImages ? "Revisando fotos…" : "Publicar producto"}</button><button type="button" className={forms.secondary} disabled={busy || paymentLoading} onClick={() => navigate(-1)}>Cancelar</button></div>
+    </form>
+  </FormPage>;
 }
