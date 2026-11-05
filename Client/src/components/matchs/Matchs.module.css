@@ -28,7 +28,7 @@
 
   text-align: center;
 
-  color: #777;
+  color: var(--text-secondary);
 
   font-size: clamp(13px, 1vw, 18px);
 
@@ -46,7 +46,7 @@
 
   background: var(--surface-secondary);
 
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
 
   border-radius: clamp(12px, 1.2vw, 20px);
 
@@ -126,7 +126,7 @@
 .label {
   margin-bottom: clamp(5px, 0.7vw, 10px);
 
-  color: #888;
+  color: var(--text-secondary);
 
   font-size: clamp(9px, 0.75vw, 13px);
 
@@ -168,7 +168,7 @@
 
   border-radius: clamp(9px, 1vw, 15px);
 
-  border: 1px solid #eeeeee;
+  border: 1px solid var(--border);
 
   display: block;
 }
@@ -188,7 +188,7 @@
     auto
     0;
 
-  color: #333;
+  color: var(--text-primary);
 
   font-size: clamp(12px, 1vw, 17px);
 
@@ -226,9 +226,9 @@
 
   border-radius: 50%;
 
-  background: #f1f1f1;
+  background: var(--surface-secondary);
 
-  color: #777;
+  color: var(--text-secondary);
 }
 
 
@@ -274,13 +274,9 @@
 
   border-radius: clamp(8px, 0.8vw, 11px);
 
-  background: linear-gradient(
-    135deg,
-    var(--accent2, #4cafef),
-    var(--accent, #007bff)
-  );
+  background: var(--accent);
 
-  color: #ffffff;
+  color: var(--on-accent);
 
   font-family: inherit;
 
@@ -316,13 +312,13 @@
 
   padding: 7px clamp(10px, 1.2vw, 18px);
 
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
 
   border-radius: clamp(8px, 0.8vw, 11px);
 
   background: transparent;
 
-  color: #333;
+  color: var(--text-primary);
 
   font-family: inherit;
 
@@ -364,7 +360,7 @@
 
   object-fit: cover;
 
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
 
   display: block;
 }
@@ -379,7 +375,7 @@
 
   white-space: nowrap;
 
-  color: #000207;
+  color: var(--text-primary);
 
   font-size: clamp(13px, 0.85vw, 15px);
 }
@@ -411,7 +407,7 @@
   .profileBtn:hover {
     transform: translateY(-1px);
 
-    background: #f1f1f1;
+    background: var(--surface-secondary);
   }
 }
 

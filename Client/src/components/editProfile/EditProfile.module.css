@@ -2,7 +2,7 @@
 .dialog::backdrop { background:#14251f88; backdrop-filter:blur(5px); }
 .heading { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
 .heading h2 { font-size:clamp(24px,4vw,30px); line-height:1.2; margin:0; letter-spacing:-.025em; }
-.eyebrow { color:#547345; font-size:11px; font-weight:800; letter-spacing:.16em; margin:0 0 8px; }
+.eyebrow { color:var(--accent); font-size:11px; font-weight:800; letter-spacing:.16em; margin:0 0 8px; }
 .description { color:var(--text-secondary); font-size:14px; margin:14px 0 26px; }
 .close { flex-shrink:0; width:40px; height:40px; padding:0; border-radius:50%; font-size:27px; line-height:1; color:var(--text-secondary); background:var(--surface-secondary); }
 .close:disabled { opacity:.5; }

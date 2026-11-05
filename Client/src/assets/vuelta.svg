@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 442 212" fill="none">
+  <defs>
+    <pattern id="dots" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#95ad70"/></pattern>
+    <pattern id="mesh" width="8" height="7" patternUnits="userSpaceOnUse"><path d="m0 0 8 7m0-7L0 7" stroke="#78513c" stroke-width="1"/></pattern>
+    <g id="wheel"><circle r="41" fill="#fcf6dc" stroke="#234739" stroke-width="6"/><circle r="36" stroke="#bcc9a2" stroke-width="2"/><g stroke="#91a184" stroke-width="1.3"><path d="M-36 0h72M0-36v72m-25.5-61.5 51 51m-51 0 51-51M-34-13l68 26m-47 21 26-68m-47 47 68-26m-47-21 26 68"/></g><circle r="4" fill="#234739"/></g>
+  </defs>
+  <circle cx="253" cy="108" r="89" fill="#f5d58e"/>
+  <path d="M43 123c-14-45 14-84 55-84 21 0 42 12 49 28-54-6-71 50-104 56Z" fill="url(#dots)"/>
+  <path d="M333 44c28 0 56 18 67 40m-1-12 2 14-14-3M111 27c-21 1-37 7-54 18m5-13-8 15 17-2" stroke="#668363" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4 5"/>
+  <ellipse cx="231" cy="184" rx="173" ry="7" fill="#a5b68b" opacity=".45"/>
+  <g transform="translate(0 4)">
+    <use href="#wheel" x="134" y="137"/><use href="#wheel" x="280" y="137"/>
+    <g stroke-linecap="round" stroke-linejoin="round">
+      <path d="m134 137 37-62 25 57-62 5 108-66 38 66" stroke="#204936" stroke-width="8"/>
+      <path d="m172 77 24 55 46-66" stroke="#467354" stroke-width="7"/>
+      <path d="m171 76-6-15m76 5-9-27 14-6h10" stroke="#234739" stroke-width="5"/>
+      <path d="M150 58c6-3 15 0 29 0l2 4c-9 2-22 4-31 1Z" fill="#78523c" stroke="#234739" stroke-width="2"/>
+      <path d="m247 34 12-2" stroke="#b77346" stroke-width="6"/>
+      <path d="M139 132c16-5 36-5 58-6 13-1 13 15 0 16l-58 1c-8 0-9-8 0-11Z" fill="#dce5bb" stroke="#345a43" stroke-width="3"/>
+      <circle cx="196" cy="133" r="5" fill="#2b523b"/><path d="m196 133 9 10h9m-27-19-7-8h-6" stroke="#274a36" stroke-width="3"/>
+      <path d="M236 40c18 4 26 21 25 37" stroke="#62765d" stroke-width="1.6"/>
+      <path d="m251 60 12 29h38l6-30Z" fill="#d99969" stroke="#4a543d" stroke-width="3"/>
+      <path d="m254 63 11 23h34l5-23Z" fill="url(#mesh)"/>
+      <path d="M274 58c-4-16-15-22-15-22 0 14 5 20 15 22Zm5 1c1-19 12-25 19-26-2 15-8 21-19 26Z" fill="#608153"/>
+      <path d="m275 57-1-20" stroke="#416140" stroke-width="3"/><circle cx="274" cy="33" r="6" fill="#bf714c"/><circle cx="282" cy="39" r="5" fill="#edc05a"/>
+      <path d="m111 91 37-2 11 22m-45-18 13 34" stroke="#415a43" stroke-width="3"/>
+    </g>
+  </g>
+  <g stroke="#3a513b" stroke-width="2.2" stroke-linejoin="round">
+    <path d="m45 166 45-4 15 6-45 5Z" fill="#d68e61"/><path d="m60 173 45-5v8l-45 5Z" fill="#faf2d8"/><path d="m45 166 15 7v8l-15-7Z" fill="#a95e3b"/>
+    <path d="m52 153 38-3 11 6-38 5Z" fill="#608168"/><path d="m63 161 38-5v8l-38 5Z" fill="#f9e7bd"/><path d="m52 153 11 8v8l-11-7Z" fill="#54745a"/>
+  </g>
+  <g transform="translate(341 0)"><path d="M19 150c4-18 2-36-3-54m5 43 17-18m-18 11L5 116" stroke="#34543e" stroke-width="3"/><path d="M16 111C-2 108-2 90 3 81c15 5 20 19 13 30Zm9 16c-3-19 7-37 22-42 5 15-3 34-22 42Zm-8 13c-18-1-31-15-27-28 17 0 26 11 27 28Z" fill="#67865e"/><path d="M4 147h39l-6 34H10Z" fill="#ce895c" stroke="#47533b" stroke-width="2.5"/><path d="M1 146h45v7H1Z" fill="#e4a478" stroke="#47533b" stroke-width="2.5"/><path d="m17 158 1 15m7-15v16m9-16-2 15" stroke="#a96443" stroke-width="2"/></g>
+  <g stroke="#658258" stroke-width="2" stroke-linecap="round"><path d="M87 81v10m-5-5h10M360 44v10m-5-5h10"/></g>
+</svg>

@@ -17,7 +17,7 @@
 } 
 
 .avatarPremium {
-  border: 2px solid goldenrod;
+  border: 2px solid var(--gold);
 }
 
 .imageWrapper {
@@ -41,7 +41,7 @@
   height: 100%;
 
   box-sizing: border-box;
-  border: 3px solid #4ecdc4;
+  border: 3px solid var(--accent);
   border-radius: 50%;
 
   object-fit: cover;
@@ -86,7 +86,7 @@
 .avatarPremium p {
   max-width: 100%;
   margin: 0.2rem 0;
-  color: gray;
+  color: var(--text-secondary);
   overflow-wrap: anywhere;
   font-size: clamp(0.75rem, 2.5vw, 0.9rem);
 }
@@ -94,7 +94,7 @@
 .avatar h4,
 .avatarPremium h4 {
   margin: 0.6rem 0;
-  color: #4ecdc4;
+  color: var(--accent);
   font-size: clamp(0.75rem, 2.5vw, 0.9rem);
 }
 
@@ -134,31 +134,31 @@
 
 .dark {
   min-width: 5.6rem;
-  background-color: black;
+  background-color: var(--forest);
   color: whitesmoke;
 }
 
-.editProfile { background: #9dbe0a; color: #182600; font-weight: 600; }
+.editProfile { background: var(--accent); color: var(--on-accent); font-weight: 600; }
 
 .light {
   min-width: 5.6rem;
-  background-color: white;
-  color: black;
+  background-color: var(--surface-secondary);
+  color: var(--text-primary);
 }
 
 .premium {
-  background-color: goldenrod;
-  color: whitesmoke;
+  background-color: var(--gold-soft);
+  color: var(--gold);
 }
 
 .logout {
-  background-color: #ff6b6b;
-  color: whitesmoke;
+  background-color: var(--danger-soft);
+  color: var(--danger);
 }
 
 .deleteAccount {
-  background-color: #c0392b;
-  color: whitesmoke;
+  background-color: var(--danger-button);
+  color: var(--on-forest);
 }
 
 .premium:disabled,
@@ -169,6 +169,9 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+.avatar h3, .avatarPremium h3 { font-family: var(--display-font); font-weight: 500; letter-spacing: -.035em; }
+.avatar, .avatarPremium { background: var(--surface); border-radius: 20px; }
 
 @media (min-width: 1440px) {
   .avatar,

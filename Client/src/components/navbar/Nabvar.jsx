@@ -165,7 +165,7 @@ export default function NavBar({ isAuthenticated, userData }) {
             )}
           </div>
         ) : (
-          <Link to="/login" className={style.item}>
+          <Link to="/login" className={[style.item, style.entry].join(" ")}>
             Ingresar
           </Link>
         )}

@@ -1,3 +1,4 @@
+import { filterCatalog } from "../utils/catalog.js";
 import {
   GET_ALL_USERS,
   GET_ALL_DISABLED_USERS,
@@ -49,7 +50,7 @@ import {
   GET_ALL_LIKES,
   SELECTED_POST,
   CLEAR_DETAIL,
-} from "./actionTypes";
+} from "./actionTypes.js";
 
 const initialState = {
   allUsers: [],
@@ -213,27 +214,7 @@ function rootReducer(state = initialState, action) {
       };
 
     case GET_ALL_POSTS: {
-      // Aplicar los filtros directamente a action.payload
-      let filteredAllPosts = action.payload;
-
-      if (state.selectedCategory) {
-        filteredAllPosts = filteredAllPosts.filter(
-          (post) => post.category === state.selectedCategory,
-        );
-      }
-
-      if (state.selectedProvince) {
-        filteredAllPosts = filteredAllPosts.filter((post) =>
-          post.ubication.includes(state.selectedProvince),
-        );
-      }
-
-      if (state.selectedLocality) {
-        filteredAllPosts = filteredAllPosts.filter((post) =>
-          post.ubication.includes(state.selectedLocality),
-        );
-      }
-
+      const filteredAllPosts = filterCatalog(action.payload, state);
       return {
         ...state,
         allPosts: filteredAllPosts,
@@ -308,23 +289,12 @@ function rootReducer(state = initialState, action) {
       };
 
     case SELECT_PROVINCE:
-      return {
-        ...state,
-        selectedProvince: action.payload,
-        selectedLocality: "",
-      };
-
     case SELECT_LOCALITY:
-      return {
-        ...state,
-        selectedLocality: action.payload,
-      };
-
-    case SELECT_CATEGORY:
-      return {
-        ...state,
-        selectedCategory: action.payload,
-      };
+    case SELECT_CATEGORY: {
+      const patch = action.type === SELECT_PROVINCE ? {selectedProvince: action.payload, selectedLocality: ""} : action.type === SELECT_LOCALITY ? {selectedLocality: action.payload} : {selectedCategory: action.payload};
+      const next = { ...state, ...patch };
+      return { ...next, allPosts: filterCatalog(state.allPostsCopy, next) };
+    }
 
     case SELECTED_POST:
       return {
@@ -336,30 +306,7 @@ function rootReducer(state = initialState, action) {
     case GET_POST_BY_CATEGORY:
     case GET_POST_BY_PROVINCE:
     case GET_POST_BY_LOCALITY: {
-      let filteredPosts = state.allPostsCopy;
-
-      if (state.selectedCategory) {
-        filteredPosts = filteredPosts.filter(
-          (post) => post.category === state.selectedCategory,
-        );
-      }
-
-      if (state.selectedProvince) {
-        filteredPosts = filteredPosts.filter((post) =>
-          post.ubication.includes(state.selectedProvince),
-        );
-      }
-
-      if (state.selectedLocality) {
-        filteredPosts = filteredPosts.filter((post) =>
-          post.ubication.includes(state.selectedLocality),
-        );
-      }
-
-      return {
-        ...state,
-        allPosts: filteredPosts,
-      };
+      return { ...state, allPosts: filterCatalog(state.allPostsCopy, state) };
     }
 
     case CREATE_POST:
@@ -554,6 +501,7 @@ function rootReducer(state = initialState, action) {
     case RESET_FILTERS:
       return {
         ...state,
+        allPosts: state.allPostsCopy,
         selectedCategory: "",
         selectedProvince: "",
         selectedLocality: "",

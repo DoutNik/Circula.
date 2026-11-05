@@ -54,54 +54,7 @@ const App = () => {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
-    const root = document.documentElement;
-
-    if (darkMode) {
-      root.style.setProperty("--page-background", "#19191e");
-
-      root.style.setProperty("--surface", "#24242b");
-
-      root.style.setProperty("--surface-secondary", "#2d2d35");
-
-      root.style.setProperty("--surface-hover", "#34343d");
-
-      root.style.setProperty("--text-primary", "#f1f1f1");
-
-      root.style.setProperty("--text-secondary", "#cccccc");
-
-      root.style.setProperty("--text-muted", "#a5a5a5");
-
-      root.style.setProperty("--border", "#41414a");
-
-      root.style.setProperty("--border-strong", "#50505a");
-
-      root.style.setProperty("--shadow", "rgba(0, 0, 0, 0.35)");
-
-      root.style.setProperty("color-scheme", "dark");
-    } else {
-      root.style.setProperty("--page-background", "whitesmoke");
-
-      root.style.setProperty("--surface", "#ffffff");
-
-      root.style.setProperty("--surface-secondary", "#f5f5f5");
-
-      root.style.setProperty("--surface-hover", "#fafafa");
-
-      root.style.setProperty("--text-primary", "#333333");
-
-      root.style.setProperty("--text-secondary", "#666666");
-
-      root.style.setProperty("--text-muted", "#888888");
-
-      root.style.setProperty("--border", "#eeeeee");
-
-      root.style.setProperty("--border-strong", "#dddddd");
-
-      root.style.setProperty("--shadow", "rgba(128, 128, 128, 0.2)");
-
-      root.style.setProperty("color-scheme", "light");
-    }
-
+    document.documentElement.dataset.theme = darkMode ? "dark" : "light";
     localStorage.setItem("darkMode", String(darkMode));
   }, [darkMode]);
 

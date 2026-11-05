@@ -6,7 +6,7 @@
   margin: clamp(1rem, 3vw, 2rem) auto;
   overflow: hidden;
   border-radius: 0.65rem;
-  background-color: white;
+  background-color: var(--surface);
   box-shadow: 0 0.3rem 0.65rem rgba(125, 125, 125, 0.3);
 }
 
@@ -16,14 +16,14 @@
   align-items: center;
   width: 100%;
   padding: 0.5rem 1rem;
-  background-color: #ffe66d;
+  background-color: var(--forest);
   border-radius: 0 0 0.9rem 0.9rem;
 }
 
 .user h3 {
   margin: 0 0 0 0.75rem;
   overflow-wrap: anywhere;
-  color: black;
+  color: var(--on-forest);
   font-size: clamp(1rem, 3vw, 1.25rem);
   text-shadow: 0 0.3rem 0.65rem rgba(0, 0, 0, 0.5);
 }
@@ -32,7 +32,7 @@
   width: clamp(2.8rem, 8vw, 3.75rem);
   aspect-ratio: 1;
   margin: 0;
-  border: 3px solid #4ecdc4;
+  border: 3px solid var(--accent);
   border-radius: 50%;
   object-fit: cover;
   box-shadow: 0 0.3rem 0.65rem rgba(0, 0, 0, 0.3);
@@ -79,7 +79,7 @@
 .otherUserLabel {
   margin: 0;
   padding: 0;
-  color: black;
+  color: var(--text-primary);
 }
 
 .myUserLabel {
@@ -111,12 +111,12 @@
 
 .myMessage h5 {
   border-radius: 0.65rem 0 0.65rem 0.65rem;
-  background-color: rgba(54, 166, 170, 0.6);
+  background-color: var(--accent);
 }
 
 .otherMessage h5 {
   border-radius: 0 0.65rem 0.65rem 0.65rem;
-  background-color: rgba(162, 0, 255, 0.6);
+  background-color: var(--surface-secondary);
 }
 
 .input {
@@ -144,14 +144,14 @@
   background: var(--surface,#fff);
   font-size: 1rem;
 }
-.chat textarea[aria-invalid="true"] { border-color: #c5423f; box-shadow: 0 0 0 1px #c5423f; }
-.chat textarea:focus-visible { outline: 3px solid #426b48; outline-offset: 2px; }
+.chat textarea[aria-invalid="true"] { border-color: var(--danger); box-shadow: 0 0 0 1px var(--danger); }
+.chat textarea:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 .composerHelp { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 3px 12px; font-size: 11px; color: var(--text-secondary,#63705e); }
-.composerError { margin: 0; font-size: 13px; color: #b32e2a; }
-.historyStatus { text-align: center; padding: 24px 12px; color: #63705e; font-size: 14px; }
-.historyStatus button { min-height: 44px; padding: 8px 14px; background: #fff1ae; color: #243127; border-radius: 10px; font-weight: 700; }
+.composerError { margin: 0; font-size: 13px; color: var(--danger); }
+.historyStatus { text-align: center; padding: 24px 12px; color: var(--text-secondary); font-size: 14px; }
+.historyStatus button { min-height: 44px; padding: 8px 14px; background: var(--moss); color: var(--text-primary); border-radius: 10px; font-weight: 700; }
 .historyStatus p { margin: 0 0 12px; }
-.sendProgress { font-size: 22px; color: #243127; }
+.sendProgress { font-size: 22px; color: var(--forest); }
 
 .sendMessage {
   display: grid;
@@ -162,7 +162,7 @@
   padding: 0;
   border: none;
   border-radius: 50%;
-  background-color: #ffe16b;
+  background-color: var(--lime);
   cursor: pointer;
 }
 .sendMessage:disabled { opacity: .55; }
@@ -172,11 +172,15 @@
 }
 
 .sendMessage:focus-visible {
-  outline: 3px solid #1a535c;
+  outline: 3px solid var(--focus);
   outline-offset: 3px;
 }
 
 /* Tablets */
+.myMessage h5 { color: var(--on-accent); }
+.otherMessage h5 { color: var(--text-primary); }
+.user h3 { text-shadow: none; }
+
 @media (max-width: 768px) {
   .chat {
     width: min(calc(100% - 1rem), 42rem);

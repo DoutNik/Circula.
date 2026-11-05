@@ -6,7 +6,8 @@ const Footer = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
-    <footer>
+    <footer className={style.shell}>
+      <div className={style.masthead}><div><strong>Circula</strong><p>Comunidad de canje</p></div>
       <button
         type="button"
         className={style.toggle}
@@ -17,21 +18,15 @@ const Footer = () => {
           isCollapsed ? "Expandir pie de página" : "Ocultar pie de página"
         }
       >
-        <img
-          src={
-            isCollapsed
-              ? "https://img.icons8.com/color/48/expand-arrow.png"
-              : "https://img.icons8.com/color/48/collapse-arrow.png"
-          }
-          alt=""
-        />
-      </button>
+        {isCollapsed ? "Ver enlaces" : "Ocultar enlaces"} <span aria-hidden="true">{isCollapsed ? "＋" : "−"}</span>
+      </button></div>
 
       <div
         id="footer-content"
-        className={`${style.footer} ${isCollapsed ? style.collapsed : ""}`}
+        className={style.footer}
+        hidden={isCollapsed}
       >
-        <section className={style.left}>
+        <section>
           <h3>Acerca de</h3>
           <Link to="/terminos-y-condiciones">Términos y condiciones</Link>
           <Link to="/privacidad">Política de privacidad</Link>
@@ -39,27 +34,22 @@ const Footer = () => {
           <Link to="/nosotros">Nosotros</Link>
         </section>
 
-        <section className={style.right}>
+        <section>
           <h3>Contacto</h3>
 
           <a href="https://www.instagram.com/" target="_blank" rel="noreferrer">
-            <img
-              src="https://img.icons8.com/color-glass/48/instagram-new--v1.png"
-              alt=""
-            />
             Instagram
           </a>
 
           <a href="mailto:carlosklema@hotmail.com">
-            <img src="https://img.icons8.com/color/48/apple-mail.png" alt="" />
             Email de ayuda
           </a>
         </section>
 
-        <section className={style.center}>
+        <section>
           <h3>Desarrollada por</h3>
 
-          <div className={style.ab}>
+          <div>
             <a
               href="https://github.com/DoutNik"
               target="_blank"

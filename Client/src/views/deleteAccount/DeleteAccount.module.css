@@ -1,11 +1,11 @@
-.warning { margin-bottom: 24px; padding: 18px 20px; border: 1px solid #e8c7a5; border-radius: 16px; background: #fff6e9; color: #67421e; }
+.warning { margin-bottom: 24px; padding: 18px 20px; border: 1px solid var(--border); border-radius: 16px; background: var(--gold-soft); color: var(--gold); }
 .warning h2 { margin: 0 0 8px; font-size: 17px; }
 .warning p { margin: 0; font-size: 14px; }
 .confirmation { display: flex; align-items: flex-start; gap: 12px; padding: 16px; border: 1px solid var(--border-strong, #dce3dc); border-radius: 14px; cursor: pointer; }
 .confirmation input { flex: 0 0 auto; width: 20px; height: 20px; margin-top: 3px; accent-color: #315d3c; }
-.invalid { border-color: #c5423f; }
-.error { margin: 8px 0; color: #b32e2a; font-size: 14px; }
-.danger { min-height: 48px; padding: 12px 20px; border: 1px solid #a62b28; border-radius: 12px; background: #ad302d; color: white; font-weight: 700; }
+.invalid { border-color: var(--danger); }
+.error { margin: 8px 0; color: var(--danger); font-size: 14px; }
+.danger { min-height: 48px; padding: 12px 20px; border: 1px solid #a62b28; border-radius: 12px; background: var(--danger-button); color: white; font-weight: 700; }
 .danger:hover:not(:disabled) { background: #902420; }
 .danger:disabled { opacity: .6; }
 .back { margin: 24px 0 0; text-align: center; font-size: 14px; }

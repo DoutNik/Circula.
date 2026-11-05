@@ -23,7 +23,7 @@
 .pageHeader h3 {
   margin: 0;
 
-  color: #666;
+  color: var(--text-secondary);
 
   font-size: clamp(20px, 2.5vw, 32px);
 }
@@ -72,7 +72,7 @@
 .tile p {
   margin: 0;
 
-  color: #666;
+  color: var(--text-secondary);
 
   font-size: clamp(11px, 0.9vw, 15px);
 
@@ -94,23 +94,23 @@
 }
 
 .newUsers {
-  color: rgb(150, 222, 42);
+  color: var(--accent);
 }
 
 .delUsers {
-  color: #e53935;
+  color: var(--danger);
 }
 
 .publications {
-  color: #00bcd4;
+  color: var(--accent);
 }
 
 .matchs {
-  color: orange;
+  color: var(--clay);
 }
 
 .premium {
-  color: blueviolet;
+  color: var(--gold);
 }
 
 /* =========================================================
@@ -144,7 +144,7 @@
 .filterPanel h3 {
   margin: 0 0 12px;
 
-  color: #666;
+  color: var(--text-secondary);
 
   font-size: clamp(14px, 1vw, 18px);
 
@@ -196,9 +196,9 @@
 }
 
 .selectGroup button {
-  background: #4ecdc4;
+  background: var(--accent);
 
-  color: white;
+  color: var(--on-accent);
 
   font-weight: 600;
 
@@ -209,9 +209,12 @@
     transform 0.2s ease;
 }
 
+.pageHeader h3, .columnTitle { font-family: var(--display-font); font-weight: 500; letter-spacing: -.035em; }
+.tile, .filterPanel, .column { border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--panel-shadow); }
+
 @media (hover: hover) and (pointer: fine) {
   .selectGroup button:hover {
-    background: #1a535c;
+    background: var(--accent-hover);
 
     transform: translateY(-1px);
   }
@@ -250,13 +253,13 @@
 
   padding: 14px 16px;
 
-  color: #555;
+  color: var(--text-secondary);
 
   text-align: center;
 
   font-size: clamp(14px, 1vw, 18px);
 
-  border-bottom: 1px solid #eeeeee;
+  border-bottom: 1px solid var(--border);
 }
 
 /* =========================================================
@@ -292,7 +295,7 @@
 
   padding: 10px 12px;
 
-  border-bottom: 1px solid #eeeeee;
+  border-bottom: 1px solid var(--border);
 }
 
 .element:last-child {
@@ -304,7 +307,7 @@
 
   margin: 0;
 
-  color: #333;
+  color: var(--text-primary);
 
   font-size: clamp(10px, 0.75vw, 14px);
 
@@ -340,7 +343,7 @@
 }
 
 .email {
-  color: #888;
+  color: var(--text-secondary);
 
   font-size: 0.9em;
 }
@@ -355,11 +358,11 @@
 }
 
 .statusActive {
-  color: #3ec762;
+  color: var(--accent);
 }
 
 .statusDisabled {
-  color: crimson;
+  color: var(--danger);
 }
 
 /* =========================================================

@@ -4,18 +4,20 @@
 .dialog p { line-height:1.55; }
 .close { position:absolute; right:14px; top:10px; width:40px; height:40px; border:0; border-radius:50%; color:var(--text-secondary,#63705e); background:transparent; font-size:26px; cursor:pointer; }
 .close:hover:not(:disabled) { background:var(--surface-secondary,#f0f4ec); }
-.symbol { display:grid; place-items:center; margin:0 auto; width:56px; height:56px; border-radius:18px; background:#fff1ae; font-size:30px; font-weight:700; }
+.symbol { display:grid; place-items:center; margin:0 auto; width:56px; height:56px; border-radius:18px; background:var(--moss); font-size:30px; font-weight:700; }
 .email { overflow-wrap:anywhere; }
 .eyebrow { margin:18px 0 0; font-size:11px; font-weight:750; letter-spacing:1.5px; color:var(--text-secondary,#63705e); }
 .notice { background:var(--surface-secondary,#f0f4ec); padding:12px; border-radius:12px; font-size:14px; }
 .dialog label { display:block; text-align:left; font-size:14px; font-weight:600; margin:18px 0 8px; }
 .code { box-sizing:border-box; width:100%; padding:16px 10px; text-align:center; font-size:30px; letter-spacing:9px; border:1px solid var(--border-strong,#9ca798); border-radius:14px; background:var(--surface,#fff); color:var(--text-primary,#243127); font-variant-numeric:tabular-nums; scroll-margin-block:120px; }
-.code[aria-invalid="true"] { border-color:#c5423f; box-shadow:0 0 0 1px #c5423f; }
-.code:focus-visible, .dialog button:focus-visible { outline:3px solid #426b48; outline-offset:3px; }
-.primary { width:100%; min-height:50px; margin-top:20px; padding:14px; border:0; border-radius:14px; background:#ffe16b; color:#243127; font-size:16px; font-weight:700; cursor:pointer; }
-.primary:hover:not(:disabled) { background:#f7d74e; }
-.resend { margin-top:16px; border:0; background:transparent; color:#315d3c; font-size:14px; font-weight:600; padding:10px; cursor:pointer; }
+.code[aria-invalid="true"] { border-color:var(--danger); box-shadow:0 0 0 1px var(--danger); }
+.code:focus-visible, .dialog button:focus-visible { outline:3px solid var(--focus); outline-offset:3px; }
+.primary { width:100%; min-height:50px; margin-top:20px; padding:14px; border:0; border-radius:14px; background:var(--accent); color:var(--on-accent); font-size:16px; font-weight:700; cursor:pointer; }
+.primary:hover:not(:disabled) { background:var(--accent-hover); }
+.resend { margin-top:16px; border:0; background:transparent; color:var(--accent); font-size:14px; font-weight:600; padding:10px; cursor:pointer; }
 .dialog button:disabled { opacity:.55; cursor:default; }
 .help { font-size:13px; color:var(--text-secondary,#63705e); }
-.error { color:#a82a25; font-size:14px; text-align:left; }
+.error { color:var(--danger); font-size:14px; text-align:left; }
+.dialog h2 { font-family: var(--display-font); font-weight: 500; letter-spacing: -.035em; }
+
 @media(max-width:480px) { .dialog { padding:28px 20px 20px; } }

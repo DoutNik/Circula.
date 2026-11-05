@@ -28,8 +28,8 @@
   width: min(100%, clamp(300px, 75vw, 650px));
   max-height: min(90vh, 700px);
   overflow-y: auto;
-  background: whitesmoke;
-  color: #222;
+  background: var(--surface);
+  color: var(--text-primary);
   padding: clamp(24px, 4vw, 42px) clamp(20px, 4vw, 46px) clamp(22px, 3vw, 34px);
   border-radius: clamp(12px, 1.5vw, 22px);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
@@ -41,7 +41,7 @@
 }
 .modalContent h2 {
   margin: 0 0 clamp(12px, 1.5vw, 20px);
-  color: #222;
+  color: var(--text-primary);
   font-size: clamp(20px, 2.3vw, 34px);
   line-height: 1.2;
   font-weight: 700;
@@ -49,7 +49,7 @@
 }
 .modal p {
   margin: 0;
-  color: #666;
+  color: var(--text-secondary);
   font-size: clamp(14px, 1.2vw, 19px);
   line-height: 1.6;
   max-width: 560px;
@@ -69,7 +69,7 @@
   border: none;
   border-radius: 50%;
   background: transparent;
-  color: crimson;
+  color: var(--danger);
   font-size: clamp(16px, 1.5vw, 22px);
   line-height: 1;
   cursor: pointer;
@@ -77,6 +77,8 @@
     transform 0.2s ease,
     background 0.2s ease;
 }
+.modalContent h2 { font-family: var(--display-font); font-weight: 500; letter-spacing: -.035em; }
+
 @media (hover: hover) and (pointer: fine) {
   .closeModal:hover {
     transform: scale(1.1);

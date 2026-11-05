@@ -116,7 +116,7 @@ const MyProfile = ({ userData, setAuth, toggleDarkMode }) => {
 
   return (
     <>
-      <Header
+      <Header variant="profile"
         banner1={BANNER_1}
         banner2={BANNER_2}
       />

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllPosts } from "../../redux/actions";
 
@@ -26,66 +26,26 @@ const Home = () => {
   const dispatch = useDispatch();
 
   const allPosts = useSelector((state) => state.allPosts);
-  const posts = useSelector((state) => state.allPostsCopy);
-
+  const province = useSelector(s => s.selectedProvince), locality = useSelector(s => s.selectedLocality), category = useSelector(s => s.selectedCategory);
+  const filtered = Boolean(province || locality || category);
   const [showModal, setShowModal] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
-
+  const [sort, setSort] = useState("recent");
+  const [page, setPage] = useState(0);
+  const [request, setRequest] = useState("loading");
+  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
-    dispatch(getAllPosts());
-  }, [dispatch]);
-
-  /*
-   * Calculamos las publicaciones de la página actual
-   * en lugar de guardarlas en otro estado.
-   */
-  const items = useMemo(() => {
-    const firstIndex = currentPage * POST_PER_PAGE;
-
-    return allPosts.slice(firstIndex, firstIndex + POST_PER_PAGE);
-  }, [allPosts, currentPage]);
-
-  /*
-   * Si cambia la cantidad de publicaciones y la página actual
-   * deja de existir, volvemos automáticamente a la primera.
-   */
-  useEffect(() => {
-    const totalPages = Math.ceil(allPosts.length / POST_PER_PAGE);
-
-    if (currentPage >= totalPages && totalPages > 0) {
-      setCurrentPage(0);
-    }
-
-    if (allPosts.length === 0 && currentPage !== 0) {
-      setCurrentPage(0);
-    }
-  }, [allPosts.length, currentPage]);
-
-  const toggleModal = () => {
-    setShowModal((prev) => !prev);
-  };
-
-  const nextHandler = () => {
-    const totalPages = Math.ceil(allPosts.length / POST_PER_PAGE);
-
-    setCurrentPage((prevPage) => {
-      if (prevPage >= totalPages - 1) {
-        return prevPage;
-      }
-
-      return prevPage + 1;
-    });
-  };
-
-  const prevHandler = () => {
-    setCurrentPage((prevPage) => {
-      if (prevPage <= 0) {
-        return 0;
-      }
-
-      return prevPage - 1;
-    });
-  };
+    let active = true;
+    setRequest("loading");
+    dispatch(getAllPosts()).then(() => active && setRequest("ready")).catch(() => active && setRequest("error"));
+    return () => { active = false; };
+  }, [dispatch, attempt]);
+  useEffect(() => { setPage(0); }, [province, locality, category, sort]);
+  const ordered = useMemo(() => [...allPosts].sort((a,b) => sort === "name"
+    ? String(a.title || "").localeCompare(String(b.title || ""), "es")
+    : (new Date(b.createdAt) - new Date(a.createdAt)) * (sort === "old" ? -1 : 1)), [allPosts, sort]);
+  const pageCount = Math.ceil(ordered.length / POST_PER_PAGE);
+  const currentPage = Math.max(0, Math.min(page, pageCount - 1));
+  const items = ordered.slice(currentPage * POST_PER_PAGE, (currentPage + 1) * POST_PER_PAGE);
 
   return (
     <>
@@ -96,46 +56,22 @@ const Home = () => {
       />
 
       <main className={style.container}>
-        {showModal && (
-          <div className={style.button}>
-            <VideoModal onClose={toggleModal} />
+        <Filters />
+        <section className={style.results} aria-labelledby="catalog-title">
+          <div className={style.topline}>
+            <div><h2 id="catalog-title">Productos para canjear</h2></div>
+            <label className={style.sort}>Ordenar por
+              <select value={sort} onChange={e=>setSort(e.target.value)}><option value="recent">Más recientes</option><option value="old">Más antiguos</option><option value="name">Nombre: A a Z</option></select>
+            </label>
           </div>
-        )}
-
-        {!showModal && (
-          <button
-            type="button"
-            onClick={toggleModal}
-            className={style.open}
-            aria-label="Abrir ayuda"
-            aria-haspopup="dialog"
-          >
-            <img
-              src="https://img.icons8.com/color/96/help--v1.png"
-              alt=""
-              aria-hidden="true"
-            />
-          </button>
-        )}
-
-        <section className={style.filtersSection} aria-label="Filtrar productos">
-          <Filters />
-        </section>
-
-        <section className={style.cardsSection}>
-          <Cards allPosts={posts} />
-        </section>
-
-        <section className={style.allCardsSection}>
-          <AllCards
-            posts={items}
-            currentPage={currentPage}
-            nextHandler={nextHandler}
-            prevHandler={prevHandler}
-          />
+          <p className={style.meta} role="status">{request === "loading" && !items.length ? "Buscando publicaciones…" : request === "error" && !items.length ? "Catálogo no disponible" : `${ordered.length} ${ordered.length === 1 ? "publicación" : "publicaciones"}${filtered ? " · Con tus filtros" : ""}`}</p>
+          {!filtered && <Cards allPosts={ordered} />}
+          {request === "error" && <div className={style.notice} role="alert">No pudimos actualizar el catálogo. <button onClick={()=>setAttempt(a=>a+1)}>Volver a intentar</button></div>}
+          {request === "ready" && !items.length && <div className={style.empty}><h3>{filtered ? "No hay productos con esos filtros" : "Todavía no hay publicaciones"}</h3><p>{filtered ? "Cambiá una opción o limpiá los filtros para ver más productos." : "Los productos que publique la comunidad van a aparecer acá."}</p></div>}
+          <AllCards posts={items} pageCount={pageCount} currentPage={currentPage} prevHandler={()=>setPage(currentPage-1)} nextHandler={()=>setPage(currentPage+1)} />
         </section>
       </main>
-
+      {showModal ? <VideoModal onClose={()=>setShowModal(false)} /> : <button type="button" className={style.help} aria-label="Cómo funciona Circula" aria-haspopup="dialog" onClick={()=>setShowModal(true)}>?</button>}
       <Footer />
     </>
   );

@@ -144,41 +144,7 @@ const Detail = ({ userData }) => {
   };
   const allPosts = useSelector((state) => state.allPosts);
 
-  const handlePrevClick = () => {
-    const currentIndex = allPosts.findIndex((p) => p.id === parseInt(id, 10));
-
-    if (
-      Array.isArray(allPosts) &&
-      allPosts.length > 0 &&
-      currentIndex !== -1 &&
-      currentIndex < allPosts.length - 1
-    ) {
-      const nextPostId = allPosts[currentIndex + 1].id;
-      navigate(`/detail/${nextPostId}`);
-    } else {
-      console.log(
-        "No hay publicaciones disponibles o ya estás en la primera publicación",
-      );
-    }
-  };
-
-  const handleNextClick = () => {
-    const currentIndex = allPosts.findIndex((p) => p.id === parseInt(id, 10));
-
-    if (
-      Array.isArray(allPosts) &&
-      allPosts.length > 0 &&
-      currentIndex !== -1 &&
-      currentIndex > 0
-    ) {
-      const prevPostId = allPosts[currentIndex - 1].id;
-      navigate(`/detail/${prevPostId}`);
-    } else {
-      console.log(
-        "No hay publicaciones disponibles o ya estás en la última publicación",
-      );
-    }
-  };
+  const productIndex = allPosts.findIndex(item => String(item.id) === String(id));
 
   const handleReport = () => {
     if (!myUserId) { navigate("/login"); return; }
@@ -305,7 +271,6 @@ const Detail = ({ userData }) => {
         className={style.detail}
       >
         <div className={style.carousel}>
-          {post && post.title && <h3>{post.title}</h3>}
           <Slider {...settings}>
             {post?.image?.map((image, index) => (
               <div key={`${post.id}-${index}`}>
@@ -320,29 +285,19 @@ const Detail = ({ userData }) => {
         </div>
 
         <div className={style.info}>
-          <h5>Calificación:</h5>
-          {post.User && post.User.averageRating ? (
-            <div className={style.rating}>
-              {Array.from({ length: post.User.averageRating }, (_, index) => (
-                <p key={index}>⭐️</p>
-              ))}
-            </div>
-          ) : (
-            <h4>Todavía nadie te ha calificado.</h4>
-          )}
-          <span>Publicacion de:</span>
-          {post.User && userName && <h4>{userName}</h4>}
-
-          <span>Ubicación:</span>
-          {post && post.ubication && <h4>{post.ubication}</h4>}
-          <span>Descripción:</span>
-          {post && post.description && <h4>{post.description}</h4>}
+          <p className={style.category}>{post.category || "Producto para canjear"}</p>
+          <h1>{post.title}</h1>
+          {post.description && <p className={style.description}>{post.description}</p>}
+          <dl>
+            {userName && <><dt>Publicado por</dt><dd>{userName}</dd></>}
+            {post.ubication && <><dt>Ubicación</dt><dd>{post.ubication}</dd></>}
+            <dt>Calificación de quien publica</dt>
+            <dd>{Number(post.User?.averageRating) > 0 ? `★ ${post.User.averageRating} de 5` : "Todavía no recibió calificaciones."}</dd>
+          </dl>
         </div>
 
         <div className={style.buttons}>
-          <Link to="/">
-            <button className={style.back}>Principal</button>
-          </Link>
+          <Link to="/" className={style.back}>Volver al catálogo</Link>
           <button type="button" className={style.back} onClick={handleReport}>
             Denunciar
           </button>
@@ -394,26 +349,10 @@ const Detail = ({ userData }) => {
           </div>
         </div>
       </motion.div>
-      <div className={style.navigationButtons}>
-        <button onClick={handleNextClick}>
-          <img
-            width="24"
-            height="24"
-            src="https://img.icons8.com/ios-filled/50/back.png"
-            alt="back"
-            className={style.arrow}
-          />
-        </button>
-        <button onClick={handlePrevClick}>
-          <img
-            width="24"
-            height="24"
-            src="https://img.icons8.com/ios-filled/50/forward.png"
-            alt="forward"
-            className={style.arrow}
-          />
-        </button>
-      </div>
+      {productIndex >= 0 && allPosts.length > 1 && <nav className={style.navigationButtons} aria-label="Recorrer el catálogo">
+        <button disabled={productIndex === 0} onClick={() => navigate(`/detail/${allPosts[productIndex - 1].id}`)}>← Anterior</button>
+        <button disabled={productIndex === allPosts.length - 1} onClick={() => navigate(`/detail/${allPosts[productIndex + 1].id}`)}>Siguiente →</button>
+      </nav>}
     </>
   );
 };

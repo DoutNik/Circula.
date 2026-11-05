@@ -71,7 +71,7 @@ const Exchanges = ({ userData }) => {
 
   return (
     <>
-      <Header
+      <Header variant="exchanges"
         banner1={BANNER_1}
         banner2={BANNER_2}
       />

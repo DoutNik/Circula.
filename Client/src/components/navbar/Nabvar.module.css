@@ -2,13 +2,13 @@
   position: fixed;
   inset: 0 0 auto;
   z-index: 998;
-  background: var(--surface, #fff);
-  border-bottom: 1px solid var(--border);
+  background: var(--forest);
+  border-bottom: 1px solid #ffffff20;
   box-shadow: 0 4px 24px #18251a0a;
-  color: var(--text-primary);
+  color: var(--on-forest);
 }
 .inner {
-  max-width: 1244px;
+  max-width: calc(var(--content-width) + 40px);
   margin: auto;
   min-height: 68px;
   display: flex;
@@ -47,8 +47,8 @@
 .item:hover,
 .item[aria-expanded="true"],
 .item[aria-current="page"] {
-  background: #eaf2d4;
-  color: #34471d;
+  background: var(--lime);
+  color: var(--forest);
 }
 .item:focus-visible,
 .panel a:focus-visible,
@@ -56,6 +56,7 @@
   outline: 3px solid #74942b;
   outline-offset: 3px;
 }
+.entry { background: var(--lime); color: var(--forest); border-radius: 999px; }
 .dropdown {
   position: relative;
   min-width: 0;
@@ -78,10 +79,11 @@
 .initial {
   display: grid;
   place-items: center;
-  background: #eaf2d4;
-  color: #34471d;
+  background: var(--lime);
+  color: var(--forest);
 }
 .panel {
+  color: var(--text-primary);
   position: absolute;
   top: calc(100% + 12px);
   right: 0;
@@ -126,7 +128,7 @@
   color: var(--text-secondary);
 }
 .panel .signout {
-  color: #ac3434;
+  color: var(--danger);
   border-top: 1px solid var(--border);
   margin-top: 6px;
   border-radius: 0 0 10px 10px;

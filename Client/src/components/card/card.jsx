@@ -1,38 +1,16 @@
-import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import style from "./Card.module.css";
-
-const DEFAULT_IMAGE =
-  "https://img.icons8.com/fluency-systems-regular/240/image.png";
-
-const Card = ({ post }) => {
-  const { id, ubication, title, image } = post;
-
-  const imageUrl = Array.isArray(image) ? image[0] : image;
-
-  return (
-    <Link to={`/detail/${id}`} className={style.link}>
-      <motion.article
-        className={style.card}
-        whileHover={{ y: -5 }}
-        transition={{ duration: 0.2 }}
-      >
-        <motion.img
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.35 }}
-          src={imageUrl || DEFAULT_IMAGE}
-          className={style.img}
-          alt={title || "Publicación"}
-        />
-
-        <div className={style.content}>
-          <p className={style.location}>📍 {ubication || "Sin ubicación"}</p>
-          <h3 className={style.title}>{title || "Sin título"}</h3>
-        </div>
-      </motion.article>
-    </Link>
-  );
-};
-
-export default Card;
+export default function Card({ post }) {
+  const src = Array.isArray(post.image) ? post.image[0] : post.image;
+  const title = post.title || "Producto sin título";
+  return <Link to={`/detail/${post.id}`} className={style.link} aria-label={title}>
+    <article className={style.card}>
+      <div className={style.photo}>{src ? <img loading="lazy" src={src} alt="" /> : <span>Sin foto</span>}</div>
+      <div className={style.content}>
+        {post.category && <p className={style.category}>{post.category}</p>}
+        <h3>{title}</h3>
+        <p className={style.location}><svg aria-hidden="true" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.4"><path d="M13 6.5c0 3.3-5 8-5 8s-5-4.7-5-8a5 5 0 1 1 10 0Z"/><circle cx="8" cy="6.5" r="1.6"/></svg>{post.ubication || "Sin ubicación"}</p>
+      </div>
+    </article>
+  </Link>;
+}

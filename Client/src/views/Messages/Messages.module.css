@@ -8,7 +8,7 @@
 
   border-radius: 0.75rem;
 
-  background-color: #fff;
+  background-color: var(--surface);
 
   box-shadow: 0 0.3rem 0.8rem rgba(128, 128, 128, 0.3);
 }
@@ -16,7 +16,7 @@
 .messages h2 {
   margin: 0 0 1rem;
 
-  color: #666;
+  color: var(--text-secondary);
 
   font-size: 1.2rem;
   font-weight: 600;
@@ -48,7 +48,7 @@
   border: none;
   border-radius: 0.65rem;
 
-  background-color: #fff;
+  background-color: var(--surface);
 
   box-shadow: 0 0.3rem 0.6rem rgba(124, 124, 124, 0.25);
 
@@ -67,13 +67,13 @@
 .list:hover {
   transform: translateY(-1px);
 
-  background-color: #fafafa;
+  background-color: var(--surface-secondary);
 
   box-shadow: 0 0.4rem 0.8rem rgba(124, 124, 124, 0.3);
 }
 
 .list:focus-visible {
-  outline: 3px solid #4ecdc4;
+  outline: 3px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -91,7 +91,7 @@
 
   object-fit: cover;
 
-  border: 3px solid #4ecdc4;
+  border: 3px solid var(--accent);
   border-radius: 50%;
 }
 
@@ -106,7 +106,7 @@
 
   margin: 0;
 
-  color: #444;
+  color: var(--text-primary);
 
   font-size: 1rem;
   font-weight: 600;
@@ -118,7 +118,7 @@
 .empty {
   margin: 1.5rem 0;
 
-  color: #777;
+  color: var(--text-secondary);
 
   font-size: 0.9rem;
 
@@ -128,6 +128,9 @@
 /* =========================
    TABLET
 ========================= */
+
+.messages h2 { font-family: var(--display-font); font-weight: 500; letter-spacing: -.035em; }
+.messages { border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--panel-shadow); }
 
 @media (max-width: 768px) {
   .messages {

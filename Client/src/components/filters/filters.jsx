@@ -1,183 +1,42 @@
+import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  selectCategory,
-  selectLocality,
-  selectProvince,
-  getPostByProvince,
-  getPostByLocality,
-  getPostByCategory,
-  getAllPosts,
-  resetFilters,
-} from "../../redux/actions";
+import { selectCategory, selectLocality, selectProvince, resetFilters } from "../../redux/actions";
+import { locationOf, optionsFrom } from "../../utils/catalog";
 import style from "./Filters.module.css";
-import { motion } from "framer-motion";
 
-const Filters = () => {
-  const selectedProvince = useSelector((state) => state.selectedProvince);
-  const selectedLocality = useSelector((state) => state.selectedLocality);
-  const selectedCategory = useSelector((state) => state.selectedCategory);
+function Sliders() {
+  return <svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <path d="M3 6h5m4 0h9M3 12h11m4 0h3M3 18h4m4 0h10"/><circle cx="10" cy="6" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="9" cy="18" r="2"/>
+  </svg>;
+}
+
+export default function Filters() {
+  const province = useSelector(s=>s.selectedProvince), locality = useSelector(s=>s.selectedLocality), category = useSelector(s=>s.selectedCategory);
+  const posts = useSelector(s=>s.allPostsCopy);
   const dispatch = useDispatch();
-  const allPostsCopy = useSelector((state) => state.allPostsCopy);
-
-  const handleProvinceChange = (event) => {
-    const province = event.target.value;
-    dispatch(selectProvince(province));
-    dispatch(getPostByProvince(province));
-    if (selectedCategory) {
-      dispatch(getPostByCategory(selectedCategory));
-    }
-  };
-
-  const handleLocalityChange = (event) => {
-    const locality = event.target.value;
-    dispatch(selectLocality(locality));
-    dispatch(getPostByLocality(locality));
-  };
-
-  const handleCategoryChange = (event) => {
-    const category = event.target.value;
-    dispatch(selectCategory(category));
-    dispatch(getPostByCategory(category));
-  };
-
-  const locations = allPostsCopy.map((post) => post.ubication);
-
-  const provinceToLocalityMap = new Map();
-  locations.forEach((location) => {
-    const [province, locality] = location.split(", ");
-    if (!provinceToLocalityMap.has(province)) {
-      provinceToLocalityMap.set(province, []);
-    }
-    const localityArray = provinceToLocalityMap.get(province);
-    if (!localityArray.includes(locality)) {
-      localityArray.push(locality);
-    }
-  });
-
-  const uniqueProvinces = () => {
-    const filteredPosts = allPostsCopy
-      .filter(
-        (post) =>
-          !selectedLocality || post.ubication.includes(selectedLocality),
-      )
-      .filter(
-        (post) => !selectedCategory || post.category === selectedCategory,
-      );
-
-    return Array.from(
-      new Set(filteredPosts.map((post) => post.ubication.split(", ")[0])),
-    );
-  };
-
-  const uniqueLocalities = () => {
-    let filteredPosts = allPostsCopy;
-    if (selectedProvince) {
-      filteredPosts = filteredPosts.filter((post) =>
-        post.ubication.startsWith(selectedProvince),
-      );
-    }
-    if (selectedCategory) {
-      filteredPosts = filteredPosts.filter(
-        (post) => post.category === selectedCategory,
-      );
-    }
-    const localities = new Set();
-    filteredPosts.forEach((post) => {
-      const [province, locality] = post.ubication.split(", ");
-      if (!selectedProvince || province === selectedProvince) {
-        localities.add(locality);
-      }
-    });
-    return Array.from(localities);
-  };
-
-  const uniqueCategories = () => {
-    const filteredPosts = allPostsCopy
-      .filter(
-        (post) =>
-          !selectedProvince || post.ubication.startsWith(selectedProvince),
-      )
-      .filter(
-        (post) =>
-          !selectedLocality || post.ubication.includes(selectedLocality),
-      );
-
-    return [...new Set(filteredPosts.map((post) => post.category))];
-  };
-
-  const handleResetFilters = () => {
-    dispatch(resetFilters());
-    dispatch(getAllPosts());
-  };
-
-  return (
-    <>
-      <motion.div
-        initial={{
-          opacity: 0,
-          scale: 0.8,
-        }}
-        animate={{
-          opacity: 1,
-          scale: 1,
-        }}
-        className={style.filters}
-      >
-        <div className={style.field}>
-        <label htmlFor="filter-province">Provincia</label>
-        <select id="filter-province" value={selectedProvince} onChange={handleProvinceChange}>
-          <option value="" disabled>
-            Todas las provincias
-          </option>
-          {uniqueProvinces().map((province) => (
-            <option key={province} value={province}>
-              {province}
-            </option>
-          ))}
+  const [open, setOpen] = useState(false);
+  const locations = posts.map(locationOf);
+  const choices = [
+    { id:"province", label:"Provincia", value:province, all:"Todas las provincias", options:optionsFrom(locations.map(l=>l.province)), action:selectProvince },
+    { id:"locality", label:"Localidad", value:locality, all:province ? "Todas las localidades" : "Primero elegí provincia", disabled:!province, options:optionsFrom(locations.filter(l=>l.province===province).map(l=>l.locality)), action:selectLocality },
+    { id:"category", label:"Categoría", value:category, all:"Todas las categorías", options:optionsFrom(posts.map(p=>p.category)), action:selectCategory },
+  ];
+  const count = choices.filter(c=>c.value).length;
+  const heading = <><Sliders/> Filtros {count > 0 && <span className={style.count} aria-label={`${count} activos`}>{count}</span>}</>;
+  return <aside className={style.filters} aria-label="Filtros del catálogo">
+    <h2 className={style.heading}>{heading}</h2>
+    <button className={style.toggle} type="button" aria-expanded={open} aria-controls="catalog-filters" onClick={()=>setOpen(!open)}>
+      {heading}<span className={style.chevron} aria-hidden="true">{open ? "−" : "+"}</span>
+    </button>
+    <div id="catalog-filters" data-open={open} className={style.body}>
+      {choices.map(choice=><div key={choice.id} className={style.field}>
+        <label htmlFor={`filter-${choice.id}`}>{choice.label}</label>
+        <select id={`filter-${choice.id}`} disabled={choice.disabled} value={choice.value} onChange={e=>dispatch(choice.action(e.target.value))}>
+          <option value="">{choice.all}</option>
+          {choice.options.map(option=><option key={option} value={option}>{option}</option>)}
         </select>
-        </div>
-        <div className={style.field}>
-        <label htmlFor="filter-locality">Localidad</label>
-        <select
-          id="filter-locality"
-          value={selectedLocality}
-          onChange={handleLocalityChange}
-          disabled={!selectedProvince}
-        >
-          <option value="" disabled>
-            {selectedProvince ? "Todas las localidades" : "Primero elegí una provincia"}
-          </option>
-          {uniqueLocalities().map((locality) => (
-            <option key={locality} value={locality}>
-              {locality}
-            </option>
-          ))}
-        </select>
-        </div>
-        <div className={style.field}>
-        <label htmlFor="filter-category">Categoría</label>
-        <select id="filter-category" value={selectedCategory} onChange={handleCategoryChange}>
-          <option value="" disabled>
-            Todas las categorías
-          </option>
-          {uniqueCategories().map((category) => (
-            <option key={category} value={category}>
-              {category}
-            </option>
-          ))}
-        </select>
-        </div>
-        <button type="button" onClick={handleResetFilters}>
-          Limpiar filtros
-          <img
-            width="24"
-            height="24"
-            src="https://img.icons8.com/color/48/broom.png"
-            alt=""
-          />
-        </button>
-      </motion.div>
-    </>
-  );
-};
-export default Filters;
+      </div>)}
+      <button className={style.reset} type="button" onClick={()=>dispatch(resetFilters())} disabled={!count}>Limpiar filtros</button>
+    </div>
+  </aside>;
+}

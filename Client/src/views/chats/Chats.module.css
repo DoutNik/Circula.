@@ -22,7 +22,7 @@
   height: clamp(42px, 5vw, 70px);
   object-fit: cover;
   border-radius: 50%;
-  border: clamp(2px, 0.3vw, 4px) solid #4ecdc4;
+  border: clamp(2px, 0.3vw, 4px) solid var(--accent);
   flex-shrink: 0;
 } /* ========================================================= NOMBRE ========================================================= */
 .name {
@@ -30,7 +30,7 @@
   min-width: 0;
   margin: 0;
   text-align: left;
-  color: #333;
+  color: var(--text-primary);
   font-size: clamp(13px, 1vw, 17px);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -46,7 +46,7 @@
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: clamp(10px, 1.5vw, 18px);
-  background: #ffffff;
+  background: var(--surface);
   box-shadow: 0 5px 15px rgba(128, 128, 128, 0.2);
   border-radius: clamp(10px, 1vw, 16px);
 } /* ========================================================= CONVERSACIÓN ========================================================= */
@@ -62,7 +62,7 @@
   gap: clamp(8px, 1vw, 14px);
   overflow-y: auto;
   overflow-x: hidden;
-  background: #ffffff;
+  background: var(--surface);
   border-radius: clamp(10px, 1vw, 16px);
   box-shadow: 0 5px 15px rgba(128, 128, 128, 0.2); /* Mejora el scroll en móviles. */
   overscroll-behavior: contain;
@@ -81,7 +81,7 @@
   object-fit: cover;
   align-self: end;
   border-radius: 50%;
-  border: clamp(2px, 0.25vw, 3px) solid #999;
+  border: clamp(2px, 0.25vw, 3px) solid var(--text-secondary);
   box-shadow: 0 5px 10px rgba(122, 122, 122, 0.25);
   flex-shrink: 0;
 } /* ========================================================= BURBUJA OTRO USUARIO ========================================================= */
@@ -93,8 +93,8 @@
   margin: 0;
   padding: clamp(8px, 1vw, 12px);
   border-radius: 5px 12px 12px 12px;
-  background-color: #808080;
-  color: whitesmoke;
+  background-color: var(--surface-secondary);
+  color: var(--text-primary);
   font-size: clamp(11px, 0.85vw, 15px);
   line-height: 1.4;
   text-align: left;
@@ -115,7 +115,7 @@
   object-fit: cover;
   align-self: end;
   border-radius: 50%;
-  border: clamp(2px, 0.25vw, 3px) solid #4ecdc4;
+  border: clamp(2px, 0.25vw, 3px) solid var(--accent);
   box-shadow: 0 5px 10px rgba(122, 122, 122, 0.25);
   flex-shrink: 0;
 } /* ========================================================= BURBUJA PROPIA ========================================================= */
@@ -127,8 +127,8 @@
   margin: 0;
   padding: clamp(8px, 1vw, 12px);
   border-radius: 12px 5px 12px 12px;
-  background-color: #4ecdc4;
-  color: whitesmoke;
+  background-color: var(--accent);
+  color: var(--on-accent);
   font-size: clamp(11px, 0.85vw, 15px);
   line-height: 1.4;
   text-align: left;
@@ -154,8 +154,8 @@
   border: 1px solid transparent;
   border-radius: clamp(8px, 1vw, 12px);
   outline: none;
-  background: #ffffff;
-  color: #222;
+  background: var(--surface);
+  color: var(--text-primary);
   font-family: inherit;
   font-size: clamp(12px, 0.9vw, 15px);
   box-shadow: 0 5px 10px rgba(122, 122, 122, 0.15);
@@ -164,14 +164,14 @@
     box-shadow 0.2s ease;
 }
 .message input:focus {
-  border-color: #4ecdc4;
+  border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.12);
 }
 .message input::placeholder {
-  color: #999;
+  color: var(--text-secondary);
 }
 .message input:disabled {
-  background: #eeeeee;
+  background: var(--surface-secondary);
   cursor: not-allowed;
 } /* ========================================================= BOTÓN / ICONO DE ENVÍO ========================================================= */
 .message img {
@@ -179,7 +179,7 @@
   height: clamp(38px, 4vw, 52px);
   padding: clamp(7px, 0.8vw, 10px);
   box-sizing: border-box;
-  background-color: #4ecdc4;
+  background-color: var(--accent);
   border-radius: 50%;
   box-shadow: 0 5px 10px rgba(122, 122, 122, 0.3);
   cursor: pointer;

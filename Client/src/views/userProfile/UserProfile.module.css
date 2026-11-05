@@ -19,13 +19,13 @@
   width: min(100%, 26rem);
   padding: clamp(1.25rem, 4vw, 1.875rem);
   border-radius: 0.75rem;
-  background: #fff;
+  background: var(--surface);
   box-shadow: 0 0.3rem 0.8rem rgba(125, 125, 125, 0.25);
   text-align: center;
 }
 
 .avatarPremium {
-  border: 2px solid goldenrod;
+  border: 2px solid var(--gold);
 }
 
 .profileTop {
@@ -44,7 +44,7 @@
   display: block;
   width: clamp(4rem, 18vw, 5rem);
   height: clamp(4rem, 18vw, 5rem);
-  border: 3px solid #4ecdc4;
+  border: 3px solid var(--accent);
   border-radius: 50%;
   object-fit: cover;
 }
@@ -60,7 +60,7 @@
 
 .profileTop h2 {
   margin: 0.25rem 0;
-  color: #444;
+  color: var(--text-primary);
   font-size: 1.2rem;
   overflow-wrap: anywhere;
 }
@@ -68,7 +68,7 @@
 .email {
   max-width: 100%;
   margin: 0.25rem 0;
-  color: #777;
+  color: var(--text-secondary);
   font-size: 0.9rem;
   overflow-wrap: anywhere;
 }
@@ -88,14 +88,14 @@
 }
 
 .ratingValue {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 0.9rem;
   font-weight: 600;
 }
 
 .calif {
   margin: 1rem 0 0;
-  color: #4ecdc4;
+  color: var(--accent);
   font-size: 0.9rem;
   line-height: 1.4;
 }
@@ -132,22 +132,22 @@
 }
 
 .bRating {
-  background-color: #4ecdc4;
-  color: #fff;
+  background-color: var(--accent);
+  color: var(--on-accent);
 }
 
 .bRating:hover {
-  background-color: #3dbbb2;
+  background-color: var(--accent-hover);
   transform: translateY(-1px);
 }
 
 .back {
-  background-color: #ff6347;
-  color: #fff;
+  background-color: var(--surface-hover);
+  color: var(--text-primary);
 }
 
 .back:hover {
-  background-color: #ec5339;
+  background-color: var(--surface-hover);
   transform: translateY(-1px);
 }
 
@@ -171,20 +171,20 @@
   width: min(100%, 28rem);
   padding: clamp(1.25rem, 5vw, 2rem);
   border-radius: 0.75rem;
-  background: #fff;
+  background: var(--surface);
   box-shadow: 0 0.4rem 1rem rgba(128, 128, 128, 0.25);
   text-align: center;
 }
 
 .modal h2 {
   margin: 0;
-  color: #444;
+  color: var(--text-primary);
   font-size: clamp(1.2rem, 5vw, 1.5rem);
 }
 
 .ratingText {
   margin: 0.75rem 0 1.5rem;
-  color: #777;
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
@@ -213,8 +213,8 @@
 }
 
 .starLabel:hover {
-  background-color: #f5fffe;
-  border-color: #4ecdc4;
+  background-color: var(--moss);
+  border-color: var(--accent);
   transform: translateY(-1px);
 }
 
@@ -227,7 +227,7 @@
 }
 
 .starInput:focus-visible + .star {
-  outline: 3px solid #4ecdc4;
+  outline: 3px solid var(--accent);
   outline-offset: 3px;
   border-radius: 0.25rem;
 }
@@ -239,7 +239,7 @@
 
 .starNumber {
   margin-top: 0.25rem;
-  color: #777;
+  color: var(--text-secondary);
   font-size: 0.75rem;
 }
 
@@ -247,15 +247,15 @@
   display: grid;
   min-height: 50vh;
   place-items: center;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 /* Compatibilidad con otros controles del componente */
 .premium {
   margin-top: 0.9375rem;
   padding: 0.5rem;
-  background-color: goldenrod;
-  color: #fff;
+  background-color: var(--gold-soft);
+  color: var(--gold);
   font-size: 0.875rem;
 }
 
@@ -268,24 +268,27 @@
 
 .dark {
   width: 5.625rem;
-  background-color: #000;
+  background-color: var(--forest);
   color: #fff;
 }
 
 .light {
   width: 5.625rem;
-  background-color: #fff;
-  color: #000;
+  background-color: var(--surface);
+  color: var(--text-primary);
 }
 
 .avatar .logout,
 .avatarPremium .logout {
   width: 5.8125rem;
-  background-color: #ff6b6b;
-  color: #fff;
+  background-color: var(--danger-soft);
+  color: var(--danger);
 }
 
 /* Tablet / móvil */
+.profileTop h2, .modal h2 { font-family: var(--display-font); font-weight: 500; letter-spacing: -.035em; }
+.avatar, .avatarPremium { border-radius: 20px; box-shadow: var(--panel-shadow); }
+
 @media (max-width: 768px) {
   .container,
   .ratingView {

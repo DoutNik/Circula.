@@ -2,5 +2,5 @@
 .photoControls { min-width:0; flex:1; }
 .avatar { width:84px; height:84px; flex-shrink:0; border-radius:50%; object-fit:cover; border:3px solid var(--surface); }
 .fileName { font-size:13px; color:var(--text-secondary); overflow-wrap:anywhere; }
-.loadError { margin-top:10px; color:#ae3333; font-size:13px; }
+.loadError { margin-top:10px; color:var(--danger); font-size:13px; }
 @media(max-width:540px) { .photoArea { align-items:flex-start; flex-direction:column; padding:14px; } .photoControls { width:100%; } }

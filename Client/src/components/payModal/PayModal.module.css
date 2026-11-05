@@ -20,13 +20,13 @@
   width: min(100%, clamp(300px, 75vw, 600px));
   max-height: 90vh;
   overflow-y: auto;
-  background-color: whitesmoke;
+  background-color: var(--surface);
   padding: clamp(30px, 5vw, 65px) clamp(20px, 5vw, 70px) clamp(20px, 3vw, 35px);
   border-radius: clamp(12px, 1.5vw, 20px);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   box-sizing: border-box;
   text-align: center;
-  color: #222;
+  color: var(--text-primary);
 } /* ========================================================= CUERPO ========================================================= */
 .modalbody {
   width: 100%;
@@ -36,7 +36,7 @@
 } /* ========================================================= TITULO ========================================================= */
 .modalcontent h2 {
   margin: 0 0 clamp(16px, 2vw, 30px);
-  color: #222;
+  color: var(--text-primary);
   font-size: clamp(24px, 3vw, 38px);
   line-height: 1.2;
   font-weight: 700;
@@ -44,7 +44,7 @@
 .modalcontent p {
   width: 100%;
   margin: 0 0 clamp(10px, 1vw, 16px);
-  color: #666;
+  color: var(--text-secondary);
   font-size: clamp(13px, 1.2vw, 18px);
   line-height: 1.5;
   white-space: normal;
@@ -57,8 +57,8 @@
   padding: 8px clamp(16px, 2vw, 24px);
   border: none;
   border-radius: 10px;
-  background: linear-gradient(135deg, #d9a441, goldenrod);
-  color: whitesmoke;
+  background: var(--accent);
+  color: var(--on-accent);
   font-family: inherit;
   font-size: clamp(13px, 1vw, 17px);
   font-weight: 700;
@@ -69,6 +69,8 @@
     filter 0.2s ease,
     box-shadow 0.2s ease;
 }
+.modalcontent h2 { font-family: var(--display-font); font-weight: 500; letter-spacing: -.035em; }
+
 @media (hover: hover) and (pointer: fine) {
   .pay:hover {
     transform: translateY(-2px);
@@ -81,7 +83,7 @@
 } /* ========================================================= PRECIO ========================================================= */
 .modalcontent h6 {
   margin: clamp(10px, 1vw, 15px) 0 0;
-  color: #777;
+  color: var(--text-secondary);
   font-size: clamp(11px, 0.9vw, 14px);
   font-weight: 500;
 } /* ========================================================= BOTÓN CERRAR ========================================================= */
@@ -98,7 +100,7 @@
   border: none;
   border-radius: 50%;
   background: transparent;
-  color: red;
+  color: var(--danger);
   font-size: clamp(16px, 1.5vw, 22px);
   line-height: 1;
   cursor: pointer;

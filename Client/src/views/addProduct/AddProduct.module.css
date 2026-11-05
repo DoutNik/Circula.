@@ -1,20 +1,20 @@
 .fieldset { min-width:0; padding:0; margin:0; border:0; }
 .requiredNote { margin:0 0 26px; color:var(--text-secondary); font-size:.8rem; }
-.requiredNote span { font-weight:700; color:#547345; }
+.requiredNote span { font-weight:700; color:var(--accent); }
 .counter { margin:7px 0 0; font-size:.75rem; color:var(--text-muted); text-align:right; }
 .uploadArea { position:relative; min-height:190px; gap:6px; transition:background .18s,border-color .18s; }
 .uploadArea strong { font-size:.93rem; font-weight:650; }
-.uploadArea.dragging { border-color:#557d49; background:#eff5e8; }
-.uploadArea:hover { border-color:#7d9565; }
-.uploadIcon { display:grid; place-items:center; width:42px; height:42px; margin-bottom:7px; background:#e8efdc; color:#47643a; font-size:27px; border-radius:13px; }
+.uploadArea.dragging { border-color:var(--accent); background:var(--moss); }
+.uploadArea:hover { border-color:var(--focus); }
+.uploadIcon { display:grid; place-items:center; width:42px; height:42px; margin-bottom:7px; background:var(--moss); color:var(--moss-ink); font-size:27px; border-radius:13px; }
 .fileInput { position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; }
 .fileInput:disabled { cursor:wait; }
 .previews { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin:0 0 12px; }
 .previewItem { margin:0; min-width:0; }
 .previewItem img { width:100%; aspect-ratio:4 / 3; object-fit:cover; border:1px solid var(--border); border-radius:12px; background:var(--surface-secondary); }
 .previewItem figcaption { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:7px; font-size:.78rem; color:var(--text-secondary); }
-.previewItem:first-child figcaption > span { color:#4e6c38; background:#eff4e6; border-radius:6px; padding:3px 7px; font-weight:650; }
-.remove { min-height:36px; background:transparent; padding:4px 0 4px 7px; color:#a94035; font-size:.78rem; text-decoration:underline; text-underline-offset:3px; }
+.previewItem:first-child figcaption > span { color:var(--moss-ink); background:var(--moss); border-radius:6px; padding:3px 7px; font-weight:650; }
+.remove { min-height:36px; background:transparent; padding:4px 0 4px 7px; color:var(--danger); font-size:.78rem; text-decoration:underline; text-underline-offset:3px; }
 .progressText { margin:0 0 8px; }
 .progress { display:block; width:min(100%,340px); height:7px; border:0; border-radius:20px; accent-color:#567d47; }
 .progress::-webkit-progress-bar { border-radius:20px; background:#dce6d3; }

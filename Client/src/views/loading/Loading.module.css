@@ -17,7 +17,7 @@
   margin: 6rem auto 0;
   padding: 1.5rem;
 
-  background-color: whitesmoke;
+  background-color: var(--surface);
 
   border-radius: 0.75rem;
 
@@ -52,7 +52,7 @@
   line-height: 1.5;
   font-weight: 600;
 
-  color: #333;
+  color: var(--text-primary);
 }
 
 /* =========================
@@ -72,8 +72,8 @@
 
   border-radius: 0.4rem;
 
-  background-color: #4ecdc4;
-  color: whitesmoke;
+  background-color: var(--accent);
+  color: var(--on-accent);
 
   font-size: 1rem;
   font-weight: 600;
@@ -89,7 +89,7 @@
 }
 
 .loginButton:hover {
-  background-color: #3dbbb2;
+  background-color: var(--accent-hover);
 
   transform: translateY(-1px);
 
@@ -141,7 +141,7 @@
 
   border-radius: 50%;
 
-  background-color: #ffe66d;
+  background-color: var(--accent);
 
   animation: bounceDelay 1.4s infinite ease-in-out both;
 }

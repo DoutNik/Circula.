@@ -46,7 +46,7 @@
   width: 100%;
   margin: 0;
   overflow: hidden;
-  color: grey;
+  color: var(--text-secondary);
   font-size: clamp(0.75rem, 2vw, 0.9rem);
   line-height: 1.25;
   overflow-wrap: anywhere;
@@ -55,7 +55,7 @@
 }
 
 .names span {
-  color: grey;
+  color: var(--text-secondary);
   font-size: 0.7rem;
 }
 
@@ -63,7 +63,7 @@
 .empty {
   width: min(calc(100% - 1.5rem), 40rem);
   margin: 1.5rem auto;
-  color: grey;
+  color: var(--text-secondary);
   text-align: center;
 }
 
