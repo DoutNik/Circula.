@@ -28,8 +28,12 @@ const Icon = ({ kind }) => (
       </>
     ) : (
       <>
-        <path d="M21 11a8 8 0 0 1-8 8H6l-4 3 1-7a8 8 0 1 1 18-4Z" />
-        <path d="M7 11h10" />
+        <path d="M7 4h10a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4H9l-5 3v-4a4 4 0 0 1-1-3V8a4 4 0 0 1 4-4Z" />
+        <g fill="currentColor" stroke="none">
+          <circle cx="8" cy="11" r="1" />
+          <circle cx="12" cy="11" r="1" />
+          <circle cx="16" cy="11" r="1" />
+        </g>
       </>
     )}
   </svg>
